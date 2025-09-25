@@ -169,6 +169,18 @@ class SmartSpectraSdk private constructor(private val appContext: Context) {
     }
 
     /**
+     * Clears metrics and error state from the previous session.
+     *
+     * Resets `metricsBuffer`, `edgeMetrics`, and `errorMessage` so a new
+     * recording session starts without stale values appearing in the UI.
+     */
+    fun resetMetrics() {
+        _metricsBuffer.postValue(MetricsBuffer.getDefaultInstance())
+        _edgeMetrics.postValue(Metrics.getDefaultInstance())
+        _errorMessage.postValue("")
+    }
+
+    /**
      * JNI bridge that instructs the native layer to connect to the test server.
      */
     private external fun nativeUseTestServer()

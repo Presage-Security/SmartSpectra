@@ -47,7 +47,7 @@ dependencyResolutionManagement {
 
 ```gradle
 dependencies {
-    implementation("com.presagetech:smartspectra:1.0.24")
+    implementation("com.presagetech:smartspectra:1.0.25")
 }
 ```
 
@@ -264,7 +264,7 @@ android {
 }
 
 dependencies {
-    implementation("com.presagetech:smartspectra:1.0.24")
+    implementation("com.presagetech:smartspectra:1.0.25")
 }
 ```
 

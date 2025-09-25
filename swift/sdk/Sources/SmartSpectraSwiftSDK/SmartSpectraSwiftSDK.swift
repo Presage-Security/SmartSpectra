@@ -187,4 +187,18 @@ public class SmartSpectraSwiftSDK: ObservableObject {
         }
     }
 
+    /// Clears metrics and result texts from the previous session.
+    ///
+    /// Resets `metricsBuffer`, `edgeMetrics`, and associated display texts to
+    /// their initial values so that stale data is not shown when a new
+    /// recording session starts.
+    public func resetMetrics() {
+        DispatchQueue.main.async {
+            self.metricsBuffer = nil
+            self.edgeMetrics = nil
+            self.resultText = "No Results\n..."
+            self.resultErrorText = ""
+        }
+    }
+
 }
