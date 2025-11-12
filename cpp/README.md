@@ -124,7 +124,8 @@ int main(int argc, char** argv) {
         
         // Configure camera (defaults work for most cases)
         settings.video_source.device_index = 0;
-        settings.video_source.resolution_selection_mode = video_source::ResolutionSelectionMode::Auto;
+        // NOTE: If capture_width and/or capture_height is
+        //     modified the HUD will also need to be changed
         settings.video_source.capture_width_px = 1280;
         settings.video_source.capture_height_px = 720;
         settings.video_source.codec = presage::camera::CaptureCodec::MJPG;
@@ -148,12 +149,22 @@ int main(int argc, char** argv) {
         auto hud = std::make_unique<gui::OpenCvHud>(10, 0, 1260, 400);
         
         // Set up callbacks
+        // NOTE: If code in callbacks adds more than 75ms of delay it might affect
+        //       incoming data.
         auto status = container->SetOnCoreMetricsOutput(
             [&hud](const presage::physiology::MetricsBuffer& metrics, int64_t timestamp) {
-                int pulse = static_cast<int>(metrics.pulse().strict().value());
-                int breathing = static_cast<int>(metrics.breathing().strict().value());
+                float pulse;
+                float breathing;
+                if (!metrics.pulse().rate().empty()){
+                    pulse = metrics.pulse().rate().rbegin()->value();
+                }
+                if (!metrics.breathing().rate().empty()){
+                    breathing = metrics.breathing().rate().rbegin()->value();
+                }
                 
-                std::cout << "Vitals - Pulse: " << pulse << " BPM, Breathing: " << breathing << " BPM\n";
+                if (!metrics.pulse().rate().empty() && !metrics.breathing().rate().empty()){
+                    std::cout << "Vitals - Pulse: " << pulse << " BPM, Breathing: " << breathing << " BPM\n";
+                }
                 hud->UpdateWithNewMetrics(metrics);
                 return absl::OkStatus();
             }
@@ -200,7 +211,7 @@ int main(int argc, char** argv) {
             return 1;
         }
         
-        std::cout << "Ready! Press 'q' to quit.\n";
+        std::cout << "Ready! Press 's' to start/stop recording data.\nPress 'q' to quit.\n";
         if (auto status = container->Run(); !status.ok()) {
             std::cerr << "Processing failed: " << status.message() << "\n";
             return 1;
@@ -260,6 +271,12 @@ export SMARTSPECTRA_API_KEY=YOUR_KEY
 🎉 **That's it!** Point your camera at your face and get real-time vitals measurement with a clean GUI overlay showing your pulse and breathing rates.
 
 ![SmartSpectra C++ SDK Demo](docs/images/cpp-quickstart.gif)
+
+### Keyboard Shortcuts
+During the run of any example, use the following keyboard shortcuts:
+- `q` or `ESC`: exit
+- `s`: start/stop recording data (**webcam input / streaming** mode only)
+- `e`: lock/unlock exposure (**webcam input / streaming** mode only)
 
 ### Try the Pre-built Examples
 
