@@ -149,8 +149,10 @@ int main(int argc, char** argv) {
         auto hud = std::make_unique<gui::OpenCvHud>(10, 0, 1260, 400);
         
         // Set up callbacks
-        // NOTE: If code in callbacks adds more than 75ms of delay it might affect
-        //       incoming data.
+        // NOTE: These callbacks are designed to be lightweight. 
+        // Any heavy post-processing or network communication should be performed outside these
+        // callbacks (in asynchronous threads when necessary)
+        // Delays of 25ms+ might affect incoming data
         auto status = container->SetOnCoreMetricsOutput(
             [&hud](const presage::physiology::MetricsBuffer& metrics, int64_t timestamp) {
                 float pulse;
