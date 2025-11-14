@@ -29,25 +29,25 @@ Get measuring vitals in under 5 minutes! This minimal example gets you up and ru
 
 Create a new Android project and add the SmartSpectra dependency.
 
-**settings.gradle (or build.gradle for older projects):**
+**settings.gradle.kts (or build.gradle for older projects):**
 
 ```gradle
 dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
         mavenCentral()
         // Required: JitPack repository for MPAndroidChart dependency
-        maven { url 'https://jitpack.io' }
+        maven { url = uri("https://jitpack.io") }
     }
 }
 ```
 
-**app/build.gradle:**
+**app/build.gradle.kts:**
 
 ```gradle
 dependencies {
-    implementation("com.presagetech:smartspectra:1.0.25")
+    implementation("com.presagetech:smartspectra:1.0.26")
 }
 ```
 
@@ -78,7 +78,7 @@ class MainActivity : AppCompatActivity() {
 }
 ```
 
-**activity_main.xml:**
+**res/layout/activity_main.xml:**
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -264,7 +264,7 @@ android {
 }
 
 dependencies {
-    implementation("com.presagetech:smartspectra:1.0.25")
+    implementation("com.presagetech:smartspectra:1.0.26")
 }
 ```
 
