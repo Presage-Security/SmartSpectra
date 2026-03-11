@@ -1,0 +1,382 @@
+================================================================================
+THIRD-PARTY SOFTWARE NOTICES AND INFORMATION
+================================================================================
+
+SmartSpectra SDK
+Copyright (C) 2026 Presage Security, Inc.
+Licensed under the GNU Lesser General Public License v3.0 (LGPL-3.0)
+
+This file contains the licenses and notices for third-party software included
+in or linked by the SmartSpectra SDK. Each dependency is listed with its
+license type, copyright notice, and full license text where required.
+
+================================================================================
+TABLE OF CONTENTS
+================================================================================
+
+  Swift Platform:
+    1. swift-protobuf (Apache-2.0 with Runtime Library Exception)
+
+  Android Platform:
+    2. AndroidX Libraries (Apache-2.0)
+    3. Google Material Components (Apache-2.0)
+    4. Google Protobuf Java Lite (BSD-3-Clause)
+    5. MPAndroidChart (Apache-2.0)
+    6. Timber (Apache-2.0)
+    7. Google Guava (Apache-2.0)
+    8. Google Flogger (Apache-2.0)
+    9. OpenCV for Android (Apache-2.0)
+   10. Google Play Integrity API (Android Software Development Kit License)
+   11. MediaPipe (Apache-2.0)
+
+  C++ Platform:
+   12. Protocol Buffers / gRPC (Apache-2.0)
+   13. Video4Linux (LGPL-2.1)
+   14. Catch2 [test only] (BSL-1.0)
+
+================================================================================
+1. swift-protobuf
+================================================================================
+
+  Version: 1.28.1
+  License: Apache License 2.0 with Swift Runtime Library Exception
+  Source:  https://github.com/apple/swift-protobuf
+
+  Copyright 2008 Google Inc.  All rights reserved.
+  Portions Copyright (c) 2014-2024 Apple Inc. and the Swift project authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+  --- Runtime Library Exception ---
+
+  As an exception, if you use this Software to compile your source code and
+  portions of this Software are embedded into the binary product as a result,
+  you may redistribute such product without providing attribution as would
+  otherwise be required by Sections 4(a), 4(b) and 4(d) of the License.
+
+================================================================================
+2. AndroidX Libraries
+================================================================================
+
+  Includes:
+    - androidx.core:core-ktx:1.13.1
+    - androidx.appcompat:appcompat:1.7.0
+    - androidx.constraintlayout:constraintlayout:2.2.0
+    - androidx.lifecycle:lifecycle-livedata-ktx:2.8.7
+    - androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7
+    - androidx.camera:camera-core:1.4.0
+    - androidx.camera:camera-camera2:1.4.0
+    - androidx.camera:camera-lifecycle:1.4.0
+    - androidx.camera:camera-view:1.4.0
+    - androidx.startup:startup-runtime:1.2.0
+    - androidx.test:core-ktx:1.6.1
+
+  License: Apache License 2.0
+  Source:  https://developer.android.com/jetpack/androidx
+
+  Copyright (C) The Android Open Source Project
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+================================================================================
+3. Google Material Components for Android
+================================================================================
+
+  Version: 1.12.0
+  License: Apache License 2.0
+  Source:  https://github.com/material-components/material-components-android
+
+  Copyright (C) The Android Open Source Project
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+================================================================================
+4. Google Protobuf Java Lite
+================================================================================
+
+  Version: 4.26.1
+  License: BSD 3-Clause
+  Source:  https://github.com/protocolbuffers/protobuf
+
+  Copyright 2008 Google Inc.  All rights reserved.
+
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are
+  met:
+
+      * Redistributions of source code must retain the above copyright
+  notice, this list of conditions and the following disclaimer.
+      * Redistributions in binary form must reproduce the above
+  copyright notice, this list of conditions and the following disclaimer
+  in the documentation and/or other materials provided with the
+  distribution.
+      * Neither the name of Google Inc. nor the names of its
+  contributors may be used to endorse or promote products derived from
+  this software without specific prior written permission.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+================================================================================
+5. MPAndroidChart
+================================================================================
+
+  Version: 3.1.0
+  License: Apache License 2.0
+  Source:  https://github.com/PhilJay/MPAndroidChart
+
+  Copyright 2020 Philipp Jahoda
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+================================================================================
+6. Timber
+================================================================================
+
+  Version: 5.0.1
+  License: Apache License 2.0
+  Source:  https://github.com/JakeWharton/timber
+
+  Copyright 2013 Jake Wharton
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+================================================================================
+7. Google Guava
+================================================================================
+
+  Version: 27.0.1-android
+  License: Apache License 2.0
+  Source:  https://github.com/google/guava
+
+  Copyright (C) The Guava Authors
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+================================================================================
+8. Google Flogger
+================================================================================
+
+  Version: 0.6
+  License: Apache License 2.0
+  Source:  https://github.com/google/flogger
+
+  Copyright (C) Google LLC
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+================================================================================
+9. OpenCV for Android
+================================================================================
+
+  Version: 4.10.0
+  License: Apache License 2.0
+  Source:  https://github.com/opencv/opencv
+
+  Copyright (C) 2000-2024, Intel Corporation, all rights reserved.
+  Copyright (C) 2009-2011, Willow Garage Inc., all rights reserved.
+  Copyright (C) 2009-2016, NVIDIA Corporation, all rights reserved.
+  Copyright (C) 2010-2013, Advanced Micro Devices, Inc., all rights reserved.
+  Copyright (C) 2015-2024, OpenCV Foundation, all rights reserved.
+  Copyright (C) 2008-2011, Itseez Inc., all rights reserved.
+  Copyright (C) 2019-2024, Xperience AI, all rights reserved.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+================================================================================
+10. Google Play Integrity API
+================================================================================
+
+  Version: 1.4.0
+  License: Android Software Development Kit License
+  Source:  https://developer.android.com/google/play/integrity
+
+  Usage governed by the Android Software Development Kit License Agreement.
+  See: https://developer.android.com/studio/terms
+
+================================================================================
+11. MediaPipe
+================================================================================
+
+  License: Apache License 2.0
+  Source:  https://github.com/google-ai-edge/mediapipe
+
+  Copyright 2019-2024 The MediaPipe Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+================================================================================
+12. Protocol Buffers / gRPC (C++)
+================================================================================
+
+  License: Apache License 2.0
+  Source:  https://github.com/protocolbuffers/protobuf
+           https://github.com/grpc/grpc
+
+  Copyright 2008 Google Inc.  All rights reserved. (protobuf)
+  Copyright 2015-2024 gRPC authors. (gRPC)
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+================================================================================
+13. Video4Linux (v4l2)
+================================================================================
+
+  License: LGPL-2.1-or-later (system library)
+  Source:  https://linuxtv.org/
+
+  Video4Linux is a Linux kernel API and userspace library. It is used
+  as a system library for camera access on Linux platforms only. As a
+  system library dynamically linked at runtime, its use is compatible
+  with the LGPL-3.0 license of this SDK per the system library
+  exception in the GNU GPL.
+
+================================================================================
+14. Catch2 [test only - not distributed]
+================================================================================
+
+  Version: 3.7.0
+  License: Boost Software License 1.0 (BSL-1.0)
+  Source:  https://github.com/catchorg/Catch2
+
+  Copyright (c) Two Blue Cubes Ltd. All rights reserved.
+
+  Boost Software License - Version 1.0 - August 17th, 2003
+
+  Permission is hereby granted, free of charge, to any person or
+  organization obtaining a copy of the software and accompanying
+  documentation covered by this license (the "Software") to use,
+  reproduce, display, distribute, execute, and transmit the Software,
+  and to prepare derivative works of the Software, and to permit
+  third-parties to whom the Software is furnished to do so, all
+  subject to the following:
+
+  The copyright notices in the Software and this entire statement,
+  including the above license grant, this restriction and the following
+  disclaimer, must be included in all copies of the Software, in whole
+  or in part, and all derivative works of the Software, unless such
+  copies or derivative works are solely in the form of
+  machine-executable object code generated by a source language
+  processor.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE AND
+  NON-INFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR ANYONE
+  DISTRIBUTING THE SOFTWARE BE LIABLE FOR ANY DAMAGES OR OTHER
+  LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
+  OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+  THE SOFTWARE.
+
+================================================================================
+END OF THIRD-PARTY NOTICES
+================================================================================
