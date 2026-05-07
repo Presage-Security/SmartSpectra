@@ -1,0 +1,11 @@
+{
+  "title": "Swift",
+  "pages": [
+    "index",
+    "metrics",
+    "migration-guide",
+    "use-case-examples",
+    "api-reference",
+    "troubleshooting"
+  ]
+}

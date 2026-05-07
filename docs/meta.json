@@ -1,0 +1,13 @@
+{
+  "title": "SmartSpectra SDK",
+  "pages": [
+    "index",
+    "authentication",
+    "swift",
+    "---Guides---",
+    "headless-mode",
+    "---Reference---",
+    "model-cards-and-limitations",
+    "data-types"
+  ]
+}

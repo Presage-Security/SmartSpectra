@@ -8,7 +8,6 @@ The UI test suite includes:
 
 - **Core App Functionality Tests** - Basic app controls and navigation
 - **Continuous Measurement Flow** - Full workflow for continuous vital signs monitoring
-- **Spot Measurement Flow** - Complete 30-second measurement workflow with results validation
 - **Launch Tests** - App startup and initial state verification
 - **Measurement Preparation** - Helper tests for manual testing setup
 
@@ -16,13 +15,13 @@ The UI test suite includes:
 
 ### Required Tools
 
-- Xcode 15.0+
-- iOS Simulator or physical iOS device (iOS 15.0+)
+- Xcode 16.0+
+- iOS Simulator or physical iOS device (iOS 17.0+)
 - Camera permissions (for real device testing)
 
 ### Setup
 
-1. Open `SmartSpectra.xcworkspace` in Xcode (or just `demo-app.xcodeproj` in Xcode and add sdk dependency)
+1. Open `demo-app.xcodeproj` in Xcode.
 2. Ensure the demo-app scheme is selected
 3. For real device testing:
    - Connect your iOS device
@@ -42,22 +41,31 @@ The UI test suite includes:
 
 ### Via Command Line
 
-**NOTE** Currently not tested. will be updated with tested commands in future merge requests
-<!--
 ```bash
 # Run all UI tests
-xcodebuild test -workspace SmartSpectra.xcworkspace -scheme demo-app -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.0'
+xcodebuild test \
+  -project demo-app.xcodeproj \
+  -scheme demo-app \
+  -destination 'platform=iOS Simulator,name=<simulator name>'
 
 # Run specific test class
-xcodebuild test -workspace SmartSpectra.xcworkspace -scheme demo-app -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.0' -only-testing:demo-app-UITests/demo_app_MeasurementTests
+xcodebuild test \
+  -project demo-app.xcodeproj \
+  -scheme demo-app \
+  -destination 'platform=iOS Simulator,name=<simulator name>' \
+  -only-testing:demo-app-UITests/demo_app_MeasurementTests
 
 # Run on physical device (replace with your device ID)
-xcodebuild test -workspace SmartSpectra.xcworkspace -scheme demo-app -destination 'platform=iOS,id=YOUR_DEVICE_ID'
+xcodebuild test \
+  -project demo-app.xcodeproj \
+  -scheme demo-app \
+  -destination 'platform=iOS,id=YOUR_DEVICE_ID'
 ```
 
 ### Via Fastlane
-The project includes Fastlane configuration for CI/CD. Tests can be integrated into release workflows.
- -->
+
+The sample's Fastlane configuration currently covers release workflows. UI test
+lanes are not configured.
 
 ## Test Structure
 
@@ -74,7 +82,6 @@ The project includes Fastlane configuration for CI/CD. Tests can be integrated i
 
 - **`testCoreAppFunctionality()`** - Tests basic app controls:
   - Camera switching (front/back)
-  - Mode switching (Continuous/Spot)
   - Measurement duration controls
   - Tab navigation (iOS 16+)
 
@@ -84,12 +91,6 @@ The project includes Fastlane configuration for CI/CD. Tests can be integrated i
   - Tutorial flow handling
   - 10-second recording session
   - Results validation
-
-- **`testSpotMeasurementFlow()`** - Complete spot measurement:
-  - Duration setup (30 seconds)
-  - Full measurement cycle with countdown
-  - Results validation (BPM, charts, sections)
-  - 60-second timeout for API response
 
 - **`testMeasurementPreparation()`** - Setup helper for manual testing
 
@@ -106,20 +107,10 @@ The project includes Fastlane configuration for CI/CD. Tests can be integrated i
 
 ### Continuous Mode Testing
 
-1. Ensures app is in Continuous mode
-2. Handles tutorial flow if present
-3. Initiates 10-second recording
-4. Validates measurement UI components
-5. Captures results screenshots
-
-### Spot Mode Testing
-
-1. Switches to Spot mode
-2. Sets 30-second duration
-3. Handles tutorial and permissions
-4. Runs full measurement cycle (countdown + measurement + processing)
-5. Validates results (pulse, breathing, blood pressure sections)
-6. Checks for BPM values and chart titles
+1. Handles tutorial flow if present
+2. Initiates 10-second recording
+3. Validates measurement UI components
+4. Captures results screenshots
 
 ### Tutorial Flow Handling
 
@@ -160,7 +151,6 @@ The tests include automatic handling of:
 
 **Test timeouts on real devices:**
 
-- Spot measurements allow 60 seconds for API response
 - Ensure stable network connection
 - Check server endpoint availability
 
@@ -220,36 +210,8 @@ func testNewFeature() throws {
 
 ## CI/CD Integration
 
-### Xcode Cloud (TODO: not implemented yet, but can be used from public github repo)
-
-Tests are configured to run in Xcode scheme and can be integrated with Xcode Cloud workflows.
-
-### Fastlane Integration (TODO: not implemented yet)
-
-The project includes Fastlane configuration (`fastlane/Fastfile`) that can be extended to include UI testing:
-
-```ruby
-lane :run_ui_tests do
-  run_tests(
-    project: "demo-app.xcodeproj",
-    scheme: "demo-app",
-    devices: ["iPhone 15"],
-    only_testing: ["demo-app-UITests"]
-  )
-end
-```
-
-### GitHub Actions Example (TODO: not implemented yet)
-
-```yaml
-- name: Run UI Tests
-  run: |
-    xcodebuild test \
-      -project demo-app.xcodeproj \
-      -scheme demo-app \
-      -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.0' \
-      -resultBundlePath TestResults
-```
+CI integration is not currently configured for these UI tests. Use the Xcode or
+`xcodebuild` flows above until a CI lane is added.
 
 ## Maintenance
 
@@ -262,7 +224,6 @@ end
 
 ### Performance Considerations
 
-- Spot measurement tests take 60+ seconds
 - Continuous tests complete in ~15 seconds
 - Consider parallel execution for faster CI builds
 - Use simulator for faster feedback loops during development

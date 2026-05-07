@@ -1,12 +1,7 @@
-# Table of Contents
-
-- [Table of Contents](#table-of-contents)
-  - [1. Create an Account](#1-create-an-account)
-  - [2. Log In](#2-log-in)
-  - [3a. API Key (Development Only)](#3a-api-key-development-only)
-    - [How to include your API Key](#how-to-include-your-api-key)
-  - [3b. Register an OAuth App](#3b-register-an-oauth-app)
-  - [4. Download Your Configuration File and place it in your App's repo](#4-download-your-configuration-file-and-place-it-in-your-apps-repo)
+---
+title: Authentication
+description: Set up API key or OAuth authentication for SmartSpectra SDK across all platforms.
+---
 
 ## 1. Create an Account
 
@@ -20,24 +15,20 @@
 2. Enter your email and password, then click **Submit**.
 3. After successful login you will be redirected to your Portal page, where you can manage your API key and Apps registered for OAuth Authentication.
 
-## 3a. API Key (Development Only)
+## 3a. API Key
 
 > ⚠️ **Warning:** API Keys are intended for quick testing and local development. For production workloads, use the OAuth 2.0 flow with short-lived tokens.
 
 ### How to include your API Key
 
-1. In your Dashboard, copy the **Active API Key** and then follow your platform's Documentation.
+1. In your Dashboard, copy the **Active API Key** and then follow your platform's documentation:
 
-- [Swift](../swift/README.md)
-
-- [Android](../android/README.md)
+- [Swift (iOS)](/docs/ios)
+- [Android](/docs/android)
 
 ## 3b. Register an OAuth App
 
-> **NOTE**
-> OAuth is currently only supported for iOS and Android. If you are using a different platform, please use the API Key method.
-> Currently, it requires testflight/appstore builds for iOS, and play store testing/release build for Android
-> We may support sandbox builds/development builds in the future.
+> **Note:** OAuth is currently only supported for iOS and Android. If you are using a different platform, please use the API Key method.
 
 On your **Account → Registered App for OAuth** section:
 
@@ -49,21 +40,30 @@ On your **Account → Registered App for OAuth** section:
    - [How to find your Android App ID](https://developer.android.com/build/configure-app-module)
 3. Provide your **Org ID** if you're registering an Apple App or your Signing Key SHA-256 fingerprint if registering an Android App:
    - **Apple**: Org ID (e.g. `AB12CDE34F`)
-       - [How to find your Org ID](https://developer.apple.com/help/account/)
+     - [How to find your Org ID](https://developer.apple.com/help/account/)
    - **Android**: Certificate SHA-256 fingerprint
-       - [How to find your Signing Key SHA-256 fingerprint](https://developers.google.com/android/guides/client-auth)
+     - Android OAuth is currently documented for Play Store releases
+     - [How to find your Signing Key SHA-256 fingerprint](https://developers.google.com/android/guides/client-auth)
+     - To get the SHA-256 fingerprint from your release keystore, run:
+
+       ```bash
+       keytool -list -v -keystore <path-to-keystore> -alias <key-alias> -storepass <store-password> | grep SHA256
+       ```
+
+       For example, for the debug keystore:
+
+       ```bash
+       keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android | grep SHA256
+       ```
+
 4. Click **Register App ID**.
 
-## 4. Download Your Configuration File and place it in your App's repo
+## 4. Download Your Configuration File
 
 Once your app appears in the **Registered App(s) for OAuth** table:
 
 - **Apple**
-  Click **Download .plist** to fetch a `PresageServices-Info.plist` file and store in the root of your App's repo. No additional code/configuration authentication is needed.
-
-  ![ios-oauth-config-location](images/plist_location_in_repo.png)
+  Click **Download .plist** to fetch a `PresageService-Info.plist` file and store it in the root of your App's repo. No additional code/configuration for authentication is needed.
 
 - **Android**
-  Click **Download .xml** to fetch a `presage_services.xml` file and store in the root of your App's `/src/main/res/xml/presage_services.xml`. No additional code/configuration for authentication is needed.
-
-  ![android-oauth-config-location](../android/media/xml_location_in_repo.png)
+  Click **Download .xml** to fetch a `presage_services.xml` file and store it at `/src/main/res/xml/presage_services.xml`. No additional code/configuration for authentication is needed.

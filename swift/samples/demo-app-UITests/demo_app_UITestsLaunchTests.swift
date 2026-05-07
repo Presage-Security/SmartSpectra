@@ -1,10 +1,8 @@
+// demo_app_UITestsLaunchTests.swift
 //
-//  demo_app_UITestsLaunchTests.swift  
-//  demo-app-UITests
+// Copyright © 2026 Presage Technologies, Inc.
 //
-//  Created by Ashraful Islam on 8/10/25.
-//
-
+// SPDX-License-Identifier: LicenseRef-Proprietary
 import XCTest
 
 final class demo_app_UITestsLaunchTests: XCTestCase {

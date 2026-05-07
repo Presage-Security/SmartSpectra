@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="23094" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23082"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="UIKit button configuration" minToolsVersion="15.0"/>
+    </dependencies>
+    <scenes>
+        <!--View Controller-->
+        <scene sceneID="tne-QT-ifu">
+            <objects>
+                <viewController id="BYZ-38-t0r" customClass="ViewController" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+
+                            <!-- Full-screen camera preview -->
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" translatesAutoresizingMaskIntoConstraints="NO" id="img-01-preview">
+                                <rect key="frame" x="0" y="0" width="393" height="852"/>
+                            </imageView>
+
+                            <!-- Validation pill at top -->
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" customClass="PaddedLabel" customModuleProvider="target" id="lbl-06-validation">
+                                <rect key="frame" x="40" y="59" width="313" height="22"/>
+                                <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
+                                <color key="textColor" red="1.0" green="0.78" blue="0.36" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                            </label>
+
+                            <!-- Bottom overlay panel -->
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="panel-01-bottom">
+                                <rect key="frame" x="0" y="420" width="393" height="432"/>
+                                <subviews>
+                                    <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" showsHorizontalScrollIndicator="NO" translatesAutoresizingMaskIntoConstraints="NO" id="scr-02-panel">
+                                        <rect key="frame" x="0" y="0" width="393" height="432"/>
+                                        <subviews>
+                                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="stk-01-root">
+                                        <rect key="frame" x="16" y="20" width="361" height="380"/>
+                                        <subviews>
+
+                                            <!-- Heart Rate row -->
+                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="card-02-hr">
+                                                <rect key="frame" x="0" y="0" width="361" height="56"/>
+                                                <subviews>
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Heart Rate" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="lbl-02-hr-title">
+                                                        <rect key="frame" x="16" y="10" width="80" height="16"/>
+                                                        <fontDescription key="fontDescription" style="UICTFontTextStyleCaption1"/>
+                                                        <color key="textColor" white="1" alpha="0.5" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                    </label>
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="-- bpm" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="lbl-03-hr-value">
+                                                        <rect key="frame" x="16" y="28" width="329" height="20"/>
+                                                        <fontDescription key="fontDescription" type="system" weight="bold" pointSize="28"/>
+                                                        <color key="textColor" red="1.0" green="0.42" blue="0.42" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                    </label>
+                                                </subviews>
+                                                <color key="backgroundColor" white="1" alpha="0.08" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                <constraints>
+                                                    <constraint firstItem="lbl-02-hr-title" firstAttribute="top" secondItem="card-02-hr" secondAttribute="top" constant="10" id="hr-c01"/>
+                                                    <constraint firstItem="lbl-02-hr-title" firstAttribute="leading" secondItem="card-02-hr" secondAttribute="leading" constant="16" id="hr-c02"/>
+                                                    <constraint firstItem="lbl-03-hr-value" firstAttribute="top" secondItem="lbl-02-hr-title" secondAttribute="bottom" constant="2" id="hr-c04"/>
+                                                    <constraint firstItem="lbl-03-hr-value" firstAttribute="leading" secondItem="card-02-hr" secondAttribute="leading" constant="16" id="hr-c05"/>
+                                                    <constraint firstAttribute="trailing" secondItem="lbl-03-hr-value" secondAttribute="trailing" constant="16" id="hr-c06"/>
+                                                    <constraint firstAttribute="bottom" secondItem="lbl-03-hr-value" secondAttribute="bottom" constant="10" id="hr-c07"/>
+                                                </constraints>
+                                                <userDefinedRuntimeAttributes>
+                                                    <userDefinedRuntimeAttribute type="boolean" keyPath="layer.masksToBounds" value="YES"/>
+                                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                                        <real key="value" value="12"/>
+                                                    </userDefinedRuntimeAttribute>
+                                                </userDefinedRuntimeAttributes>
+                                            </view>
+
+                                            <!-- Breathing graph card -->
+                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="card-03-br">
+                                                <rect key="frame" x="0" y="66" width="361" height="110"/>
+                                                <subviews>
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Breathing Rate" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="lbl-04-br-title">
+                                                        <rect key="frame" x="12" y="8" width="337" height="16"/>
+                                                        <fontDescription key="fontDescription" style="UICTFontTextStyleCaption1"/>
+                                                        <color key="textColor" white="1" alpha="0.5" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                    </label>
+                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" customClass="LineGraphView" customModuleProvider="target" id="grp-01-breathing">
+                                                        <rect key="frame" x="8" y="28" width="345" height="74"/>
+                                                        <color key="backgroundColor" red="0" green="0" blue="0" alpha="0" colorSpace="custom" customColorSpace="sRGB"/>
+                                                    </view>
+                                                </subviews>
+                                                <color key="backgroundColor" white="1" alpha="0.08" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                <constraints>
+                                                    <constraint firstItem="lbl-04-br-title" firstAttribute="top" secondItem="card-03-br" secondAttribute="top" constant="8" id="br-c01"/>
+                                                    <constraint firstItem="lbl-04-br-title" firstAttribute="leading" secondItem="card-03-br" secondAttribute="leading" constant="12" id="br-c02"/>
+                                                    <constraint firstAttribute="trailing" secondItem="lbl-04-br-title" secondAttribute="trailing" constant="12" id="br-c03"/>
+                                                    <constraint firstItem="grp-01-breathing" firstAttribute="top" secondItem="lbl-04-br-title" secondAttribute="bottom" constant="4" id="br-c04"/>
+                                                    <constraint firstItem="grp-01-breathing" firstAttribute="leading" secondItem="card-03-br" secondAttribute="leading" constant="8" id="br-c05"/>
+                                                    <constraint firstAttribute="trailing" secondItem="grp-01-breathing" secondAttribute="trailing" constant="8" id="br-c06"/>
+                                                    <constraint firstAttribute="bottom" secondItem="grp-01-breathing" secondAttribute="bottom" constant="8" id="br-c07"/>
+                                                    <constraint firstItem="grp-01-breathing" firstAttribute="height" constant="74" id="grp-h-01"/>
+                                                </constraints>
+                                                <userDefinedRuntimeAttributes>
+                                                    <userDefinedRuntimeAttribute type="boolean" keyPath="layer.masksToBounds" value="YES"/>
+                                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                                        <real key="value" value="12"/>
+                                                    </userDefinedRuntimeAttribute>
+                                                </userDefinedRuntimeAttributes>
+                                            </view>
+
+                                            <!-- Blood Pressure graph card -->
+                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="card-04-bp">
+                                                <rect key="frame" x="0" y="186" width="361" height="110"/>
+                                                <subviews>
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Blood Pressure Trace" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="lbl-05-bp-title">
+                                                        <rect key="frame" x="12" y="8" width="337" height="16"/>
+                                                        <fontDescription key="fontDescription" style="UICTFontTextStyleCaption1"/>
+                                                        <color key="textColor" white="1" alpha="0.5" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                    </label>
+                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" customClass="LineGraphView" customModuleProvider="target" id="grp-02-bp">
+                                                        <rect key="frame" x="8" y="28" width="345" height="74"/>
+                                                        <color key="backgroundColor" red="0" green="0" blue="0" alpha="0" colorSpace="custom" customColorSpace="sRGB"/>
+                                                    </view>
+                                                </subviews>
+                                                <color key="backgroundColor" white="1" alpha="0.08" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                <constraints>
+                                                    <constraint firstItem="lbl-05-bp-title" firstAttribute="top" secondItem="card-04-bp" secondAttribute="top" constant="8" id="bp-c01"/>
+                                                    <constraint firstItem="lbl-05-bp-title" firstAttribute="leading" secondItem="card-04-bp" secondAttribute="leading" constant="12" id="bp-c02"/>
+                                                    <constraint firstAttribute="trailing" secondItem="lbl-05-bp-title" secondAttribute="trailing" constant="12" id="bp-c03"/>
+                                                    <constraint firstItem="grp-02-bp" firstAttribute="top" secondItem="lbl-05-bp-title" secondAttribute="bottom" constant="4" id="bp-c04"/>
+                                                    <constraint firstItem="grp-02-bp" firstAttribute="leading" secondItem="card-04-bp" secondAttribute="leading" constant="8" id="bp-c05"/>
+                                                    <constraint firstAttribute="trailing" secondItem="grp-02-bp" secondAttribute="trailing" constant="8" id="bp-c06"/>
+                                                    <constraint firstAttribute="bottom" secondItem="grp-02-bp" secondAttribute="bottom" constant="8" id="bp-c07"/>
+                                                    <constraint firstItem="grp-02-bp" firstAttribute="height" constant="74" id="grp-h-02"/>
+                                                </constraints>
+                                                <userDefinedRuntimeAttributes>
+                                                    <userDefinedRuntimeAttribute type="boolean" keyPath="layer.masksToBounds" value="YES"/>
+                                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                                        <real key="value" value="12"/>
+                                                    </userDefinedRuntimeAttribute>
+                                                </userDefinedRuntimeAttributes>
+                                            </view>
+
+                                            <!-- Insight Card -->
+                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="card-05-insight">
+                                                <rect key="frame" x="0" y="296" width="361" height="80"/>
+                                                <subviews>
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="AI Insight" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="lbl-07-insight-title">
+                                                        <rect key="frame" x="12" y="8" width="260" height="16"/>
+                                                        <fontDescription key="fontDescription" style="UICTFontTextStyleCaption1"/>
+                                                        <color key="textColor" white="1" alpha="0.5" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                    </label>
+                                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="btn-02-insight">
+                                                        <rect key="frame" x="280" y="4" width="69" height="24"/>
+                                                        <buttonConfiguration key="configuration" style="gray" title="Ask AI" cornerStyle="capsule">
+                                                            <fontDescription key="titleFontDescription" type="system" weight="medium" pointSize="12"/>
+                                                        </buttonConfiguration>
+                                                        <connections>
+                                                            <action selector="insightTapped" destination="BYZ-38-t0r" eventType="touchUpInside" id="con-12"/>
+                                                        </connections>
+                                                    </button>
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Tap Ask AI to get an analysis of your vitals." textAlignment="natural" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="lbl-08-insight-body">
+                                                        <rect key="frame" x="12" y="30" width="337" height="42"/>
+                                                        <fontDescription key="fontDescription" type="system" pointSize="13"/>
+                                                        <color key="textColor" white="1" alpha="0.7" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                    </label>
+                                                </subviews>
+                                                <color key="backgroundColor" white="1" alpha="0.08" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                <constraints>
+                                                    <constraint firstItem="lbl-07-insight-title" firstAttribute="top" secondItem="card-05-insight" secondAttribute="top" constant="8" id="in-c01"/>
+                                                    <constraint firstItem="lbl-07-insight-title" firstAttribute="leading" secondItem="card-05-insight" secondAttribute="leading" constant="12" id="in-c02"/>
+                                                    <constraint firstItem="btn-02-insight" firstAttribute="centerY" secondItem="lbl-07-insight-title" secondAttribute="centerY" id="in-c03"/>
+                                                    <constraint firstAttribute="trailing" secondItem="btn-02-insight" secondAttribute="trailing" constant="12" id="in-c04"/>
+                                                    <constraint firstItem="lbl-08-insight-body" firstAttribute="top" secondItem="lbl-07-insight-title" secondAttribute="bottom" constant="6" id="in-c05"/>
+                                                    <constraint firstItem="lbl-08-insight-body" firstAttribute="leading" secondItem="card-05-insight" secondAttribute="leading" constant="12" id="in-c06"/>
+                                                    <constraint firstAttribute="trailing" secondItem="lbl-08-insight-body" secondAttribute="trailing" constant="12" id="in-c07"/>
+                                                    <constraint firstAttribute="bottom" secondItem="lbl-08-insight-body" secondAttribute="bottom" constant="8" id="in-c08"/>
+                                                </constraints>
+                                                <userDefinedRuntimeAttributes>
+                                                    <userDefinedRuntimeAttribute type="boolean" keyPath="layer.masksToBounds" value="YES"/>
+                                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                                        <real key="value" value="12"/>
+                                                    </userDefinedRuntimeAttribute>
+                                                </userDefinedRuntimeAttributes>
+                                            </view>
+
+                                            <!-- Status -->
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Idle" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="lbl-01-status">
+                                                <rect key="frame" x="0" y="306" width="361" height="14"/>
+                                                <fontDescription key="fontDescription" style="UICTFontTextStyleCaption2"/>
+                                                <color key="textColor" white="1" alpha="0.5" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                            </label>
+
+                                            <!-- Start/Stop Button -->
+                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="btn-01-toggle">
+                                                <rect key="frame" x="0" y="330" width="361" height="50"/>
+                                                <constraints>
+                                                    <constraint firstAttribute="height" constant="50" id="btn-h-01"/>
+                                                </constraints>
+                                                <buttonConfiguration key="configuration" style="filled" title="Start" cornerStyle="capsule"/>
+                                                <connections>
+                                                    <action selector="toggleTapped" destination="BYZ-38-t0r" eventType="touchUpInside" id="con-04"/>
+                                                </connections>
+                                            </button>
+
+                                        </subviews>
+                                    </stackView>
+                                        </subviews>
+                                        <constraints>
+                                            <constraint firstItem="stk-01-root" firstAttribute="top" secondItem="scr-02-panel" secondAttribute="top" constant="12" id="s2-c01"/>
+                                            <constraint firstItem="stk-01-root" firstAttribute="leading" secondItem="scr-02-panel" secondAttribute="leading" constant="16" id="s2-c02"/>
+                                            <constraint firstItem="stk-01-root" firstAttribute="trailing" secondItem="scr-02-panel" secondAttribute="trailing" constant="-16" id="s2-c03"/>
+                                            <constraint firstItem="stk-01-root" firstAttribute="bottom" secondItem="scr-02-panel" secondAttribute="bottom" constant="-16" id="s2-c04"/>
+                                            <constraint firstItem="stk-01-root" firstAttribute="width" secondItem="scr-02-panel" secondAttribute="width" constant="-32" id="s2-c05"/>
+                                            <constraint firstItem="scr-02-panel" firstAttribute="height" secondItem="stk-01-root" secondAttribute="height" constant="28" priority="750" id="s2-c06"/>
+                                        </constraints>
+                                    </scrollView>
+                                </subviews>
+                                <color key="backgroundColor" red="0" green="0" blue="0" alpha="0" colorSpace="custom" customColorSpace="sRGB"/>
+                                <constraints>
+                                    <constraint firstItem="scr-02-panel" firstAttribute="top" secondItem="panel-01-bottom" secondAttribute="top" id="p-c01"/>
+                                    <constraint firstItem="scr-02-panel" firstAttribute="leading" secondItem="panel-01-bottom" secondAttribute="leading" id="p-c02"/>
+                                    <constraint firstAttribute="trailing" secondItem="scr-02-panel" secondAttribute="trailing" id="p-c03"/>
+                                    <constraint firstAttribute="bottom" secondItem="scr-02-panel" secondAttribute="bottom" id="p-c04"/>
+                                </constraints>
+                            </view>
+
+                        </subviews>
+                        <color key="backgroundColor" red="0" green="0" blue="0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <!-- Validation label horizontal (vertical managed in code) -->
+                            <constraint firstItem="lbl-06-validation" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="8" id="c05"/>
+                            <constraint firstItem="lbl-06-validation" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="40" id="c06"/>
+                            <constraint firstAttribute="trailing" secondItem="lbl-06-validation" secondAttribute="trailing" constant="40" id="c07"/>
+                            <!-- Preview and panel positioning managed in code for portrait/landscape -->
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
+                    </view>
+                    <connections>
+                        <outlet property="previewImageView" destination="img-01-preview" id="con-01"/>
+                        <outlet property="validationLabel" destination="lbl-06-validation" id="con-09"/>
+                        <outlet property="statusLabel" destination="lbl-01-status" id="con-02"/>
+                        <outlet property="toggleButton" destination="btn-01-toggle" id="con-03"/>
+                        <outlet property="heartRateLabel" destination="lbl-03-hr-value" id="con-05"/>
+                        <outlet property="breathingRateLabel" destination="lbl-04-br-title" id="con-08"/>
+                        <outlet property="breathingGraphView" destination="grp-01-breathing" id="con-06"/>
+                        <outlet property="bloodPressureGraphView" destination="grp-02-bp" id="con-07"/>
+                        <outlet property="bottomPanel" destination="panel-01-bottom" id="con-10"/>
+                        <outlet property="insightLabel" destination="lbl-08-insight-body" id="con-11"/>
+                        <outlet property="insightButton" destination="btn-02-insight" id="con-13"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
+            </objects>
+        </scene>
+    </scenes>
+</document>

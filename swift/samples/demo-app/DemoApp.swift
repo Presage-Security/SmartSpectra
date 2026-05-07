@@ -1,21 +1,15 @@
+// DemoApp.swift
 //
-//  DemoApp.swift
-//  Demo App
+// Copyright © 2026 Presage Technologies, Inc.
 //
-//  Created by Bill Vivino on 4/5/24.
-//
-
+// SPDX-License-Identifier: LicenseRef-Proprietary
 import SwiftUI
 
 @main
 struct DemoApp: App {
     var body: some Scene {
         WindowGroup {
-            if #available(iOS 16.0, *) {
-                DemoAppView()
-            } else {
-                ContentView()
-            }
+            DemoAppView()
         }
     }
 }

@@ -1,10 +1,8 @@
+// demo_app_MeasurementTests.swift
 //
-//  demo_app_MeasurementTests.swift
-//  demo-app-UITests
+// Copyright © 2026 Presage Technologies, Inc.
 //
-//  Full measurement flow tests for Continuous and Spot modes
-//
-
+// SPDX-License-Identifier: LicenseRef-Proprietary
 import XCTest
 
 final class demo_app_MeasurementTests: UITestBase {
@@ -18,52 +16,79 @@ final class demo_app_MeasurementTests: UITestBase {
         }
     }
 
-    private func handleTutorialFlow() {
-        // Handle tutorial/onboarding flow if it appears (only shows on first run)
-
-        // Check if any tutorial exists by checking the first image
-        let firstTutorialImage = app.images["tutorial_image1"]
-        if !firstTutorialImage.waitForExistence(timeout: 1) {
-            print("ℹ️ No tutorial flow detected, skipping...")
+    /// Dismiss the tutorial sheet if it appears (shown on first launch after tapping Checkup).
+    /// The tutorial is a TabView presented as a sheet with a "Skip Tutorial" toolbar button.
+    private func dismissTutorialIfNeeded() {
+        // The tutorial uses PageTabViewStyle which exposes page indicators
+        let pageIndicators = app.pageIndicators.firstMatch
+        guard pageIndicators.waitForExistence(timeout: 4) else {
+            print("No tutorial detected, skipping...")
             return
         }
 
-        // Tutorial exists, swipe through all images
-        print("📖 Tutorial flow detected, processing...")
-        let tutorialImages = ["tutorial_image1", "tutorial_image2", "tutorial_image3",
-                             "tutorial_image4", "tutorial_image5", "tutorial_image6", "tutorial_image7"]
-
-        for (index, imageName) in tutorialImages.enumerated() {
-            let image = app.images[imageName]
-            if image.waitForExistence(timeout: 1) {
-                print("📖 Swiping tutorial image \(index + 1)...")
-                if index == tutorialImages.count - 1 {
-                    image.swipeRight() // Last image swipes right
-                } else {
-                    image.swipeLeft() // Other images swipe left
-                }
-                Thread.sleep(forTimeInterval: 0.5)
+        print("Tutorial detected, tapping Skip...")
+        let skipButton = app.buttons["Skip Tutorial"]
+        if skipButton.waitForExistence(timeout: 3) {
+            skipButton.tap()
+        } else {
+            // Fallback: swipe through all pages then tap the finish checkmark
+            for i in 0..<7 {
+                print("  Swiping tutorial page \(i + 1)...")
+                app.swipeLeft()
+                Thread.sleep(forTimeInterval: 0.3)
+            }
+            let finishButton = app.buttons["Finish Tutorial"]
+            if finishButton.waitForExistence(timeout: 3) {
+                finishButton.tap()
             }
         }
+        Thread.sleep(forTimeInterval: 0.5)
+        print("Tutorial dismissed")
+    }
 
-        // Handle agreement/terms if they appear
-        let agreeButton = app.staticTexts["Agree"]
-        if agreeButton.waitForExistence(timeout: 2) {
-            print("📜 Accepting terms...")
+    /// Accept a legal agreement (Terms of Service or Privacy Policy) if its sheet appears.
+    /// The LegalDocumentView has an "Agree" button that enables after web content loads.
+    private func acceptAgreementIfNeeded(name: String, timeout: TimeInterval = 10) {
+        let agreeButton = app.buttons["Agree"]
+        guard agreeButton.waitForExistence(timeout: timeout) else {
+            print("No \(name) agreement presented, skipping...")
+            return
+        }
+
+        print("\(name) presented, waiting for Agree button to be enabled...")
+        // The Agree button is disabled until web content loads; wait for it to be hittable
+        let deadline = Date().addingTimeInterval(timeout)
+        while !agreeButton.isEnabled && Date() < deadline {
+            Thread.sleep(forTimeInterval: 0.5)
+        }
+
+        if agreeButton.isEnabled {
             agreeButton.tap()
-            Thread.sleep(forTimeInterval: 1)
+            print("\(name) accepted")
+        } else {
+            print("WARNING: \(name) Agree button never became enabled, tapping anyway")
+            agreeButton.tap()
         }
+        Thread.sleep(forTimeInterval: 0.5)
+    }
 
-        // Handle system permissions dialog if it appears in springboard
-        let springboardApp = XCUIApplication(bundleIdentifier: "com.apple.springboard")
-        let allowButton = springboardApp.buttons["Allow"]
-        if allowButton.waitForExistence(timeout: 2) {
-            print("🔐 Allowing camera permission...")
-            allowButton.tap()
-            Thread.sleep(forTimeInterval: 1)
+    /// Handle the full onboarding flow that appears after tapping the Checkup button:
+    /// Tutorial (skip) -> Terms of Service (agree) -> Privacy Policy (agree) -> camera permission.
+    private func handleOnboardingFlow() {
+        dismissTutorialIfNeeded()
+        acceptAgreementIfNeeded(name: "Terms of Service")
+        acceptAgreementIfNeeded(name: "Privacy Policy")
+
+        // Handle camera permission system dialog
+        let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
+        if springboard.alerts.firstMatch.waitForExistence(timeout: 3) {
+            let alert = springboard.alerts.firstMatch
+            let allow = alert.buttons["Allow"].exists ? alert.buttons["Allow"] : alert.buttons["OK"]
+            if allow.exists {
+                print("Allowing camera permission...")
+                allow.tap()
+            }
         }
-
-        print("✅ Tutorial flow completed")
     }
 
     @MainActor
@@ -71,92 +96,70 @@ final class demo_app_MeasurementTests: UITestBase {
         // Test full continuous measurement workflow
         XCTAssertTrue(waitForAppToLoad(), "App should launch")
 
-        // Ensure we're in continuous mode
-        let switchToSpotButton = app.buttons["Switch to Spot"]
-        if switchToSpotButton.waitForExistence(timeout: 2) {
-            // Already in continuous mode, good
-            print("✅ Already in Continuous mode")
-        } else {
-            // Switch from spot to continuous
-            let switchToContinuousButton = app.buttons["Switch to Continuous"]
-            if switchToContinuousButton.waitForExistence(timeout: 2) {
-                switchToContinuousButton.tap()
-                XCTAssertTrue(switchToSpotButton.waitForExistence(timeout: 2), "Should switch to continuous mode")
-                print("✅ Switched to Continuous mode")
-            }
-        }
-
-        // Handle tutorial/onboarding flow if it appears
-        handleTutorialFlow()
-
         // Find and tap the SmartSpectra Checkup button
         let checkupButton = app.buttons.containing(.image, identifier: "Love").firstMatch
         if checkupButton.waitForExistence(timeout: 3) {
-            print("✅ Found SmartSpectra Checkup button")
+            print("Found SmartSpectra Checkup button")
             checkupButton.tap()
 
-            // wait for the UI to be visible
-            Thread.sleep(forTimeInterval: 1)
-            // Look for Record button in the measurement UI and wait for it to be tappable
-            let recordButton = app.staticTexts["Record"]
-            if recordButton.waitForExistence(timeout: 3) {
-                print("✅ Found Record button, waiting for it to be tappable...")
+            // Handle onboarding flow: tutorial -> terms -> privacy -> camera permission
+            handleOnboardingFlow()
 
-                // Wait for button to be hittable/tappable (up to 5 seconds)
-                let timeout = Date().addingTimeInterval(5)
-                while !recordButton.isHittable && Date() < timeout {
-                    Thread.sleep(forTimeInterval: 0.5)
-                }
-
-                if recordButton.isHittable {
-                    print("✅ Record button is now tappable, starting measurement")
-                    recordButton.tap()
-                } else {
-                    print("⚠️ Record button exists but is not tappable after 5 seconds")
-                    takeScreenshot(name: "Record Button Not Tappable")
-                    recordButton.tap() // Try anyway
-                }
-
-                // In continuous mode, wait 10 seconds then stop recording
-                print("⏱️ Recording for 10 seconds...")
-                Thread.sleep(forTimeInterval: 10)
-
-                // Look for and click the Stop button
-                let stopButton = app.staticTexts["Stop"]
-                if stopButton.waitForExistence(timeout: 2) {
-                    print("✅ Found Stop button, stopping recording")
-                    stopButton.tap()
-
-                    // Wait a moment for processing
-                    Thread.sleep(forTimeInterval: 3)
-                    
-                    // Press back button to return to main screen
-                    let backButton = app.navigationBars.buttons.element(boundBy: 0)
-                    if backButton.waitForExistence(timeout: 2) {
-                        print("✅ Found back button, returning to main screen")
-                        backButton.tap()
-                        Thread.sleep(forTimeInterval: 1)
-                    } else {
-                        // Try alternative back button selectors
-                        let backButton2 = app.buttons["Back"]
-                        if backButton2.waitForExistence(timeout: 1) {
-                            print("✅ Found 'Back' button, returning to main screen")
-                            backButton2.tap()
-                            Thread.sleep(forTimeInterval: 1)
-                        } else {
-                            print("⚠️ Back button not found, may still be in measurement view")
-                            takeScreenshot(name: "Continuous Mode - No Back Button")
-                        }
-                    }
-                } else {
-                    print("⚠️ Stop button not found, measurement may still be running")
-                    takeScreenshot(name: "Continuous Mode - No Stop Button")
-                }
-            } else {
-                print("❌ Record button not found")
-                takeScreenshot(name: "Continuous Mode - No Record Button")
-                XCTFail("Could not find Record button in measurement UI")
+            // The screening view auto-starts measurement on appear in continuous
+            // mode — the record button transitions Record → Stop as the SDK
+            // moves .idle → .starting → .running. Poll both labels so the
+            // assertion is robust to that transition timing.
+            let recordButton = app.buttons["Record"]
+            let stopButton = app.buttons["Stop"]
+            let deadline = Date().addingTimeInterval(15)
+            var measurementButton: XCUIElement? = nil
+            while Date() < deadline {
+                if recordButton.exists { measurementButton = recordButton; break }
+                if stopButton.exists { measurementButton = stopButton; break }
+                Thread.sleep(forTimeInterval: 0.5)
+            }
+            guard let measurementButton else {
+                print("❌ Neither Record nor Stop button appeared")
+                takeScreenshot(name: "Continuous Mode - No Measurement Button")
+                XCTFail("Could not find measurement control (Record/Stop) in screening UI")
                 return
+            }
+            print("✅ Measurement control visible (label=\(measurementButton.label))")
+
+            // Let the continuous measurement run for a short while.
+            print("⏱️ Recording for 10 seconds...")
+            Thread.sleep(forTimeInterval: 10)
+
+            // Stop the measurement. After auto-start the button is "Stop";
+            // if the SDK is still in .starting, the button reads "Record" but
+            // is disabled — a tap on either is a no-op in that case, so the
+            // back-nav fallback handles cleanup.
+            let liveStopButton = app.buttons["Stop"]
+            if liveStopButton.waitForExistence(timeout: 2) {
+                print("✅ Tapping Stop to end measurement")
+                liveStopButton.tap()
+                Thread.sleep(forTimeInterval: 3)
+            } else {
+                print("ℹ️ Stop button not present — SDK may still be initializing")
+                takeScreenshot(name: "Continuous Mode - No Stop Button")
+            }
+
+            // Press back button to return to main screen
+            let backButton = app.navigationBars.buttons.element(boundBy: 0)
+            if backButton.waitForExistence(timeout: 2) {
+                print("✅ Found back button, returning to main screen")
+                backButton.tap()
+                Thread.sleep(forTimeInterval: 1)
+            } else {
+                let backButton2 = app.buttons["Back"]
+                if backButton2.waitForExistence(timeout: 1) {
+                    print("✅ Found 'Back' button, returning to main screen")
+                    backButton2.tap()
+                    Thread.sleep(forTimeInterval: 1)
+                } else {
+                    print("⚠️ Back button not found, may still be in measurement view")
+                    takeScreenshot(name: "Continuous Mode - No Back Button")
+                }
             }
         } else {
             print("❌ SmartSpectra Checkup button not found")
@@ -196,162 +199,13 @@ final class demo_app_MeasurementTests: UITestBase {
     }
 
     @MainActor
-    func testSpotMeasurementFlow() throws {
-        // Test full spot measurement workflow
-        XCTAssertTrue(waitForAppToLoad(), "App should launch")
-
-        // Switch to spot mode
-        let switchToSpotButton = app.buttons["Switch to Spot"]
-        if switchToSpotButton.waitForExistence(timeout: 2) {
-            switchToSpotButton.tap()
-            XCTAssertTrue(app.buttons["Switch to Continuous"].waitForExistence(timeout: 2), "Should switch to spot mode")
-            print("✅ Switched to Spot mode")
-        } else {
-            print("✅ Already in Spot mode")
-        }
-
-        // Set measurement duration to 30 seconds (default should be 30)
-        let stepper = app.steppers.firstMatch
-        if stepper.waitForExistence(timeout: 2) {
-            let durationText = app.staticTexts.containing(NSPredicate(format: "label CONTAINS 'Measurement Duration'")).firstMatch
-            if durationText.exists {
-                print("📏 Current duration: \(durationText.label)")
-
-                // Ensure we're at 30 seconds
-                let currentLabel = durationText.label
-                if !currentLabel.contains("30") {
-                    // Adjust to 30 if needed
-                    let incrementButton = stepper.buttons["Increment"]
-                    let decrementButton = stepper.buttons["Decrement"]
-
-                    // Simple approach: reset to reasonable value
-                    if incrementButton.exists && currentLabel.contains("25") {
-                        incrementButton.tap()
-                        print("✅ Adjusted duration to 30 seconds")
-                    } else if decrementButton.exists && currentLabel.contains("35") {
-                        decrementButton.tap()
-                        print("✅ Adjusted duration to 30 seconds")
-                    }
-                }
-            }
-        }
-
-        // Handle tutorial/onboarding flow if it appears
-        handleTutorialFlow()
-
-        // Find and tap the SmartSpectra Checkup button
-        let checkupButton = app.buttons.containing(.image, identifier: "Love").firstMatch
-        if checkupButton.waitForExistence(timeout: 3) {
-            print("✅ Found SmartSpectra Checkup button")
-            checkupButton.tap()
-
-            // wait for the UI to be visible
-            Thread.sleep(forTimeInterval: 1)
-
-            // Look for Record button in the measurement UI and wait for it to be tappable
-            let recordButton = app.staticTexts["Record"]
-            if recordButton.waitForExistence(timeout: 3) {
-                print("✅ Found Record button, waiting for it to be tappable...")
-
-                // Wait for button to be hittable/tappable (up to 5 seconds)
-                let timeout = Date().addingTimeInterval(5)
-                while !recordButton.isHittable && Date() < timeout {
-                    Thread.sleep(forTimeInterval: 0.5)
-                }
-
-                if recordButton.isHittable {
-                    print("✅ Record button is now tappable, starting spot measurement")
-                    takeScreenshot(name: "Spot Measurement UI - Ready to Record")
-                    recordButton.tap()
-                } else {
-                    print("⚠️ Record button exists but is not tappable after 5 seconds")
-                    takeScreenshot(name: "Record Button Not Tappable")
-                    recordButton.tap() // Try anyway
-                }
-
-                // Wait for countdown + measurement + processing (30s + buffers)
-                print("⏱️ Starting 30-second spot measurement...")
-                Thread.sleep(forTimeInterval: 60) // allowing extra time for data to be uploaded and returning from the api
-
-                // Look for results directly without scrolling first
-                let sectionHeaders = ["Pulse", "Breathing", "Blood Pressure", "Face"]
-                var foundResults = false
-
-                for header in sectionHeaders {
-                    let section = app.staticTexts[header]
-                    if section.exists {
-                        print("✅ Found \(header) section")
-                        foundResults = true
-                    }
-                }
-
-                // Check for chart titles
-                let chartTitles = ["Pulse Pleth", "Breathing Pleth", "Pulse Rates", "Breathing Rates"]
-                for title in chartTitles {
-                    let chart = app.staticTexts[title]
-                    if chart.exists {
-                        print("✅ Found \(title) chart")
-                        foundResults = true
-                    }
-                }
-
-                // Look for BPM values
-                let bpmResults = app.staticTexts.containing(NSPredicate(format: "label CONTAINS 'bpm' OR label CONTAINS 'BPM'")).firstMatch
-                if bpmResults.exists {
-                    print("✅ Found BPM measurement: \(bpmResults.label)")
-                    foundResults = true
-                }
-
-                // Take screenshot regardless of results found
-                if foundResults {
-                    takeScreenshot(name: "Spot Measurement - Results Found")
-                } else {
-                    takeScreenshot(name: "Spot Measurement - Completed")
-                }
-
-                // Try gentle scroll to see more results if scroll view exists
-                let scrollView = app.scrollViews.firstMatch
-                if scrollView.exists && scrollView.isHittable {
-                    print("🔄 Attempting to view more results...")
-                    scrollView.swipeUp()
-                    Thread.sleep(forTimeInterval: 2)
-                    takeScreenshot(name: "Spot Measurement - After Scroll")
-                }
-            } else {
-                print("❌ Record button not found")
-                takeScreenshot(name: "Spot Measurement UI - No Record Button")
-                XCTFail("Could not find Record button in measurement UI")
-                return
-            }
-        } else {
-            print("❌ SmartSpectra Checkup button not found")
-            takeScreenshot(name: "Spot Mode - No Checkup Button")
-            XCTFail("Could not find SmartSpectra Checkup button")
-            return
-        }
-    }
-
-    @MainActor
     func testMeasurementPreparation() throws {
         // Helper test to prepare for manual measurement testing
         // This test sets up the app in the right state for manual testing
 
         XCTAssertTrue(waitForAppToLoad(), "App should launch")
 
-        // Test both modes are accessible
-        let continuousButton = app.buttons["Switch to Continuous"]
-        let spotButton = app.buttons["Switch to Spot"]
-
-        if spotButton.waitForExistence(timeout: 2) {
-            print("✅ Continuous mode active")
-            takeScreenshot(name: "Continuous Mode Setup")
-
-            spotButton.tap()
-            if continuousButton.waitForExistence(timeout: 2) {
-                print("✅ Spot mode active")
-                takeScreenshot(name: "Spot Mode Setup")
-            }
-        }
+        takeScreenshot(name: "App Setup")
 
         // Show all available controls
         print("Available buttons:")
