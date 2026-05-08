@@ -1,0 +1,11 @@
+<resources>
+    <color name="sample_background_dark">#000000</color>
+    <color name="sample_card_overlay">#14FFFFFF</color>
+    <color name="sample_text_primary">#FFFFFFFF</color>
+    <color name="sample_text_soft">#B3FFFFFF</color>
+    <color name="sample_text_muted">#80FFFFFF</color>
+    <color name="sample_coral">#FF6B6B</color>
+    <color name="sample_teal">#4FCCC4</color>
+    <color name="sample_violet">#A58CF9</color>
+    <color name="sample_button_secondary">#52FFFFFF</color>
+</resources>

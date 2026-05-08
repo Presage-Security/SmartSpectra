@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.presagetech.smartspectra_example.ui.screening.FaceMetricsStatusView
+        android:id="@+id/faceMetricsStatus"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginHorizontal="16dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/breathingRateTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:minWidth="125dp"
+        android:text="Breathing Rate"
+        android:textColor="@color/black"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textAlignment="viewStart"
+        android:shadowColor="@color/white"
+        android:shadowRadius="8"
+        app:layout_constraintTop_toTopOf="@+id/breathingPlot"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/breathingPlot"
+        app:layout_constraintBottom_toTopOf="@+id/breathingRateValue" />
+
+    <TextView
+        android:id="@+id/breathingRateValue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="--"
+        android:textStyle="bold"
+        android:textSize="18sp"
+        android:textColor="@color/black"
+        android:textAlignment="viewStart"
+        android:shadowColor="@color/white"
+        android:shadowRadius="8"
+        app:layout_constraintTop_toBottomOf="@+id/breathingRateTitle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/breathingPlot"
+        app:layout_constraintBottom_toBottomOf="@+id/breathingPlot"/>
+
+    <com.github.mikephil.charting.charts.LineChart
+        android:id="@+id/breathingPlot"
+        android:layout_width="0dp"
+        android:layout_height="125dp"
+        android:layout_marginStart="10dp"
+        android:shadowColor="@color/white"
+        android:shadowRadius="8"
+        app:layout_constraintTop_toBottomOf="@+id/faceMetricsStatus"
+        app:layout_constraintStart_toEndOf="@+id/breathingRateTitle"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/bloodPressureTitle" />
+
+    <!-- Blood Pressure Section (conditionally visible) -->
+    <TextView
+        android:id="@+id/bloodPressureTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:minWidth="125dp"
+        android:text="@string/screening_blood_pressure"
+        android:textColor="@color/purple"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textAlignment="viewStart"
+        android:shadowColor="@color/white"
+        android:shadowRadius="8"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="@+id/bloodPressurePlot"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/bloodPressurePlot"
+        app:layout_constraintBottom_toTopOf="@+id/pulseRateValue" />
+
+    <TextView
+        android:id="@+id/pulseRateValue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="--"
+        android:textColor="@color/purple"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textAlignment="viewStart"
+        android:shadowColor="@color/white"
+        android:shadowRadius="8"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@+id/bloodPressureTitle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/bloodPressurePlot"
+        app:layout_constraintBottom_toBottomOf="@+id/bloodPressurePlot" />
+
+    <com.github.mikephil.charting.charts.LineChart
+        android:id="@+id/bloodPressurePlot"
+        android:layout_width="0dp"
+        android:layout_height="125dp"
+        android:layout_marginStart="10dp"
+        android:shadowColor="@color/white"
+        android:shadowRadius="8"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@+id/breathingPlot"
+        app:layout_constraintStart_toEndOf="@+id/bloodPressureTitle"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/expressionStatus" />
+
+    <!-- Expression Status Section (conditionally visible) -->
+    <com.presagetech.smartspectra_example.ui.screening.ExpressionStatusView
+        android:id="@+id/expressionStatus"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@+id/bloodPressurePlot"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

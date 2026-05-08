@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="image_content_description">Tutorial Image</string>
+    <string-array name="tutorial_descriptions">
+        <item>Place your device running SmartSpectra on a stable surface, like a table.</item>
+        <item>SmartSpectra works best when you are in a well-lit environment with natural sunlight for optimal performance.</item>
+        <item>SmartSpectra works best when your face is evenly lit and does not have shadows.</item>
+        <item>Avoid having bright light sources directly behind your face, such as overhead lighting.</item>
+        <item>Stay still and refrain from talking while using SmartSpectra.</item>
+        <item>You will receive real-time feedback during the measurement process to assist you.</item>
+        <item>Start recording with SmartSpectra upon the \'Hold Still and Record\' prompt. A 30-second recording follows, and should feedback appear, comply with the prompts for an auto-restart.</item>
+    </string-array>
+</resources>

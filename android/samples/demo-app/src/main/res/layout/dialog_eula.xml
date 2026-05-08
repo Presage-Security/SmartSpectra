@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingHorizontal="16dp">
+
+    <WebView
+        android:id="@+id/webview_eula"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="end"
+        android:layout_marginVertical="8dp"
+        android:background="@android:color/transparent"
+        android:layout_gravity="bottom">
+
+        <Button
+            android:id="@+id/button_decline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Decline" />
+
+        <Button
+            android:id="@+id/button_agree"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="Agree" />
+    </LinearLayout>
+</FrameLayout>

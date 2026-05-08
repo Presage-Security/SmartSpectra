@@ -1,0 +1,102 @@
+<resources>
+    <string name="app_name">Presage SmartSpectra</string>
+    <string name="api_key_input_hint">Your api_key for Smartspectra SDK:</string>
+
+    <!-- Bottom navigation -->
+    <string name="nav_title_checkup">Checkup</string>
+    <string name="nav_title_headless">Headless</string>
+
+    <!-- Checkup controls and labels -->
+    <string name="title_headless_example">Headless Example</string>
+    <string name="demo_switch_camera_back">Switch to Back Camera</string>
+    <string name="demo_switch_camera_front">Switch to Front Camera</string>
+    <string name="demo_measurement_duration_seconds">Measurement Duration: %1$ds</string>
+    <string name="demo_metadata_id_format">ID: %1$s</string>
+    <string name="demo_metadata_timestamp_format">Upload Timestamp: %1$s</string>
+    <string name="demo_pulse_pleth">Pulse Pleth</string>
+    <string name="demo_pulse_rate">Pulse Rates</string>
+    <string name="demo_pulse_rate_confidence">Pulse Rate Confidence</string>
+    <string name="demo_breathing_pleth">Breathing Pleth</string>
+    <string name="demo_breathing_rate">Breathing Rates</string>
+    <string name="demo_breathing_rate_confidence">Breathing Rate Confidence</string>
+    <string name="demo_breathing_amplitude">Breathing Amplitude</string>
+    <string name="demo_breathing_apnea">Apnea</string>
+    <string name="demo_breathing_baseline">Breathing Baseline</string>
+    <string name="demo_breathing_line_length">Respiratory Line Length</string>
+    <string name="demo_breathing_ratio">Inhale-Exhale Ratio</string>
+    <string name="demo_blood_pressure_phasic">Phasic</string>
+    <string name="demo_cardio_measurements">Cardio Measurements</string>
+    <string name="demo_cardio_subtitle">Requires custom bundle. Not generally available yet.</string>
+    <string name="demo_face_metrics">Face Metrics</string>
+    <string name="demo_face_metrics_subtitle">Enables facial expression detection.</string>
+    <string name="demo_edge_arterial_pressure">Arterial Pressure Trace</string>
+    <string name="demo_edge_pulse_rate">Edge Pulse Rate</string>
+    <string name="demo_edge_pulse_rate_confidence">Edge Pulse Rate Confidence</string>
+    <string name="demo_face_blinking">Blinking</string>
+    <string name="demo_face_talking">Talking</string>
+    <string name="demo_mesh_points">Mesh Points</string>
+
+    <!-- Headless fragment -->
+    <string name="smart_spectra_headless_start">Start Monitoring</string>
+    <string name="smart_spectra_headless_stop">Stop Monitoring</string>
+    <string name="smart_spectra_headless_toggle_preview">Show Camera Preview</string>
+    <string name="smart_spectra_headless_status_default">Status: Initializing...</string>
+    <string name="smart_spectra_headless_status_format">Status: %1$s</string>
+    <string name="smart_spectra_headless_error_fallback">An error occurred during processing.</string>
+    <string name="smart_spectra_error_authentication_failed">Authentication failed. Check that your SmartSpectra API key is valid and authorized for this app.</string>
+    <string name="smart_spectra_error_credit_exhausted">This API key does not have enough credits for this measurement.</string>
+    <string name="smart_spectra_error_network">Could not reach SmartSpectra. Check your internet connection and try again.</string>
+    <string name="smart_spectra_error_server">SmartSpectra is temporarily unavailable. Try again later.</string>
+    <string name="smart_spectra_error_configuration">SmartSpectra is not configured correctly for this app build.</string>
+    <string name="smart_spectra_error_input_unavailable">Camera input is unavailable. Check camera permission and try again.</string>
+    <string name="smart_spectra_error_invalid_state">SmartSpectra is not ready for that action yet.</string>
+    <string name="smart_spectra_error_processing">Monitoring stopped because of an internal processing error.</string>
+    <string name="smart_spectra_headless_metrics_header">Latest Metrics</string>
+    <string name="smart_spectra_headless_metrics_placeholder">Awaiting metrics...</string>
+    <string name="smart_spectra_headless_metrics_pulse_format">Pulse: %1$.0f bpm</string>
+    <string name="smart_spectra_headless_metrics_breathing_format">Breathing: %1$.0f rpm</string>
+    <string name="smart_spectra_headless_metrics_bp_format">Blood Pressure (Phasic): %1$.0f mmHg</string>
+    <string name="smart_spectra_headless_fps_placeholder">FPS: --</string>
+
+    <!-- Insights chat -->
+    <string name="insights_chat_fab_desc">Open health insights chat</string>
+    <string name="insights_chat_title">Health Insights</string>
+    <string name="insights_chat_subtitle">Ask questions about your current vitals</string>
+    <string name="insights_chat_welcome">Hi! I can answer questions about your health metrics while monitoring is active. What would you like to know?</string>
+    <string name="insights_chat_input_hint">Ask about your vitals…</string>
+    <string name="insights_chat_send">Send</string>
+    <string name="insights_chat_error">Sorry, I couldn\'t process that request. Make sure monitoring is active and try again.</string>
+
+    <!-- Reference screening UI (relocated from SDK) -->
+    <string name="start">Start</string>
+    <string name="stop">Stop</string>
+    <string name="monitoring_validation_hint_format">%1$s</string>
+    <string name="monitoring_status_error">Monitoring stopped because of an error.</string>
+    <string name="shared_pref">Smart_Spectra</string>
+    <string name="checkup">CHECKUP</string>
+    <string name="terms_of_services">Terms of service</string>
+    <string name="instruction_of_use">Instruction of use</string>
+    <string name="privacy_policy">Privacy policy</string>
+    <string name="contact_us">Contact us</string>
+    <string name="show_tutorial">Show tutorial</string>
+    <string name="result_label_empty">No Results\n…</string>
+    <string name="result_label">Breathing Rate : %1$s\nPulse Rate : %2$s</string>
+    <string name="fps_label">FPS: %d</string>
+    <string name="measurement_failed_hint">Your data was insufficient for an accurate measurement. Please move to a better-lit location, hold still, and try again. For more guidance, see the tutorial in the dropdown menu of the \'i\' icon next to \'Checkup.\'</string>
+    <string name="loading_hint">Preparing…</string>
+    <string name="camera_permission_hint">Metrics measurements require camera permission.</string>
+    <string name="configuration_error_title">SDK configuration error</string>
+    <string name="configuration_error_default_message">SmartSpectra SDK is not configured correctly for this app build.</string>
+    <string name="allow">Allow</string>
+    <string name="open_settings">Open settings</string>
+    <string name="retry">Retry</string>
+    <string name="info_button_description">Show screening tips</string>
+    <string name="navigation_hint_start">Tap to advance</string>
+    <string name="navigation_hint_end">Tap to dismiss</string>
+    <string name="screening_blood_pressure">Pulse Rate</string>
+
+    <!-- Expression detection -->
+    <string name="expression_label">Facial Expression</string>
+    <string name="expression_confidence_default">Confidence: --</string>
+    <string name="expression_confidence_format">Confidence: %.0f%%</string>
+</resources>

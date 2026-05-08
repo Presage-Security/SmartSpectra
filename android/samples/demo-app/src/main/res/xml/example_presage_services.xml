@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+    <string name="oauth_enabled">true</string>
+    <string name="client_id">your_client_id</string>
+    <string name="sub">your_sub</string>
+    <string name="config_version">1.0</string>
+</resources>

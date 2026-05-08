@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/navigation_checkup"
+        android:icon="@drawable/ic_line_chart"
+        android:title="@string/nav_title_checkup" />
+    <item
+        android:id="@+id/navigation_headless"
+        android:icon="@drawable/ic_flip_camera"
+        android:title="@string/nav_title_headless" />
+</menu>

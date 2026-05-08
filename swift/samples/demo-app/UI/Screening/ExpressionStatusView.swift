@@ -12,7 +12,7 @@ struct ExpressionStatusView: View {
 
     private var confidenceText: String {
         guard confidence > 0 else { return "Confidence: --" }
-        return "Confidence: \(Int(confidence * 100))%"
+        return "Confidence: \(Int(confidence))%"
     }
 
     var body: some View {

@@ -1,0 +1,11 @@
+# MSBuild / Visual Studio build artifacts
+bin/
+obj/
+.vs/
+
+# C++/WinRT + XAML markup compiler output
+**/Generated Files/
+
+# Per-user VS settings
+*.vcxproj.user
+*.suo

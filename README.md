@@ -32,10 +32,7 @@ Documentation is available at <https://docs.physiology.presagetech.com/>.
   Supporting face-point analysis, iris tracking, blinking detection, and talking detection.
 
 - **Relative Blood Pressure Waveform**  
-  Relative blood pressure waveform (Contact <support@presagetech.com> for access)
-
-- **Electrodermal Activity**  
-  Electrodermal Activity real-time waveform (Contact <support@presagetech.com> for access)
+  Relative blood pressure waveform.
 
 - **Integrated Quality Control**  
   Confidence and stability metrics providing insight into the confidence in the signal. User feedback on imaging conditions to support successful use.
@@ -43,12 +40,9 @@ Documentation is available at <https://docs.physiology.presagetech.com/>.
 - **Camera Selection**  
   Front or rear facing camera selection on iOS or Android and specification of camera input for applications using the C++ SDK.
 
-- **Continuous or Spot Measurement**  
-  Options for continuous measurements or variable time window spot measurements to support varied use cases.
-
 ## Authentication
 
-- We support API key authentication for C++, iOS, and Android. We also support OAuth authentication for iOS and Android. For detailed instructions on how to set up authentication, refer to the dedicated [Authentication Docs](https://docs.physiology.presagetech.com/docs/authentication).
+- We support API key authentication for C++, iOS, and Android. We also support OAuth authentication for iOS and Android. See the platform-specific guides for setup instructions.
 
 ## Platform-Specific Guides
 
@@ -57,6 +51,7 @@ Documentation is available at <https://docs.physiology.presagetech.com/>.
 For Android integration, refer to the [Android README](android/README.md). The guide includes:
 
 - Prerequisites and setup instructions.
+- Maven setup for stable releases, release candidates, and snapshots.
 - Integration steps for your app.
 - Example usage and troubleshooting tips.
 

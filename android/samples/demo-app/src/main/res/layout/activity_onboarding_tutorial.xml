@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/frame_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/background_light"
+    android:orientation="vertical"
+    tools:context=".ui.OnboardingTutorialActivity">
+
+    <ImageView
+        android:id="@+id/tutorial_image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="fitCenter"
+        android:contentDescription="@string/image_content_description"
+        android:layout_marginBottom="80dp"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_gravity="bottom">
+        <TextView
+            android:id="@+id/tutorial_description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:textColor="@android:color/black"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_marginBottom="4dp"/>
+        <TextView
+            android:id="@+id/navigation_hint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/white"
+            android:textSize="14sp"
+            android:layout_gravity="center"
+            android:text="@string/navigation_hint_start"
+            android:background="@drawable/dialog_background"
+            android:backgroundTint="#80000000"
+            android:padding="8dp" />
+        <LinearLayout
+            android:id="@+id/navigation_dots"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:padding="4dp"
+            android:layout_marginTop="4dp"
+            android:background="@drawable/alert_background"
+            android:backgroundTint="#80000000">
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout>

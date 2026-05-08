@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center"
+    android:padding="4dp">
+
+    <!-- Blinking Status -->
+    <LinearLayout
+        android:id="@+id/blinkingContainer"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:paddingVertical="6dp"
+        android:paddingHorizontal="8dp"
+        android:layout_marginEnd="4dp">
+
+        <TextView
+            android:id="@+id/blinkingIcon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="👁️"
+            android:textSize="12sp"
+            android:layout_marginEnd="4dp" />
+
+        <TextView
+            android:id="@+id/blinkingStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Eyes Open"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            tools:text="Blinking" />
+    </LinearLayout>
+
+    <!-- Talking Status -->
+    <LinearLayout
+        android:id="@+id/talkingContainer"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:paddingVertical="6dp"
+        android:paddingHorizontal="8dp"
+        android:layout_marginStart="4dp">
+
+        <TextView
+            android:id="@+id/talkingIcon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🎤"
+            android:textSize="12sp"
+            android:layout_marginEnd="4dp" />
+
+        <TextView
+            android:id="@+id/talkingStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Silent"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            tools:text="Talking" />
+    </LinearLayout>
+
+</LinearLayout>
