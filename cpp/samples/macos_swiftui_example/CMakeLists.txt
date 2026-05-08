@@ -89,6 +89,7 @@ if(APPLE)
 
     target_include_directories(smartspectra_swift_ui PRIVATE
         "${CMAKE_CURRENT_SOURCE_DIR}/swift_ui"
+        "${SMARTSPECTRA_SDK_ROOT}/include/smartspectra/interface"
         ${OpenCV_INCLUDE_DIRS}
     )
     target_link_libraries(smartspectra_swift_ui PRIVATE

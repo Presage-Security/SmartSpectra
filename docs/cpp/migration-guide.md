@@ -1,3 +1,8 @@
+---
+title: Migration Guide
+description: C++-specific migration notes for SmartSpectra SDK upgrades.
+---
+
 ## C++ SDK v3.0 Migration
 
 Migrating from SDK v1.x to v3.0 (C++).

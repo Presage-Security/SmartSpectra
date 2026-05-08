@@ -224,3 +224,5 @@ if (auto err = spectra.UseCustomInput().Build(handle); !err.ok()) {
 ## Accessing Metrics in Headless Mode
 
 Metrics work the same way in headless mode as with the built-in UI. See the platform guide for details on subscribing to and reading edge metrics data:
+
+Configure metrics: [Android](android/metrics.md), [C++](cpp/metrics.md).

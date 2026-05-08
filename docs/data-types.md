@@ -53,16 +53,12 @@ FeatureType defines high-level physiological measurement categories. Each featur
 ```proto
 enum FeatureType {
   BREATHING = 0;
-  MICROMOTION = 1;
-  EDA = 2;
   FACE = 3;
   CARDIO = 4;
 }
 ```
 
 - `BREATHING` -- Breathing measurements (chest and abdomen)
-- `MICROMOTION` -- Micromotion detection (glutes, knees)
-- `EDA` -- Electrodermal activity (EDA) measurement
 - `FACE` -- Facial tracking and analysis
 - `CARDIO` -- Cardiovascular metrics (pulse, HRV, blood pressure)
 
@@ -80,9 +76,6 @@ enum MetricType {
   RESPIRATORY_LINE_LENGTH = 5;
   BASELINE = 6;
   INHALE_EXHALE_RATIO = 7;
-  GLUTES_MICROMOTION = 8;
-  KNEES_MICROMOTION = 9;
-  EDA_TRACE = 10;
   FACE_LANDMARKS = 11;
   BLINKING = 12;
   TALKING = 13;
@@ -96,8 +89,6 @@ enum MetricType {
 - `CHEST_BREATHING` -- Breathing upper (chest) metrics
 - `ABDOMEN_BREATHING` -- Breathing lower (abdomen) metrics
 - `BREATHING_RATE` -- Breathing aggregate metrics
-- `GLUTES_MICROMOTION` -- Micromotion metrics
-- `EDA_TRACE` -- EDA metrics
 - `FACE_LANDMARKS` -- Face metrics
 - `PULSE_RATE` -- Cardio metrics
 
@@ -166,7 +157,7 @@ message MeasurementWithConfidence {
 
 - `float` `value` -- The measured value
 - `bool` `stable` -- Whether the measurement is considered stable/reliable
-- `float` `confidence` -- Confidence score for the measurement (0.0 to 1.0)
+- `float` `confidence` -- Confidence score for the measurement, expressed as a percentage in the range [0.0, 100.0]
 - `int64` `timestamp` -- Absolute timestamp at which the measurement was taken, in microseconds, since Linux epoch
 
 ## ExpressionType
@@ -211,7 +202,7 @@ message ExpressionScore {
 ```
 
 - [`ExpressionType`](#expressiontype) `type` -- Expression type identifier
-- `float` `confidence` -- Confidence score for the expression (0.0 to 1.0)
+- `float` `confidence` -- Confidence score for the expression, expressed as a percentage in the range [0.0, 100.0]
 
 ## Expression
 
@@ -252,6 +243,8 @@ message Hrv {
 - `double` `mean_nn` -- mean normal-to-normal (NN) interval length
 - `double` `sdnn` -- Standard Deviation of normal-to-normal (NN) Intervals
 - `double` `baevsky` -- Baevsky's Stress Index, in 1/ms^2 (inverse-square milliseconds)
+- `int64` `timestamp` -- Absolute timestamp at which the HRV measurement was taken, in microseconds, since Linux epoch
+- `float` `confidence` -- Confidence score for the HRV measurement, expressed as a percentage in the range [0.0, 100.0]
 
 ## Strict
 
@@ -357,36 +350,6 @@ message Face {
 - `repeated` [`Landmarks`](#landmarks) `landmarks` -- Facial landmark coordinates over time
 - `repeated` [`Expression`](#expression) `expression` -- Detected expressions over time
 
-## MicroMotion
-
-Micro-motion measurements for body movement analysis. Tracks small movements in specific body regions.
-
-### Properties
-
-```proto
-message MicroMotion {
-  repeated Measurement glutes = 1;
-  repeated Measurement knees = 2;
-}
-```
-
-- `repeated` [`Measurement`](#measurement) `glutes` -- Micro-motion measurements in the glutes region
-- `repeated` [`Measurement`](#measurement) `knees` -- Micro-motion measurements in the knees region
-
-## Eda
-
-Electrodermal Activity (EDA) measurements. Tracks skin conductance changes related to autonomic nervous system activity.
-
-### Properties
-
-```proto
-message Eda {
-  repeated Measurement trace = 1;
-}
-```
-
-- `repeated` [`Measurement`](#measurement) `trace` -- EDA trace measurements over time
-
 ## Cardio
 
 ### Properties
@@ -412,16 +375,12 @@ Comprehensive physiological metrics container. Contains all available physiologi
 ```proto
 message Metrics {
   Breathing breathing = 1;
-  MicroMotion micromotion = 2;
-  Eda eda = 3;
   Face face = 4;
   Cardio cardio = 5;
 }
 ```
 
 - [`Breathing`](#breathing) `breathing` -- Breathing and respiratory analysis results
-- [`MicroMotion`](#micromotion) `micromotion` -- Micro-motion analysis results
-- [`Eda`](#eda) `eda` -- Electrodermal activity measurements. Note: processing needs to run for over 35 seconds to generate the first EDA result.
 - [`Face`](#face) `face` -- Facial analysis results
 - [`Cardio`](#cardio) `cardio` -- Cardiovascular measurements (pulse rate, arterial pressure, HRV)
 

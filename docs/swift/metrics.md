@@ -44,13 +44,10 @@ sdk.config.requestedMetrics = SmartSpectraConfig.breathingMetrics + [
     .pulseRate,
     .arterialPressureTrace,
     .hrv,
-    .edaTrace,
     .faceLandmarks,
     .blinking,
     .talking,
     .expressions,
-    .glutesMicromotion,
-    .kneesMicromotion,
 ]
 ```
 
@@ -61,15 +58,10 @@ if let metrics = sdk.metrics {
     let pressureTrace = metrics.cardio.arterialPressureTrace.last?.value
     let hrvRmssd = metrics.cardio.hrv.last?.rmssd
 
-    let edaTrace = metrics.eda.trace.last?.value
-
     let faceLandmarks = metrics.face.landmarks.last?.value
     let blinking = metrics.face.blinking.last?.detected
     let talking = metrics.face.talking.last?.detected
     let expression = metrics.face.expression.last
-
-    let glutesMotion = metrics.micromotion.glutes.last?.value
-    let kneesMotion = metrics.micromotion.knees.last?.value
 }
 ```
 
@@ -80,8 +72,6 @@ The Swift SDK uses the generated Swift protobuf types. Requested advanced metric
 ```swift
 Metrics {
     breathing: Breathing
-    micromotion: MicroMotion
-    eda: Eda
     face: Face
     cardio: Cardio
 }
@@ -101,21 +91,12 @@ Hrv {
     confidence: Float
 }
 
-Eda {
-    trace: [Measurement]
-}
-
 Face {
     landmarks: [Landmarks]
     blinking: [DetectionStatus]
     talking: [DetectionStatus]
     expression: [Expression]
 }
-
-MicroMotion {
-    glutes: [Measurement]
-    knees: [Measurement]
-}
 ```
 
-EDA may take longer to produce its first sample than breathing or cardio outputs. See [Data Types](../data-types.md) for the complete protobuf schema.
+See [Data Types](../data-types.md) for the complete protobuf schema.

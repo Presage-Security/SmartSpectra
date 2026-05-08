@@ -345,8 +345,8 @@ for authorization and output.
 - `DefaultSupportedMetrics()` returns `BreathingMetrics()` and is the SDK's
   empty-request fallback.
 - The static helper lists such as `BreathingMetrics()`, `CardioMetrics()`,
-  `FaceMetrics()`, `MicromotionMetrics()`, and `EdaMetrics()` are intended as
-  ready-made groups you can assign directly or combine with `AddMetrics()`.
+  and `FaceMetrics()` are intended as ready-made groups you can assign
+  directly or combine with `AddMetrics()`.
 
 Examples:
 

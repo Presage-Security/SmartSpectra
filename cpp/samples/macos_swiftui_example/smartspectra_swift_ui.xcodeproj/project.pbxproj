@@ -209,8 +209,8 @@
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					swift_ui,
-					"$(SMARTSPECTRA_INCLUDE_DIR)",
 					"$(SMARTSPECTRA_INTERFACE_INCLUDE_DIR)",
+					"$(SMARTSPECTRA_INCLUDE_DIR)",
 					"$(OPENCV_INCLUDE_DIR)",
 				);
 				HOMEBREW_PREFIX = /opt/homebrew;
@@ -269,8 +269,8 @@
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					swift_ui,
-					"$(SMARTSPECTRA_INCLUDE_DIR)",
 					"$(SMARTSPECTRA_INTERFACE_INCLUDE_DIR)",
+					"$(SMARTSPECTRA_INCLUDE_DIR)",
 					"$(OPENCV_INCLUDE_DIR)",
 				);
 				HOMEBREW_PREFIX = /opt/homebrew;

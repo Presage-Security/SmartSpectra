@@ -3,11 +3,6 @@ android {
         flavorDimensions += "sdk"
     }
     productFlavors {
-        // Local source: builds against the in-repo :sdk module. Used for
-        // day-to-day development and CI's bundleInternal smoke build.
-        register("internal") {
-            dimension = "sdk"
-        }
         // Released stable: pins the version that ships to Maven Central.
         // Validates that consumers using a stable release can build the
         // demo-app. Will not resolve until 3.0.0 is released.
@@ -40,7 +35,6 @@ def stableSdkVersion = sdkVersionProps.getProperty("stableSdkVersion")
         ?: { throw new GradleException("stableSdkVersion missing from samples/version.properties") }()
 
 dependencies {
-    internalImplementation(project(":sdk"))
     externalImplementation("com.presagetech:smartspectra:${stableSdkVersion}")
     rcImplementation("com.presagetech:smartspectra:${rcSdkVersion}-SNAPSHOT")
 }

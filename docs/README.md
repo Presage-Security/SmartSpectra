@@ -9,7 +9,8 @@ Register at [physiology.presagetech.com](https://physiology.presagetech.com/auth
 
 ## 2. Install the SDK
 
-
+- [Android](android/README.md) - Kotlin. Min SDK 28.
+- [C++](cpp/README.md) - C++17. macOS, Linux, and Windows.
 
 ## SDK metric capabilities
 

@@ -493,7 +493,7 @@ The SDK no longer ships any SwiftUI views or environment helpers. Removed from t
 If you used `SmartSpectraView()` as a one-line integration point, copy the reference implementation from the demo-app sample at [`samples/demo-app/UI/`](https://github.com/Presage-Security/SmartSpectra/tree/main/swift/samples/demo-app/UI) into your project. The folder mirrors the previous SDK layout (`Components/`, `Screening/`, `Legal/`, `Web/`) and wires through public-only SDK API:
 
 - `ScreeningViewModel` calls `try await sdk.start()` / `sdk.stop()` instead of the (removed) `processor.startProcessing/stopProcessing`.
-- `SDKExtensions.swift` recomputes `cardioMeasurementsEnabled` / `facialExpressionEnabled` / `edaInferenceEnabled` from the public `requestedMetrics` surface.
+- `SDKExtensions.swift` recomputes `cardioMeasurementsEnabled` / `facialExpressionEnabled` from the public `requestedMetrics` surface.
 - `SDKEnvironmentKey.swift` defines a sample-local `\.smartSpectraSDK` environment key + `.smartSpectraSDK(_:)` modifier — copy it if you want the same SwiftUI binding pattern.
 - `StartupRecovery` takes an explicit `videoInputEnabled` argument; the host tracks it locally rather than reading SDK config.
 - Brand color lives in `BrandColor.swift` — customize for your product theme.
@@ -585,11 +585,11 @@ SwiftUI `View` bodies, UIKit `UIViewController` methods, and `XCTestCase`-subcla
 ## Metric bundles moved to `SmartSpectraConfig`
 
 Older Swift releases did not expose public requested-metric bundles. Current
-releases provide five public `nonisolated static let`s on
-`SmartSpectraConfig`: `breathingMetrics`, `cardioMetrics`, `faceMetrics`,
-`edaMetrics`, `micromotionMetrics`. The namespace and `Metrics` suffix match
-the Android SDK's `SmartSpectraConfig.breathingMetrics` companion field and
-the C++ SDK's `SmartSpectraConfig::CardioMetrics()` static method.
+releases provide three public `nonisolated static let`s on
+`SmartSpectraConfig`: `breathingMetrics`, `cardioMetrics`, `faceMetrics`. The
+namespace and `Metrics` suffix match the Android SDK's
+`SmartSpectraConfig.breathingMetrics` companion field and the C++ SDK's
+`SmartSpectraConfig::CardioMetrics()` static method.
 
 ```swift
 // Before
@@ -598,16 +598,4 @@ the C++ SDK's `SmartSpectraConfig::CardioMetrics()` static method.
 // After
 sdk.config.requestedMetrics =
     SmartSpectraConfig.breathingMetrics + SmartSpectraConfig.cardioMetrics
-```
-
-Current releases also expose EDA and micromotion bundles:
-
-```swift
-// EDA trace
-sdk.config.requestedMetrics =
-    SmartSpectraConfig.breathingMetrics + SmartSpectraConfig.edaMetrics
-
-// Micromotion (glutes, knees)
-sdk.config.requestedMetrics =
-    SmartSpectraConfig.breathingMetrics + SmartSpectraConfig.micromotionMetrics
 ```
