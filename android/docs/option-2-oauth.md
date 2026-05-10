@@ -7,7 +7,7 @@ description: SmartSpectra Android setup using OAuth instead of a hard-coded API 
 
 Use this if you want to use SmartSpectra OAuth instead of an API key.
 
-Android OAuth is currently documented for Play Store releases. For local development, internal QA, or sideloaded debug builds, use [Option 1: API Key](OPTION_1_API_KEY.md) instead.
+Android OAuth is currently documented for Play Store releases. For local development, internal QA, or sideloaded debug builds, use [Option 1: API Key](option-1-api-key.md) instead.
 
 ## What you will change manually
 
@@ -119,7 +119,7 @@ To get the SHA-256 fingerprint from Gradle, run:
 ./gradlew signingReport
 ```
 
-![Android Studio signing report showing the SHA-256 fingerprint](SHA256Example.jpeg)
+<img src={`${process.env.NEXT_PUBLIC_BASE_PATH || ""}/docs/android/SHA256Example.jpeg`} alt="Android Studio signing report showing the SHA-256 fingerprint" />
 
 If you cannot find a download for `presage_services.xml`, stop here. Ask [Presage support](mailto:support@presagetech.com) or your Presage contact for the Android OAuth XML for this app.
 

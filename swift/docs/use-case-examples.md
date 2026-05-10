@@ -3,6 +3,8 @@ title: Use Case Examples
 description: Example SmartSpectra Swift integration patterns for common app use cases.
 ---
 
+# iOS Use Case Examples
+
 These are intentionally short, partial examples. They are meant to show one pattern at a time, not serve as complete drop-in apps.
 
 ## Shared Setup

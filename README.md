@@ -12,7 +12,6 @@ This repository hosts SmartSpectra SDK from PresageTech for measuring vitals suc
     - [Android](#android)
     - [iOS](#ios)
     - [Windows / Mac / Linux (C++)](#windows--mac--linux-c)
-    - [Windows (.NET / C#)](#windows-net--c)
   - [Bugs & Troubleshooting](#bugs--troubleshooting)
 
 ## Getting Started
@@ -68,16 +67,8 @@ For iOS integration, refer to the [iOS README](swift/README.md). The guide inclu
 For C++ integration on Windows, macOS, and Linux, refer to the [C++ README](cpp/README.md). The guide includes:
 
 - Supported systems and architectures.
-- Installation via NuGet (Windows), Homebrew (macOS), or apt (Linux).
+- Installation via the prebuilt ZIP (Windows), Homebrew (macOS), or apt (Linux).
 - Build instructions and example applications.
-
-### Windows (.NET / C#)
-
-For .NET integration on Windows, refer to the [Windows .NET README](windows/README.md). The guide includes:
-
-- Prerequisites and build steps for the .NET wrapper.
-- Installation via the `SmartSpectra.Net` NuGet package.
-- Quick start example using C# events and protobuf-typed metrics.
 
 ## Bugs & Troubleshooting
 

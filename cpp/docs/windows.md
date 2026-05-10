@@ -3,19 +3,21 @@ title: C++ on Windows
 description: Install and build the SmartSpectra C++ SDK on Windows.
 ---
 
-> **⚠️ Experimental platform**
->
-> Windows support for the SmartSpectra C++ SDK is experimental. If you have any
-> issues running SmartSpectra, [contact Presage
-> support](https://physiology.presagetech.com) for assistance.
+# SmartSpectra C++ Quickstart — Windows
+
+> **Warning — Experimental platform:** Windows support for the SmartSpectra
+> C++ SDK is experimental. If you have any issues running SmartSpectra,
+> [contact Presage support](https://physiology.presagetech.com) for assistance.
 
 ## Supported Platforms
 
 | Platform | Notes |
 | -------- | ----- |
-| Windows 10 / 11 | ZIP and NuGet distributions available |
+| Windows 10 / 11 | ZIP distribution available |
 
-## Prerequisites
+## Installation
+
+### Prerequisites
 
 Install **Visual Studio Build Tools 2022 or later** with the **Desktop development with C++** workload.
 
@@ -28,9 +30,7 @@ During installation, select the **Desktop development with C++** workload. CMake
 
 You also need an **API key** from [physiology.presagetech.com](https://physiology.presagetech.com).
 
-## Add the SDK
-
-### Option 1: ZIP
+### Add the SDK
 
 Download `smartspectra-sdk-<version>-windows-x64.zip` from
 [GitHub Releases](https://github.com/Presage-Security/SmartSpectra/releases)
@@ -39,35 +39,9 @@ and extract it to a permanent location, for example `C:\SmartSpectra`.
 Keep the extracted layout intact — CMake config files, runtime DLLs, and
 bundled resources must stay in the locations expected by the package.
 
-### Option 2: NuGet
+### Permissions
 
-NuGet is suitable for Visual Studio and MSBuild projects. The package sets
-include directories and linker inputs automatically via `SmartSpectra.props`,
-and copies the required DLLs to your build output via `SmartSpectra.targets`.
-
-Add the SmartSpectra NuGet feed as a package source:
-
-```powershell
-nuget sources add -Name SmartSpectra `
-    -Source <SMARTSPECTRA_NUGET_FEED_URL>
-```
-
-Install the package:
-
-```powershell
-nuget install SmartSpectra -Version <version>
-```
-
-Or declare it in your project file:
-
-```xml
-<PackageReference Include="SmartSpectra" Version="<version>" />
-```
-
-Replace `<version>` with the version available from your SmartSpectra NuGet feed.
-
-No further include, lib, or DLL configuration is required for MSBuild projects
-using the NuGet package.
+No SDK-specific OS permission setup is required on Windows.
 
 ## Example: Visual Studio CMake Project
 
@@ -79,7 +53,7 @@ from a camera and prints vitals to the console.
 Create a folder, for example `C:\Projects\HelloVitals`, and add these three
 files inside it.
 
-**`CMakeLists.txt`** — for the ZIP option (Option 1):
+**`CMakeLists.txt`**:
 
 ```cmake
 cmake_minimum_required(VERSION 3.22.1)
@@ -92,23 +66,17 @@ find_package(SmartSpectra REQUIRED)
 
 add_executable(hello_vitals hello_vitals.cpp)
 target_link_libraries(hello_vitals SmartSpectra::SDK)
+
+# Copy SmartSpectra runtime DLLs (and their dependencies) next to the exe
+# so it can be launched directly from Visual Studio or Explorer without
+# having to put the SDK bin directory on PATH.
+add_custom_command(TARGET hello_vitals POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            $<TARGET_RUNTIME_DLLS:hello_vitals> $<TARGET_FILE_DIR:hello_vitals>
+    COMMAND_EXPAND_LISTS)
 ```
 
-If you installed via NuGet (Option 2), use `VS_PACKAGE_REFERENCES` instead:
-
-```cmake
-cmake_minimum_required(VERSION 3.22.1)
-project(HelloVitals CXX)
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-add_executable(hello_vitals hello_vitals.cpp)
-set_property(TARGET hello_vitals PROPERTY
-    VS_PACKAGE_REFERENCES "SmartSpectra_<version>")
-```
-
-**`CMakeSettings.json`** — tells Visual Studio where the extracted SDK is
-(ZIP option only; skip this file if you are using NuGet):
+**`CMakeSettings.json`** — tells Visual Studio where the extracted SDK is:
 
 ```json
 {
@@ -140,20 +108,17 @@ Replace `C:\\SmartSpectra` with the folder where you extracted the ZIP.
 #include <smartspectra/messages/metrics.h>
 #include <glog/logging.h>
 #include <chrono>
-#include <cstdlib>
 #include <iostream>
+#include <string>
 #include <thread>
 
 namespace spectra = presage::smartspectra;
 
 int main(int argc, char** argv) {
     google::InitGoogleLogging(argv[0]);
-    FLAGS_alsologtostderr = true;
+    google::SetStderrLogging(google::INFO);
 
-    std::string api_key;
-    if (argc > 1) api_key = argv[1];
-    else if (auto* k = std::getenv("SMARTSPECTRA_API_KEY")) api_key = k;
-    else { std::cerr << "Usage: ./hello_vitals YOUR_API_KEY\n"; return 1; }
+    std::string api_key = "YOUR_API_KEY";
 
     spectra::SmartSpectraConfig config;
     config.api_key = api_key;
@@ -163,10 +128,10 @@ int main(int argc, char** argv) {
     spectra::SmartSpectra spectra(config);
     spectra.SetOnMetrics([](const presage::smartspectra::Metrics& metrics, int64_t) {
         if (metrics.has_cardio()) {
-            LOG(INFO) << "Cardio metrics: " << metrics.cardio();
+            LOG(INFO) << "Cardio metrics: " << metrics.cardio().ShortDebugString();
         }
         if (metrics.has_breathing()) {
-            LOG(INFO) << "Breathing metrics: " << metrics.breathing();
+            LOG(INFO) << "Breathing metrics: " << metrics.breathing().ShortDebugString();
         }
     });
     spectra.SetOnError([](const spectra::SmartSpectraError& error) {
@@ -212,22 +177,23 @@ to your extracted SDK folder.
 Select **x64-Release** from the configuration dropdown in the toolbar, then
 choose **Build → Build All** (or press `Ctrl+Shift+B`).
 
-The compiled executable is placed in `out\build\x64-Release\hello_vitals.exe`.
+The compiled executable is placed in
+`out\build\x64-Release\Release\hello_vitals.exe`.
 
 ### 4. Run
 
-Open a terminal in the build output folder and run:
+Replace `"YOUR_API_KEY"` in `hello_vitals.cpp` with your key from
+[physiology.presagetech.com](https://physiology.presagetech.com) and rebuild.
+
+Then either press `Ctrl+F5` (**Debug → Start Without Debugging**) in Visual
+Studio, or run the executable directly:
 
 ```powershell
-.\hello_vitals.exe YOUR_API_KEY
+.\out\build\x64-Release\Release\hello_vitals.exe
 ```
 
-Or set the environment variable and run without an argument:
-
-```powershell
-$env:SMARTSPECTRA_API_KEY = "YOUR_API_KEY"
-.\hello_vitals.exe
-```
+The SDK DLLs are copied next to `hello_vitals.exe` by the post-build step in
+`CMakeLists.txt`, so no `PATH` setup is required.
 
 You should see breathing and cardio metrics printed to the console within a few
 seconds of the camera starting.
@@ -245,25 +211,34 @@ config.AddMetrics(spectra::SmartSpectraConfig::CardioMetrics());
 
 Available bundles: `BreathingMetrics()`, `CardioMetrics()`, `FaceMetrics()`.
 
-### .NET Package
+### ZIP layout reference
 
-For C# and .NET 8 projects on Windows, use `SmartSpectra.Net` from the same
-SmartSpectra NuGet feed:
-
-```xml
-<PackageReference Include="SmartSpectra.Net" Version="<version>" />
+```text
+include/
+  smartspectra/                    # C++ SDK headers and protobuf metric headers
+  smartspectra/interface/          # Bundled third-party headers
+  smartspectra_capi.h              # C ABI shim for FFI consumers
+lib/
+  smartspectra.lib                             # C++ SDK import library (MSVC)
+  smartspectra_capi.lib                        # C ABI shim import library
+  SmartSpectra_MessageProtos_*.lib             # Message proto static libs
+  cmake/SmartSpectra/SmartSpectraConfig.cmake  # CMake package
+bin/
+  smartspectra.dll            # C++ SDK runtime DLL — must ship with your app
+  smartspectra_capi.dll       # C ABI shim runtime DLL — required for FFI consumers
+  physiology_edge_manifest.txt
+  opencv_world4100.dll        # OpenCV runtime dependency — must ship with your app
+share/smartspectra/           # Bundled graph and model resources
 ```
 
-`SmartSpectra.Net` bundles the P/Invoke wrapper, protobuf types, and native DLLs.
-
-### Permissions
-
-No SDK-specific OS permission setup is required on Windows.
+When you ship your app to other machines, copy `smartspectra.dll`,
+`opencv_world4100.dll`, and the contents of `share/smartspectra/` next to
+the executable (or onto the PATH).
 
 ## Next Steps
 
 - [Configure which metrics to compute](metrics.md)
-- [Run headless without video output](../headless-mode.md)
+- [Run headless without video output](headless-mode.md)
 - [Migration Guide](migration-guide.md) for upgrading from older SDK versions
 
 ## Troubleshooting

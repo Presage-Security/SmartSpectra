@@ -1,3 +1,12 @@
+---
+title: Migration Guide
+description: C++-specific migration notes for SmartSpectra SDK upgrades.
+---
+
+# SmartSpectra C++ SDK Migration Guide
+
+> Applies to SmartSpectra C++ SDK v3.0 (current: v3.0.0-rc.14).
+
 ## C++ SDK v3.0 Migration
 
 Migrating from SDK v1.x to v3.0 (C++).
@@ -119,9 +128,8 @@ config.AddMetrics(
 ### Public Auth Config Is API-Key Only
 
 The public C++ `SmartSpectraConfig` no longer exposes `client_id`, `sub`, or
-`app_id`. Set `api_key` for direct C++ integrations. The shared auth layer
-still contains internal attestation plumbing, but those fields are no longer
-part of the installed C++ header surface.
+`app_id`. Set `api_key` for direct C++ integrations. Lower-level auth fields
+are no longer part of the installed C++ header surface.
 
 ```cpp
 // Before:
@@ -181,11 +189,10 @@ presage::smartspectra::SmartSpectraConfig config;
 presage::smartspectra::Metrics metrics;
 ```
 
-The shared protobuf sources at `edge/smartspectra/messages/*.proto` (`insights`,
-`metric_types`, `metrics`, `point_types`, `status`) also move from
-`package presage.physiology` to `package presage.smartspectra`. The
-on-the-wire byte format of serialized messages is unchanged (field numbers
-are untouched).
+The shared protobuf message schemas (`insights`, `metric_types`, `metrics`,
+`point_types`, `status`) also move from `package presage.physiology` to
+`package presage.smartspectra`. The on-the-wire byte format of serialized
+messages is unchanged (field numbers are untouched).
 
 #### `Any.type_url` and JSON `@type` non-interop
 
@@ -209,11 +216,11 @@ declarations. Related platform surfaces are documented separately:
   consumers building against the new Android SDK release should update their
   generated-proto imports as part of the Android upgrade. See the Android
   Migration Guide for the platform-specific import examples.
-- **Python proto wheel (`Physiology-Edge-Protobuf` / `physiology.smartspectra.messages.*`)**:
-  the wheel name and Python import root rename are tracked as a follow-up.
-  This migration does not change the wheel name or import path; the
-  pre-existing "Python Proto Wheel" section below documents the v3.0
-  sub-package layout.
+- **Python proto wheel (`Physiology-Edge-Protobuf`)**: the top-level
+  `physiology` package name and the wheel name itself are unchanged in
+  v3.0. The sub-package was renamed (`physiology.modules.messages.*` →
+  `physiology.smartspectra.messages.*`) to track the C++ rename. See the
+  "Python Proto Wheel" section below for the import examples.
 
 The Android JNI-bound classes `com.presage.physiology.Messages` and
 `com.presage.physiology.emd.security.AndroidKeyStoreHelper` are pinned by
@@ -272,9 +279,6 @@ renamed:
 + cmake -DSMARTSPECTRA_DISABLE_REMOTE_MODEL_DELIVERY=ON ...
 ```
 
-The internal Bazel/compile define remains
-`PHYSIOLOGY_DISABLE_REMOTE_MODEL_DELIVERY`.
-
 ### MLX CMake Helper Rename
 
 The installed MLX helper module was renamed from `PhysiologyEdge_mlx.cmake` to
@@ -304,9 +308,10 @@ configure time.
 | custom target `_physiology_edge_deploy_metallib`      | custom target `_smartspectra_deploy_metallib`       |
 | `message(STATUS "PhysiologyEdge: …")`                 | `message(STATUS "SmartSpectra: …")`                 |
 
-The imported target name `Physiology::Edge` is part of the SDK's existing
-target namespace and is **not** renamed; consumers may continue to link
-against either `SmartSpectra::SDK` or `Physiology::Edge`.
+The installed SmartSpectra package exposes only the `SmartSpectra::*`
+targets (`SmartSpectra::SDK` for application consumers). `Physiology::Edge`
+is an internal source-build target and is not part of the installed
+package — see "Single Package SDK" above.
 
 To apply all renames mechanically across a downstream consumer's CMake
 sources, run from the repo root:

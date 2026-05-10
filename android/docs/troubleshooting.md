@@ -3,9 +3,11 @@ title: Troubleshooting
 description: Solutions to common build, runtime, and integration issues with the SmartSpectra Android SDK.
 ---
 
+# Android Troubleshooting
+
 ## Build & Setup
 
-**`Could not resolve com.github.PhilJay:MPAndroidChart:v3.1.0`**
+### `Could not resolve com.github.PhilJay:MPAndroidChart:v3.1.0`
 
 The JitPack repository is missing. Add it to `settings.gradle` (or `build.gradle` for older projects):
 
@@ -19,7 +21,7 @@ repositories {
 
 ---
 
-**`Manifest merger failed: uses-sdk:minSdkVersion 24 cannot be smaller than version 28`**
+### `Manifest merger failed: uses-sdk:minSdkVersion 24 cannot be smaller than version 28`
 
 Set `minSdk 28` in your `app/build.gradle`:
 
@@ -33,7 +35,7 @@ android {
 
 ---
 
-**`Unresolved reference: AppCompatActivity`** (or similar import errors)
+### `Unresolved reference: AppCompatActivity` (or similar import errors)
 
 Ensure all required imports are present in your activity file:
 
@@ -45,7 +47,7 @@ import com.presagetech.smartspectra.SmartSpectraSdk
 
 ---
 
-**`AAPT: error: resource mipmap/ic_launcher not found`**
+### `AAPT: error: resource mipmap/ic_launcher not found`
 
 Remove icon references from `AndroidManifest.xml` or add the missing drawable resources. A minimal application tag that avoids this:
 
@@ -59,7 +61,7 @@ Remove icon references from `AndroidManifest.xml` or add the missing drawable re
 
 ---
 
-**General build failures after an SDK update**
+### General build failures after an SDK update
 
 1. **Clean Project** — Build → Clean Project
 2. **Rebuild** — Build → Rebuild Project
@@ -72,7 +74,7 @@ If the `R` class stops resolving in the linter, Sync Project with Gradle Files t
 
 ## Camera & Permissions
 
-**Camera permission denied / measurement won't start**
+### Camera permission denied / measurement won't start
 
 The host app is responsible for requesting Android's runtime camera permission
 before calling `sdk.start()`. The SDK does not show the permission dialog itself.
@@ -82,7 +84,7 @@ Common causes:
 - Permission was previously denied — guide the user to re-enable camera access in system Settings.
 - `start()` was called before permission was granted — observe `sdk.error` for `SmartSpectraError(code = INPUT_UNAVAILABLE, retryable = true)`.
 
-**Customizing the permission rationale message**
+### Customizing the permission rationale message
 
 Because the host app owns the permission prompt, keep the rationale string in
 your app resources and show it from your onboarding or permission UI:
@@ -91,7 +93,7 @@ your app resources and show it from your onboarding or permission UI:
 <string name="camera_permission_hint">Your custom message explaining why camera access is needed.</string>
 ```
 
-**Requesting permission before starting the SDK**
+### Requesting permission before starting the SDK
 
 Request camera permission with the modern `ActivityResultLauncher` pattern:
 
@@ -138,13 +140,13 @@ Observe that error to surface recovery UI and retry after the user grants access
 
 ## Authentication
 
-**Auth errors (401 / 403)**
+### Auth errors (401 / 403)
 
 1. Verify the API key string is correct in your code.
 2. Confirm your subscription is active at [physiology.presagetech.com](https://physiology.presagetech.com).
 3. Check that the device has an active internet connection — the SDK requires network access for subscription validation.
 
-**OAuth not working in local or debug builds**
+### OAuth not working in local or debug builds
 
 Android OAuth is currently documented for Play Store releases only. For local development, internal QA, or sideloaded debug builds, use an API key instead.
 
@@ -163,6 +165,6 @@ Register that fingerprint under **Account → Registered App for OAuth** alongsi
 
 ## Getting Help
 
-- Email: support@presagetech.com
+- Email: [support@presagetech.com](mailto:support@presagetech.com)
 - [Submit a GitHub issue](https://github.com/Presage-Security/SmartSpectra/issues)
 - [FAQ and developer portal](https://physiology.presagetech.com)

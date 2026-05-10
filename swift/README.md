@@ -1,9 +1,14 @@
+---
+title: Quick Start
+description: Get started with the SmartSpectra Swift SDK for iOS — iOS 17+.
+---
+
 # SmartSpectra Swift Quickstart
 
 This repo contains two build guides that produce similar user end states:
 
-- [OPTION_1_API_KEY.md](docs/OPTION_1_API_KEY.md)
-- [OPTION_2_OAUTH.md](docs/OPTION_2_OAUTH.md)
+- [Option 1: API Key](docs/option-1-api-key.md)
+- [Option 2: OAuth](docs/option-2-oauth.md)
 
 The only difference in builds is that the API key build gets up and running very fast, but hard-codes your API key. The OAuth build is more suitable for production deployments because it avoids hard-coding your API key.
 
@@ -29,6 +34,6 @@ The Quick Start is intended so that the developer can replace `Cool Vitals/Conte
 
 ## Choose Your Guide
 
-Use [OPTION_1_API_KEY.md](docs/OPTION_1_API_KEY.md) for the fastest manual setup.
+Use [Option 1: API Key](docs/option-1-api-key.md) for the fastest manual setup.
 
-Use [OPTION_2_OAUTH.md](docs/OPTION_2_OAUTH.md) if you need OAuth.
+Use [Option 2: OAuth](docs/option-2-oauth.md) if you need OAuth.

@@ -3,6 +3,8 @@ title: C++ on macOS
 description: Install the SmartSpectra C++ SDK and run the SwiftUI macOS sample app.
 ---
 
+# SmartSpectra C++ Quickstart — macOS
+
 ## Supported Platforms
 
 | Platform | Notes |
@@ -140,7 +142,6 @@ On Apple Silicon Homebrew installs, the default paths are:
 - **Libraries**: `/opt/homebrew/lib/`
 - **CMake config**: `/opt/homebrew/lib/cmake/SmartSpectra/`
 - **pkg-config**: `/opt/homebrew/lib/pkgconfig/SmartSpectra.pc`
-- **Graph and models**: `/opt/homebrew/share/smartspectra/graph/`
 
 Consumer code includes SmartSpectra headers as:
 
@@ -179,12 +180,12 @@ brew install presage/smartspectra/smartspectra
 ## Next Steps
 
 - [Configure which metrics to compute](metrics.md)
-- [Run headless without video output](../headless-mode.md)
+- [Run headless without video output](headless-mode.md)
 - [Migration Guide](migration-guide.md) for upgrading from older SDK versions
 
 ## Documentation
 
-API reference available at [C++ API Reference](api-reference.md).
+API reference available at [C++ API Reference](https://docs.presagetech.com/docs/cpp/api-reference).
 
 ## Troubleshooting
 

@@ -1,4 +1,12 @@
-<!-- markdownlint-disable-file MD041 -->
+---
+title: Migration Guide
+description: Migration notes for SmartSpectra Swift SDK upgrades.
+---
+
+# SmartSpectra Swift SDK Migration Guide
+
+> Applies to SmartSpectra Swift SDK v3.0 (current: v3.0.0-rc.14).
+> Migrating from a v3.0 release-candidate prior to rc.13, or from v2.x.
 
 ## Protobuf Type Renames
 

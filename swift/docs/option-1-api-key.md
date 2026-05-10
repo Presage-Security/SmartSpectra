@@ -1,6 +1,11 @@
-# QuickStart - OAuth
+---
+title: "Option 1: API Key"
+description: Fast manual SmartSpectra Swift setup using an API key.
+---
 
-Use this if you want to use SmartSpectra OAuth instead of the API key.
+# QuickStart - API Key
+
+Use this if you want the fastest manual path.
 
 ## What you will change manually
 
@@ -8,10 +13,37 @@ You will touch exactly these things:
 
 1. The app target package dependencies
 2. The app target camera permission
-3. The OAuth plist target membership
-4. `Cool Vitals/ContentView.swift`
+3. `Cool Vitals/ContentView.swift`
 
 You do not need to create any new Swift files.
+
+## Result you should get
+
+At the end, the app should show:
+
+- `Status` and `Validation` at the top
+- live camera preview
+- pulse, breath rate, HRV RMSSD, and expression cards
+- white labels for those four cards
+- confidence-colored pulse and breath-rate values
+- one large arterial pressure waveform
+- chest and abdomen breathing waveforms
+- guidance text below the breathing waveforms
+- one portrait screen with no scrolling
+
+## Register for your free API Key
+
+### Create an Account
+
+1. Navigate to the Presage Developer Admin Service [Portal](https://physiology.presagetech.com)
+2. Click **Register** and fill in your email, password, and other required fields.
+3. Check your email for a confirmation link and follow it to activate your account.
+
+### Log In
+
+1. Go to the Presage Developer Admin Portal [Login](https://physiology.presagetech.com/auth/login)
+2. Enter your email and password, then click **Submit**.
+3. After successful login you will be redirected to your Portal page, where you can manage your API key.
 
 ## Step 1 — Create the project
 
@@ -57,45 +89,19 @@ In Xcode:
 **NOTE** `Ctrl + Click` on the `Custom iOS Target Properties` and click `Add Row`
 4. Set the value to `This app needs camera access to measure vitals.`
 
-## Step 4 — Get `PresageService-Info.plist`
+Manual check:
 
-This file does **not** come from Xcode.
+- The app target now has a camera usage description
 
-This file is **not** created when you add the SmartSpectra package.
-
-This file is **not** already inside your app project unless you or your team already downloaded it.
-
-You need to get it from Presage first:
-
-1. Sign in to the Presage developer portal: `https://physiology.presagetech.com/`
-2. Register for OAuth in the [Presage developer portal](https://physiology.presagetech.com/portal/apps)
-    - Your Bundle Identifier found in: `Signing & Capabilities` is what goes in the Application ID field
-    - Your Team ID found in your [Apple Developer Account](https://developer.apple.com) in the `Membership Details` is what goes in the Organization ID field
-    - Enable sandbox in the portal if you want to test locally by pushing XCode builds to your phone. When sandbox is turned off it allows app store and test flight builds only.
-3. Download the iOS OAuth config file named `PresageService-Info.plist`
-
-If you cannot find a download for `PresageService-Info.plist`, stop here.
-
-That means you do not have the OAuth config file yet. Ask [Presage support](mailto:support@presagetech.com) or your Presage contact for the iOS OAuth plist for this app.
-
-## Step 5 — Add `PresageService-Info.plist` to Xcode
-
-In Xcode:
-
-1. In Finder, locate the downloaded `PresageService-Info.plist`
-2. Drag that file from Finder into the Xcode project navigator
-3. When Xcode shows the add-file dialog:
-   - enable `Copy items if needed`
-   - make sure the `Cool Vitals` target is checked
-4. Click `Finish`
-
-## Step 6 — Replace `ContentView.swift`
+## Step 4 — Replace `ContentView.swift`
 
 In Xcode:
 
 1. Open `Cool Vitals/ContentView.swift`
 2. Delete everything in the file
 3. Paste the full file below
+4. Replace `YOUR_API_KEY` with your real API key  
+    **NOTE:** Login or Register at the [Presage developer portal](https://physiology.presagetech.com) for your API Key
 
 Paste this entire file:
 
@@ -123,6 +129,7 @@ struct ContentView: View {
     @State private var latestExpressionScores: [ExpressionScore] = []
 
     init() {
+        sdk.config.apiKey = "YOUR_API_KEY"
         sdk.config.cameraPosition = .front
         sdk.config.imageOutputEnabled = true
         sdk.config.requestedMetrics =
@@ -312,7 +319,7 @@ struct ContentView: View {
                     metricCard(
                         title: "HRV RMSSD",
                         value: hrvText,
-                        subtitle: "Latest stable HRV sample",
+                        subtitle: "",
                         valueColor: .white,
                         subtitleColor: Color.secondary,
                         accent: .mint,
@@ -321,7 +328,7 @@ struct ContentView: View {
                     metricCard(
                         title: "Expression",
                         value: latestExpressionLabel,
-                        subtitle: expressionBreakdown,
+                        subtitle: "",
                         valueColor: .white,
                         subtitleColor: Color.secondary,
                         accent: .orange,
@@ -359,7 +366,6 @@ struct ContentView: View {
                     )
                 }
                 .frame(height: compact ? 130 : 146)
-
             }
             .padding(.horizontal, horizontalPadding)
             .padding(.vertical, compact ? 10 : 14)
@@ -726,7 +732,7 @@ private extension View {
 }
 ```
 
-## Step 7 — Build and run on a phone
+## Step 5 — Build and run on a phone
 
 In Xcode:
 
@@ -749,13 +755,11 @@ If the install is correct, you should see all of these:
 - the pulse and breath-rate numbers change color with confidence
 - expressions and HRV are reported
 
-## Expected OAuth check
+## Expected log note for API key mode
 
-If OAuth is wired correctly, you should not see this fallback log at launch:
+This log is expected in API key mode and is not a failure:
 
 - `PresageService-Info.plist not found. OAuth authentication will be disabled. Using API key authentication instead.`
-
-If you do see it, the plist is missing from the target or was not copied into the app.
 
 ## Common manual mistakes
 
@@ -763,6 +767,6 @@ If the screen does not match the target state, check these first:
 
 - the package was added to the wrong target
 - `ContentView.swift` was only partially replaced
-- `PresageService-Info.plist` is not in target membership
+- `YOUR_API_KEY` was not replaced with a real key
 - the app is still running an older installed build on the phone
 - the app was run in the simulator instead of on a real device

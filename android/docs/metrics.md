@@ -3,6 +3,8 @@ title: Configuring Metrics
 description: Request and read SmartSpectra metrics from the Android SDK.
 ---
 
+# Configuring Android Metrics
+
 By default, Android measurements request the breathing metric set. Add pulse rate when your app needs a basic cardio value.
 
 ## Breathing and Pulse
@@ -101,4 +103,4 @@ Face {
 }
 ```
 
-See [Data Types](../data-types.md) for the complete protobuf schema.
+See [Data Types](https://docs.presagetech.com/docs/data-types) for the complete protobuf schema.
