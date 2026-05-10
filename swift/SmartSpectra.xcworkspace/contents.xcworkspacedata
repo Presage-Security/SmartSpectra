@@ -1,12 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Workspace version="1.0">
-   
-   <FileRef location="group:samples/demo-app.xcodeproj">
+<Workspace
+   version = "1.0">
+   <FileRef
+      location = "group:samples/demo-app.xcodeproj">
    </FileRef>
-   <FileRef location="group:samples/uikit-sample.xcodeproj">
+   <FileRef
+      location = "group:samples/uikit-sample.xcodeproj">
    </FileRef>
-   <FileRef location="group:LICENSE.md">
+   <FileRef
+      location = "group:LICENSE.md">
    </FileRef>
-   <FileRef location="group:README.md">
+   <FileRef
+      location = "group:README.md">
    </FileRef>
 </Workspace>

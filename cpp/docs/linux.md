@@ -11,13 +11,17 @@ description: Install the SmartSpectra C++ SDK package and build Linux apps on Ub
 
 ## Supported Platforms
 
-| Platform | Notes |
-| -------- | ----- |
-| Ubuntu 22.04 / Mint 21 (amd64) | Debian package available |
-| Ubuntu 22.04 / Mint 21 (arm64) | Debian package available |
-| Ubuntu 24.04 / Mint 22 | Contact [support@presagetech.com](mailto:support@presagetech.com) |
-| Debian 12 | Contact [support@presagetech.com](mailto:support@presagetech.com) |
-| RHEL 9 / Fedora 41 | Contact [support@presagetech.com](mailto:support@presagetech.com) |
+| Platform | Status | Notes |
+| -------- | ------ | ----- |
+| Ubuntu 22.04 / Mint 21 (amd64) | Experimental | Debian package available |
+| Ubuntu 22.04 / Mint 21 (arm64) | Experimental | Debian package available |
+| Ubuntu 24.04 / Mint 22 | Coming soon | — |
+| Debian 12 | Not supported | — |
+| RHEL 9 / Fedora 41 | Not supported | — |
+
+For platforms marked "Not supported" or anything not listed above, contact
+[support@presagetech.com](mailto:support@presagetech.com) if you have a
+specific need.
 
 ## Installation
 

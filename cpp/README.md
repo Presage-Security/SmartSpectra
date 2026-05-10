@@ -11,15 +11,20 @@ runs on Linux, macOS, and Windows.
 
 ## Supported Platforms
 
-| Platform | Notes |
-| --- | --- |
-| Ubuntu 22.04 / Mint 21 (amd64) | Debian package available |
-| Ubuntu 22.04 / Mint 21 (arm64) | Debian package available (new) |
-| macOS (Apple Silicon) | Homebrew package available |
-| Windows 10 / 11 | ZIP distribution available |
-| Ubuntu 24.04 / Mint 22 | Contact [support@presagetech.com](mailto:support@presagetech.com) |
-| Debian 12 | Contact [support@presagetech.com](mailto:support@presagetech.com) |
-| RHEL 9 / Fedora 41 | Contact [support@presagetech.com](mailto:support@presagetech.com) |
+| Platform | Status | Notes |
+| --- | --- | --- |
+| Ubuntu 22.04 / Mint 21 (amd64) | Experimental | Debian package available |
+| Ubuntu 22.04 / Mint 21 (arm64) | Experimental | Debian package available |
+| macOS Apple Silicon (14.0+) | Supported | Homebrew package available |
+| Windows 10 / 11 (x64) | Experimental | ZIP distribution available |
+| Ubuntu 24.04 / Mint 22 | Coming soon | — |
+| macOS Intel | Not supported | — |
+| Debian 12 | Not supported | — |
+| RHEL 9 / Fedora 41 | Not supported | — |
+
+For platforms marked "Not supported" or anything not listed above, contact
+[support@presagetech.com](mailto:support@presagetech.com) if you have a
+specific need.
 
 ## Common Prerequisites
 
