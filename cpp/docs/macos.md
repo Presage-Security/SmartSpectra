@@ -40,6 +40,27 @@ brew tap presage/smartspectra https://github.com/Presage-Security/homebrew-smart
 brew install presage/smartspectra/smartspectra
 ```
 
+For the release-candidate channel, install `smartspectra-rc` instead:
+
+```bash
+brew install presage/smartspectra/smartspectra-rc
+```
+
+### Verify the install
+
+After Homebrew finishes, confirm the SDK is wired up before opening Xcode:
+
+```bash
+pkg-config --modversion SmartSpectra
+ls /opt/homebrew/lib/cmake/SmartSpectra
+```
+
+`pkg-config` should print the installed SDK version. The `ls` should list
+the `SmartSpectra` CMake config directory the formula installed (this is
+what `find_package(SmartSpectra CONFIG REQUIRED)` in your own CMake project
+will pick up — see "Installed Paths" below). If either fails, re-run
+`brew install` and check `brew doctor`.
+
 ### Permissions
 
 SmartSpectra's default macOS builds require a signed host app with the
@@ -47,9 +68,10 @@ keychain entitlements needed for the SDK. This
 applies to SDK startup in general, including file-based processing.
 
 The SwiftUI sample below ships with the required entitlements already
-configured. For your own integrations, mirror
-[`smartspectra_swift_ui.entitlements`](https://github.com/Presage-Security/SmartSpectra/blob/main/cpp/samples/macos_swiftui_example/smartspectra_swift_ui.entitlements)
-from the sample.
+configured. For your own integrations, mirror the sample's
+`smartspectra_swift_ui.entitlements` file
+([stable](https://github.com/Presage-Security/SmartSpectra/blob/main/cpp/samples/macos_swiftui_example/smartspectra_swift_ui.entitlements)
+| [rc](https://github.com/Presage-Security/SmartSpectra/blob/rc/cpp/samples/macos_swiftui_example/smartspectra_swift_ui.entitlements)).
 
 ## Example
 
@@ -62,11 +84,21 @@ Source: [Presage-Security/SmartSpectra — `cpp/samples/macos_swiftui_example`](
 
 ### Clone and verify the environment
 
-Match the branch to the Homebrew formula you installed: use `main` for the
-stable `smartspectra` formula and `rc` for the `smartspectra-rc` formula.
+Match the branch to the Homebrew formula you installed: `main` for the
+stable `smartspectra` formula, `rc` for the `smartspectra-rc` formula.
+
+Stable:
 
 ```bash
 git clone --branch main https://github.com/Presage-Security/SmartSpectra.git
+cd SmartSpectra/cpp/samples/macos_swiftui_example
+./scripts/check-requirements.sh
+```
+
+Release candidate:
+
+```bash
+git clone --branch rc https://github.com/Presage-Security/SmartSpectra.git
 cd SmartSpectra/cpp/samples/macos_swiftui_example
 ./scripts/check-requirements.sh
 ```
@@ -117,20 +149,6 @@ The project derives include and library paths from those two variables. The
 `Validate Setup` build phase checks the SDK header, library, interface
 headers, and OpenCV headers before compilation, so a wrong prefix surfaces
 early.
-
-### Command-line build
-
-The sample also builds from the command line through CMake. CMake 3.24 or
-later is required for Swift toolchain integration.
-
-```bash
-SMARTSPECTRA_DEVELOPMENT_TEAM=<team-id> \
-HOMEBREW_PREFIX="$(brew --prefix)" \
-cmake -G Xcode -B build_xcode \
-  -DSMARTSPECTRA_SDK_ROOT="$(brew --prefix)" \
-  -DSMARTSPECTRA_DEVELOPMENT_TEAM=<team-id>
-cmake --build build_xcode --config Release
-```
 
 ## Additional Details
 
