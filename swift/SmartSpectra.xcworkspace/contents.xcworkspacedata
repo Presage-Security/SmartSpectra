@@ -1,22 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Workspace
-   version = "1.0">
-   <FileRef
-      location = "group:sdk">
+<Workspace version="1.0">
+   
+   <FileRef location="group:samples/demo-app.xcodeproj">
    </FileRef>
-   <FileRef
-      location = "group:samples/demo-app.xcodeproj">
+   <FileRef location="group:samples/uikit-sample.xcodeproj">
    </FileRef>
-   <FileRef
-      location = "group:samples/smartspectra-trials.xcodeproj">
+   <FileRef location="group:LICENSE.md">
    </FileRef>
-   <FileRef
-      location = "group:samples/breathing-app.xcodeproj">
-   </FileRef>
-   <FileRef
-      location = "group:LICENSE.md">
-   </FileRef>
-   <FileRef
-      location = "group:README.md">
+   <FileRef location="group:README.md">
    </FileRef>
 </Workspace>

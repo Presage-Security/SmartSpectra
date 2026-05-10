@@ -1,32 +1,24 @@
+// DemoAppView.swift
 //
-//  DemoAppView.swift
-//  demo-app
+// Copyright © 2026 Presage Technologies, Inc.
 //
-//  Created by Ashraful Islam on 3/5/25.
-//
-
-
-//
-//  ContentView.swift
-//  breathing-app
-//
-//  Created by Ashraful Islam on 2/22/25.
-//
-
+// SPDX-License-Identifier: LicenseRef-Proprietary
 import SwiftUI
 struct DemoAppView: View {
     var body: some View {
         TabView {
-            ContentView()
+            CheckupView()
                 .tabItem {
                     Label("Checkup", systemImage: "heart.fill")
                 }
-            if #available(iOS 16.0, *) {
-                HeadlessSDKExample()
-                    .tabItem {
-                        Label("Headless Example", systemImage: "heart.text.square.fill")
-                    }
-            }
+            HeadlessSDKExample()
+                .tabItem {
+                    Label("Headless Example", systemImage: "heart.text.square.fill")
+                }
+            VideoTestingView()
+                .tabItem {
+                    Label("Video Testing", systemImage: "film")
+                }
         }
     }
 }

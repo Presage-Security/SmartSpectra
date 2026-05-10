@@ -1,8 +1,0 @@
-# temporary (for CMake installation testing)
-install/
-
-# generated docs & doc configs
-Doxyfile
-docs/generated/
-**/docs/generated/
-

@@ -1,0 +1,5 @@
+<resources>
+    <declare-styleable name="SignalGraphView">
+        <attr name="graphColor" format="color" />
+    </declare-styleable>
+</resources>

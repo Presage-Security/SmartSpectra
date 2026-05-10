@@ -1,0 +1,8 @@
+/.DS_Store
+/build*/
+/.pre-commit-cache/
+/.pre-commit-config.yaml
+/*.xcodeproj/
+!/smartspectra_swift_ui.xcodeproj/
+/native_build/
+DerivedData/

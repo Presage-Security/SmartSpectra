@@ -3,16 +3,38 @@ android {
         flavorDimensions += "sdk"
     }
     productFlavors {
-        register("internal") {
+        // Released stable: pins the version that ships to Maven Central.
+        // Validates that consumers using a stable release can build the
+        // demo-app. Will not resolve until 3.0.0 is released.
+        register("external") {
             dimension = "sdk"
         }
-        register("external") {
+        // Release candidate: pins the current rc-cycle snapshot on Central
+        // Snapshots. Validates the prerelease publish path end-to-end
+        // (R8 keep rules, packaging, transitive deps) before stable cut.
+        register("rc") {
             dimension = "sdk"
         }
     }
 }
 
+// Single source of truth for the externally-resolving flavor versions.
+// samples/version.properties holds:
+//   rcSdkVersion     — rewritten by python-semantic-release on every prerelease
+//                      tag (build_command in ci/config/semantic-release.toml),
+//                      used by the `rc` flavor as ${rcSdkVersion}-SNAPSHOT on
+//                      Maven Central Snapshots.
+//   stableSdkVersion — rewritten by the same build_command on every stable
+//                      tag, used by the `external` flavor as the exact pin
+//                      on Maven Central.
+def sdkVersionProps = new Properties()
+file("${rootDir}/samples/version.properties").withInputStream { sdkVersionProps.load(it) }
+def rcSdkVersion = sdkVersionProps.getProperty("rcSdkVersion")
+        ?: { throw new GradleException("rcSdkVersion missing from samples/version.properties") }()
+def stableSdkVersion = sdkVersionProps.getProperty("stableSdkVersion")
+        ?: { throw new GradleException("stableSdkVersion missing from samples/version.properties") }()
+
 dependencies {
-    internalImplementation(project(":sdk"))
-    externalImplementation("com.presagetech:smartspectra:1.0.25")
+    externalImplementation("com.presagetech:smartspectra:${stableSdkVersion}")
+    rcImplementation("com.presagetech:smartspectra:${rcSdkVersion}-SNAPSHOT")
 }

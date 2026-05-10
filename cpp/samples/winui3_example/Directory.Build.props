@@ -1,0 +1,19 @@
+<!--
+  Default settings for the WinUI 3 SmartSpectra sample. MSBuild auto-imports
+  this file when building any project under this directory.
+
+  SmartSpectraSdkDir must point at the root of an unzipped SmartSpectra
+  Windows distribution (the folder containing bin\, include\, lib\, share\).
+  The trailing backslash is required.
+
+  Resolution order:
+    1. -p:SmartSpectraSdkDir=...           (command line; highest priority)
+    2. SMARTSPECTRA_SDK_DIR environment variable
+    3. The default below — edit this if you unzipped the SDK elsewhere.
+-->
+<Project>
+  <PropertyGroup>
+    <SmartSpectraSdkDir Condition="'$(SmartSpectraSdkDir)' == '' and '$(SMARTSPECTRA_SDK_DIR)' != ''">$(SMARTSPECTRA_SDK_DIR)</SmartSpectraSdkDir>
+    <SmartSpectraSdkDir Condition="'$(SmartSpectraSdkDir)' == ''">C:\SmartSpectra-3.0.0-windows-x64\</SmartSpectraSdkDir>
+  </PropertyGroup>
+</Project>

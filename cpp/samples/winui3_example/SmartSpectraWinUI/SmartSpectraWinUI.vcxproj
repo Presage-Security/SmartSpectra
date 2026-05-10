@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
+    <ResolveNuGetPackages>false</ResolveNuGetPackages>
+    <CppWinRTOptimized>true</CppWinRTOptimized>
+    <CppWinRTRootNamespaceAutoMerge>true</CppWinRTRootNamespaceAutoMerge>
+    <MinimalCoreWin>true</MinimalCoreWin>
+    <ProjectGuid>{A8B4C5D6-1234-5678-9ABC-DEF012345678}</ProjectGuid>
+    <ProjectName>SmartSpectraWinUI</ProjectName>
+    <RootNamespace>SmartSpectraWinUI</RootNamespace>
+    <TargetName>$(RootNamespace)</TargetName>
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <MinimumVisualStudioVersion>16.0</MinimumVisualStudioVersion>
+    <AppContainerApplication>false</AppContainerApplication>
+    <AppxPackage>false</AppxPackage>
+    <ApplicationType>Windows Store</ApplicationType>
+    <ApplicationTypeRevision>10.0</ApplicationTypeRevision>
+    <WindowsTargetPlatformVersion>10.0.26100.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformMinVersion>10.0.17763.0</WindowsTargetPlatformMinVersion>
+    <UseWinUI>true</UseWinUI>
+    <WinUISDKReferences>false</WinUISDKReferences>
+    <WindowsPackageType>None</WindowsPackageType>
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset Condition="'$(VisualStudioVersion)' &gt;= '18.0'">v145</PlatformToolset>
+    <PlatformToolset Condition="'$(VisualStudioVersion)' &lt; '18.0'">v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <DesktopCompatible>true</DesktopCompatible>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'" Label="Configuration">
+    <!-- The packaged SmartSpectra SDK ships release-built import/static libs. -->
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Release'" Label="Configuration">
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup>
+    <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)obj\$(Platform)\$(Configuration)\</IntDir>
+    <!-- SmartSpectraSdkDir must point at the root of the unzipped SmartSpectra
+         binary distribution (the folder containing bin\, include\, lib\,
+         share\). The default and resolution order are defined in
+         ../Directory.Build.props next to the solution. -->
+    <CanonicalSdkDir Condition="'$(SmartSpectraSdkDir)' != ''">$(SmartSpectraSdkDir.Replace('\','/'))</CanonicalSdkDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile>$(IntDir)pch.pch</PrecompiledHeaderOutputFile>
+      <WarningLevel>Level3</WarningLevel>
+      <LanguageStandard Condition="'$(VisualStudioVersion)' &gt;= '18.0'">stdcpp20</LanguageStandard>
+      <LanguageStandard Condition="'$(VisualStudioVersion)' &lt; '18.0'">stdcpp17</LanguageStandard>
+      <ConformanceMode>true</ConformanceMode>
+      <PreprocessorDefinitions>NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SmartSpectraSdkDir)include;$(SmartSpectraSdkDir)include\smartspectra\interface;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /bigobj /utf-8</AdditionalOptions>
+      <DisableSpecificWarnings>4100;4189;4459</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>$(SmartSpectraSdkDir)lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <!-- smartspectra.lib + the transitive proto/protobuf/abseil libs the SDK
+           CMake config exposes via SmartSpectra::SDK. Wildcards aren't supported
+           by linker; enumerate the message/protobuf libs explicitly. -->
+      <AdditionalDependencies>smartspectra.lib;PhysiologyEdge_MessageProtos_metrics.lib;PhysiologyEdge_MessageProtos_metrics_cc_proto.lib;PhysiologyEdge_MessageProtos_metric_types.lib;PhysiologyEdge_MessageProtos_metric_types_cc_proto.lib;PhysiologyEdge_MessageProtos_point_types_cc_proto.lib;PhysiologyEdge_MessageProtos_insights_cc_proto.lib;PhysiologyEdge_MessageProtos_status.lib;PhysiologyEdge_MessageProtos_status_cc_proto.lib;PhysiologyEdge_Protobuf_libprotobuf.lib;PhysiologyEdge_Protobuf_libprotobuf-lite.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
+    <ClCompile>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <PreprocessorDefinitions>NDEBUG;_ITERATOR_DEBUG_LEVEL=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
+    <ClCompile>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <Manifest Include="app.manifest" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="App.xaml.h">
+      <DependentUpon>App.xaml</DependentUpon>
+    </ClInclude>
+    <ClInclude Include="MainWindow.xaml.h">
+      <DependentUpon>MainWindow.xaml</DependentUpon>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml" />
+    <Page Include="MainWindow.xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="pch.cpp">
+      <PrecompiledHeader>Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="App.xaml.cpp">
+      <DependentUpon>App.xaml</DependentUpon>
+    </ClCompile>
+    <ClCompile Include="MainWindow.xaml.cpp">
+      <DependentUpon>MainWindow.xaml</DependentUpon>
+    </ClCompile>
+    <ClCompile Include="$(GeneratedFilesDir)module.g.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Midl Include="MainWindow.idl">
+      <SubType>Code</SubType>
+      <DependentUpon>MainWindow.xaml</DependentUpon>
+    </Midl>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Windows.CppWinRT" Version="2.0.240405.15">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.6.241114003" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.1742">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets" />
+  <Target Name="ValidateSmartSpectraSdkDir" BeforeTargets="PrepareForBuild">
+    <Error Condition="'$(SmartSpectraSdkDir)' == ''"
+           Text="SmartSpectraSdkDir is not set. Directory.Build.props next to the solution defines a default and the supported override mechanisms — make sure that file is present and readable." />
+    <Error Condition="'$(SmartSpectraSdkDir)' != '' and !Exists('$(SmartSpectraSdkDir)include\smartspectra\smartspectra.h')"
+           Text="SmartSpectra distribution not found at SmartSpectraSdkDir='$(SmartSpectraSdkDir)' (missing include\smartspectra\smartspectra.h). Either unzip the SmartSpectra Windows distribution to that path, or change SmartSpectraSdkDir in Directory.Build.props next to the solution (or set the SMARTSPECTRA_SDK_DIR environment variable). The value must end with a trailing backslash." />
+  </Target>
+
+  <Target Name="StageSmartSpectraRuntime" AfterTargets="Build">
+    <Copy SourceFiles="$(SmartSpectraSdkDir)bin\smartspectra.dll;$(SmartSpectraSdkDir)bin\opencv_world4100.dll" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+    <WriteLinesToFile File="$(OutDir)physiology_edge_manifest.txt" Lines="resource_root_dir=$(CanonicalSdkDir)share/smartspectra" Overwrite="true" />
+  </Target>
+</Project>

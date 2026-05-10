@@ -1,0 +1,8 @@
+repos:
+  - repo: local
+    hooks:
+      - id: bash-syntax
+        name: bash syntax
+        entry: bash -n
+        language: system
+        files: ^scripts/.*\.sh$

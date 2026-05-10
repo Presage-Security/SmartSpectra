@@ -1,3 +1,8 @@
+// ExampleInstrumentedTest.kt
+// Copyright (C) 2026 Presage Technologies, Inc.
+//
+// SPDX-License-Identifier: LicenseRef-Proprietary
+
 package com.presagetech.smartspectra_example
 
 import androidx.test.platform.app.InstrumentationRegistry

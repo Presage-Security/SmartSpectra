@@ -1,10 +1,8 @@
+// UITestHelpers.swift
 //
-//  UITestHelpers.swift
-//  demo-app-UITests
+// Copyright © 2026 Presage Technologies, Inc.
 //
-//  UI Test helpers for real device and simulator testing
-//
-
+// SPDX-License-Identifier: LicenseRef-Proprietary
 import XCTest
 
 extension XCUIElement {
@@ -65,11 +63,16 @@ class UITestBase: XCTestCase {
         continueAfterFailure = false
         
         app = XCUIApplication()
-        
+
         #if !targetEnvironment(simulator)
         isRealDevice = true
         #endif
-        
+
+        // Forward CI API key to the app under test
+        if let apiKey = ProcessInfo.processInfo.environment["SMARTSPECTRA_API_KEY"] {
+            app.launchEnvironment["SMARTSPECTRA_API_KEY"] = apiKey
+        }
+
         app.launch()
     }
     

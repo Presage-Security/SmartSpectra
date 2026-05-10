@@ -1,10 +1,8 @@
+// demo_app_UITests.swift
 //
-//  demo_app_UITests.swift
-//  demo-app-UITests
+// Copyright © 2026 Presage Technologies, Inc.
 //
-//  Created by Ashraful Islam on 8/10/25.
-//
-
+// SPDX-License-Identifier: LicenseRef-Proprietary
 import XCTest
 
 final class demo_app_UITests: UITestBase {
@@ -20,13 +18,7 @@ final class demo_app_UITests: UITestBase {
             cameraButton.tap()
             XCTAssertTrue(app.buttons["Switch to Front Camera"].waitForExistence(timeout: 2), "Camera should switch")
         }
-        
-        let modeButton = app.buttons["Switch to Spot"]  
-        if modeButton.waitForExistence(timeout: 1) {
-            modeButton.tap()
-            XCTAssertTrue(app.buttons["Switch to Continuous"].waitForExistence(timeout: 2), "Mode should switch")
-        }
-        
+
         // Test measurement duration stepper
         let stepper = app.steppers.firstMatch
         if stepper.waitForExistence(timeout: 1) {
@@ -53,21 +45,19 @@ final class demo_app_UITests: UITestBase {
             }
         }
         
-        // Test tab navigation if iOS 16+
-        if #available(iOS 16.0, *) {
-            let headlessTab = app.tabBars.buttons["Headless Example"]
-            if headlessTab.exists {
-                headlessTab.tap()
-                
-                // Test vitals start/stop
-                let startButton = app.buttons["Start"]
-                if startButton.waitForExistence(timeout: 2) {
-                    startButton.tap()
-                    let stopButton = app.buttons["Stop"]
-                    if stopButton.waitForExistence(timeout: 2) {
-                        stopButton.tap()
-                        XCTAssertTrue(startButton.waitForExistence(timeout: 2), "Should return to start state")
-                    }
+        // Test tab navigation (headless example always available on iOS 17+)
+        let headlessTab = app.tabBars.buttons["Headless Example"]
+        if headlessTab.exists {
+            headlessTab.tap()
+            
+            // Test vitals start/stop
+            let startButton = app.buttons["Start"]
+            if startButton.waitForExistence(timeout: 2) {
+                startButton.tap()
+                let stopButton = app.buttons["Stop"]
+                if stopButton.waitForExistence(timeout: 2) {
+                    stopButton.tap()
+                    XCTAssertTrue(startButton.waitForExistence(timeout: 2), "Should return to start state")
                 }
             }
         }

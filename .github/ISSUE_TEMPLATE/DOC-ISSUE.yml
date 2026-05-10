@@ -8,7 +8,7 @@ body:
     id: documentation_section
     attributes:
       label: "Documentation Section"
-      description: "Which file or page is affected? (e.g., `README.md`, `docs/authentication.md`)"
+      description: "Which file or page is affected? (e.g., `README.md`)"
       placeholder: "e.g., README.md > Quickstart"
     validations:
       required: true
