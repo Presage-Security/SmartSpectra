@@ -11,9 +11,13 @@ description: Install and build the SmartSpectra C++ SDK on Windows.
 
 ## Supported Platforms
 
-| Platform | Notes |
-| -------- | ----- |
-| Windows 10 / 11 | ZIP distribution available |
+| Platform | Status | Notes |
+| -------- | ------ | ----- |
+| Windows 10 / 11 (x64) | Experimental | ZIP distribution available |
+
+For platforms not listed above, contact
+[support@presagetech.com](mailto:support@presagetech.com) if you have a
+specific need.
 
 ## Installation
 

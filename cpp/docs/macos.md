@@ -7,11 +7,14 @@ description: Install the SmartSpectra C++ SDK and run the SwiftUI macOS sample a
 
 ## Supported Platforms
 
-| Platform | Notes |
-| -------- | ----- |
-| macOS Apple Silicon | Homebrew package available; macOS 14.0 or newer required |
+| Platform | Status | Notes |
+| -------- | ------ | ----- |
+| macOS Apple Silicon (14.0+) | Supported | Homebrew package available |
+| macOS Intel | Not supported | — |
 
-Public Homebrew packages target Apple Silicon systems.
+For platforms not listed above, contact
+[support@presagetech.com](mailto:support@presagetech.com) if you have a
+specific need.
 
 ## Installation
 

@@ -9,6 +9,7 @@
 #include "MainWindow.g.cpp"
 #endif
 
+#include <algorithm>
 #include <robuffer.h>
 
 #include <smartspectra/smartspectra_config.h>
@@ -40,10 +41,8 @@ namespace winrt::SmartSpectraWinUI::implementation
     namespace {
         std::wstring Widen(std::string const& s) {
             if (s.empty()) return {};
-            int n = MultiByteToWideChar(CP_UTF8, 0, s.data(), (int)s.size(), nullptr, 0);
-            std::wstring w(n, L'\0');
-            MultiByteToWideChar(CP_UTF8, 0, s.data(), (int)s.size(), w.data(), n);
-            return w;
+            auto h = winrt::to_hstring(s);
+            return std::wstring(h.c_str(), h.size());
         }
 
         std::wstring UserFacing(spectra::SmartSpectraError const& e) {
@@ -134,7 +133,7 @@ namespace winrt::SmartSpectraWinUI::implementation
                         if (self->m_preview_w != w || self->m_preview_h != h) {
                             self->RebuildPreview(w, h);
                         }
-                        memcpy(PixelBufferData(self->m_preview), pixels->data(), pixels->size());
+                        std::copy_n(pixels->data(), pixels->size(), PixelBufferData(self->m_preview));
                         self->m_preview.Invalidate();
                     }
                 });

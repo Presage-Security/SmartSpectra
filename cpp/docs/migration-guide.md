@@ -125,21 +125,6 @@ config.AddMetrics(
     presage::smartspectra::SmartSpectraConfig::CardioMetrics());
 ```
 
-### Public Auth Config Is API-Key Only
-
-The public C++ `SmartSpectraConfig` no longer exposes `client_id`, `sub`, or
-`app_id`. Set `api_key` for direct C++ integrations. Lower-level auth fields
-are no longer part of the installed C++ header surface.
-
-```cpp
-// Before:
-Settings<OperationMode::Continuous, IntegrationMode::Rest> settings;
-settings.rest().api_key = "...";
-
-// After:
-config.api_key = "...";
-```
-
 ### CMake Target Change
 
 Older container-based integrations linked `SmartSpectra::Container`. The
