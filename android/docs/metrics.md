@@ -103,4 +103,4 @@ Face {
 }
 ```
 
-See [Data Types](https://docs.presagetech.com/docs/data-types) for the complete protobuf schema.
+See [Data Types](https://smartspectra.presagetech.com/docs/data-types) for the complete protobuf schema.

@@ -231,15 +231,19 @@ bus and unlock a fresh keyring before running your binary:
 
 ```bash
 sudo apt install -y dbus-x11 gnome-keyring
-eval "$(dbus-launch)"
+eval "$(dbus-launch --sh-syntax)"
 echo "" | gnome-keyring-daemon --unlock --components=secrets >/dev/null 2>&1
 ./build/hello_vitals
 ```
 
-`dbus-launch` exports `DBUS_SESSION_BUS_ADDRESS` into the current shell, and
-`gnome-keyring-daemon --unlock --components=secrets` opens the secrets backend
-with an empty passphrase so libsecret reads and writes keys unattended. The
-same three commands also satisfy the SDK on a stock Ubuntu Server install.
+`dbus-launch --sh-syntax` writes `export DBUS_SESSION_BUS_ADDRESS=…;` to
+stdout so the `eval` exports the address into the current shell's
+environment, and `gnome-keyring-daemon --unlock --components=secrets` opens
+the secrets backend with an empty passphrase so libsecret reads and writes
+keys unattended. The same three commands also satisfy the SDK on a stock
+Ubuntu Server install. (Without `--sh-syntax`, `dbus-launch` prints bare
+`KEY=value` lines that `eval` treats as shell-local assignments rather
+than env exports, so the SDK subprocess does not inherit the bus address.)
 
 ## Build the Provided Samples
 
@@ -327,7 +331,7 @@ sudo apt update
 
 ## Documentation
 
-API reference available at [C++ API Reference](https://docs.presagetech.com/docs/cpp/api-reference).
+API reference available at [C++ API Reference](https://smartspectra.presagetech.com/docs/cpp/api-reference).
 
 ## Troubleshooting
 

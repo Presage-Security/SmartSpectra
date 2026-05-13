@@ -109,6 +109,8 @@ These conditions may produce inaccurate measurements with high confidence and sh
 
 - Face is significantly rotated and not approximately orthogonal to the camera.
 
+[Face landmark numbering reference](https://storage.googleapis.com/mediapipe-assets/documentation/mediapipe_face_landmark_fullsize.png)
+
 ## Breathing Rate
 
 **Output:** 30-second average breathing rate in breaths per minute with confidence. Confidence is 0 until the full 30-second window is reached.

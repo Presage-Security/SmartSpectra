@@ -5,9 +5,9 @@ description: Get started with SmartSpectra C++ across Linux, macOS, and Windows.
 
 # SmartSpectra C++ SDK
 
-Cross-platform C++ SDK for measuring vitals (pulse, breathing, blood pressure,
-and more) from a camera. Headless by default with optional preview frames;
-runs on Linux, macOS, and Windows.
+Cross-platform C++ SDK for measuring vitals and waveform shapes (pulse,
+breathing, relative blood pressure, and more) from a camera. Headless by default
+with optional preview frames; runs on Linux, macOS, and Windows.
 
 ## Supported Platforms
 
@@ -49,7 +49,7 @@ Each guide is self-contained: prerequisites → install → first running build.
 
 The quickstarts intentionally request only the breathing and cardio metric
 bundles, which is enough to see live values on the console. See the
-[C++ API reference](https://docs.presagetech.com/docs/cpp/api-reference) for
+[C++ API reference](https://smartspectra.presagetech.com/docs/cpp/api-reference) for
 the full `requested_metrics` catalog and custom-input pipeline.
 
 ## Going further
@@ -59,7 +59,7 @@ Once your first build runs:
 - [Configure which metrics to compute](docs/metrics.md)
 - [Headless mode](docs/headless-mode.md) — C++ is headless by default; see the guide for video output callbacks
 - [Migration guide](docs/migration-guide.md) — upgrading from v1.x or v2.x
-- [API reference](https://docs.presagetech.com/docs/cpp/api-reference)
+- [API reference](https://smartspectra.presagetech.com/docs/cpp/api-reference)
 
 ## Bugs & Troubleshooting
 

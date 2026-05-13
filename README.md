@@ -25,13 +25,13 @@ Documentation is available at <https://docs.physiology.presagetech.com/>.
   Real-time pulse pleth waveform supporting calculation of pulse rate and heart rate variability.
 
 - **Breathing Waveform**  
-  Real-time breathing waveform supporting biofeedback, breathing rate, inhale/exhale ratio, breathing amplitude, apnea detection, and respiratory line length.
+  Real-time breathing waveform supporting biofeedback and breathing rate.
 
 - **Myofacial Analysis**  
-  Supporting face-point analysis, iris tracking, blinking detection, and talking detection.
+  Supporting face-point analysis, iris tracking, blinking detection, talking detection, and facial expression classification.
 
 - **Relative Blood Pressure Waveform**  
-  Relative blood pressure waveform.
+  Relative blood pressure waveform shape.
 
 - **Integrated Quality Control**  
   Confidence and stability metrics providing insight into the confidence in the signal. User feedback on imaging conditions to support successful use.
@@ -49,6 +49,8 @@ Documentation is available at <https://docs.physiology.presagetech.com/>.
 
 For Android integration, refer to the [Android README](android/README.md). The guide includes:
 
+![SmartSpectra Android quickstart demo](android/media/android-quickstart.gif)
+
 - Prerequisites and setup instructions.
 - Maven setup for stable releases, release candidates, and snapshots.
 - Integration steps for your app.
@@ -58,6 +60,8 @@ For Android integration, refer to the [Android README](android/README.md). The g
 
 For iOS integration, refer to the [iOS README](swift/README.md). The guide includes:
 
+![SmartSpectra iOS quickstart demo](swift/docs/ios-quickstart.gif)
+
 - Prerequisites and setup instructions.
 - Integration steps for your app using Swift Package Manager.
 - Example usage and troubleshooting tips.
@@ -65,6 +69,8 @@ For iOS integration, refer to the [iOS README](swift/README.md). The guide inclu
 ### Windows / Mac / Linux (C++)
 
 For C++ integration on Windows, macOS, and Linux, refer to the [C++ README](cpp/README.md). The guide includes:
+
+![SmartSpectra C++ quickstart demo](cpp/docs/images/cpp-quickstart.gif)
 
 - Supported systems and architectures.
 - Installation via the prebuilt ZIP (Windows), Homebrew (macOS), or apt (Linux).

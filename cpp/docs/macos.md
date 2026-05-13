@@ -206,7 +206,7 @@ brew install presage/smartspectra/smartspectra
 
 ## Documentation
 
-API reference available at [C++ API Reference](https://docs.presagetech.com/docs/cpp/api-reference).
+API reference available at [C++ API Reference](https://smartspectra.presagetech.com/docs/cpp/api-reference).
 
 ## Troubleshooting
 

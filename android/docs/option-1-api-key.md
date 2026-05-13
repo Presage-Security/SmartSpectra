@@ -21,9 +21,9 @@ You do not need to create XML layouts or additional Kotlin files.
 At the end, the app should show:
 
 - live camera preview
-- heart rate and expression cards
-- breathing rate and breathing waveform
+- pulse rate, breathing rate, HRV RMSSD, and expression cards
 - arterial pressure waveform
+- chest and abdomen breathing waveforms
 - status text and a start/stop button
 - one portrait screen with no scrolling
 
@@ -158,10 +158,13 @@ class MainActivity : ComponentActivity() {
 
         val TEXT_PRIMARY = Color.WHITE
         val TEXT_MUTED = 0x80FFFFFF.toInt()
-        val CARD_OVERLAY = 0x2E000000
+        val CARD_OVERLAY = 0xE61A2233.toInt()
         val CORAL = 0xFFFF6B6B.toInt()
         val TEAL = 0xFF4FCCC4.toInt()
         val VIOLET = 0xFFA58CF9.toInt()
+        val MINT = 0xFF6EE7B7.toInt()
+        val BLUE = 0xFF60A5FA.toInt()
+        val AMBER = 0xFFFBBF24.toInt()
     }
 
     private val sdk by lazy { SmartSpectraSdk.shared }
@@ -169,12 +172,16 @@ class MainActivity : ComponentActivity() {
     private lateinit var heartRateLabel: TextView
     private lateinit var expressionLabel: TextView
     private lateinit var breathingRateLabel: TextView
-    private lateinit var breathingGraphView: SignalGraphView
+    private lateinit var hrvLabel: TextView
+    private lateinit var chestGraphView: SignalGraphView
+    private lateinit var abdomenGraphView: SignalGraphView
     private lateinit var bloodPressureGraphView: SignalGraphView
     private lateinit var statusLabel: TextView
+    private lateinit var validationLabel: TextView
     private lateinit var toggleButton: Button
 
-    private var latestBreathingTimestamp: Long = Long.MIN_VALUE
+    private var latestChestTimestamp: Long = Long.MIN_VALUE
+    private var latestAbdomenTimestamp: Long = Long.MIN_VALUE
     private var latestPressureTimestamp: Long = Long.MIN_VALUE
 
     private val cameraPermissionLauncher = registerForActivityResult(
@@ -183,7 +190,7 @@ class MainActivity : ComponentActivity() {
         if (granted) {
             startProcessing()
         } else {
-            statusLabel.text = "Camera permission is required to start."
+            statusLabel.text = "Status: Camera required"
         }
     }
 
@@ -201,7 +208,7 @@ class MainActivity : ComponentActivity() {
         buildUi()
         bindSdk()
         resetMeasurementUi()
-        statusLabel.text = "Idle"
+        statusLabel.text = "Status: Idle"
     }
 
     override fun onPause() {
@@ -219,9 +226,12 @@ class MainActivity : ComponentActivity() {
 
     private fun bindSdk() {
         sdk.processingStatus.observe(this) { updateProcessingStatus(it) }
+        sdk.validationStatus.observe(this) { status ->
+            validationLabel.text = "Validation: ${status?.code?.name?.replace('_', ' ') ?: "--"}"
+        }
         sdk.error.observe(this) { error ->
             if (error != null) {
-                statusLabel.text = "Error: ${error.message}"
+                statusLabel.text = "Error: ${error.message ?: "Unknown"}"
             }
         }
         sdk.metrics.observe(this) { metrics ->
@@ -242,18 +252,31 @@ class MainActivity : ComponentActivity() {
                         bloodPressureGraphView.appendValue(sample.value)
                     }
                 }
+
+                metrics.cardio.hrvList.lastOrNull()?.rmssd?.let { rmssd ->
+                    if (rmssd > 0) {
+                        hrvLabel.text = "${(rmssd * 10).roundToInt() / 10.0} ms"
+                    }
+                }
             }
 
             if (metrics.hasBreathing()) {
                 if (metrics.breathing.rateCount > 0) {
                     val breathingRate = metrics.breathing.rateList.last().value.roundToInt()
-                    breathingRateLabel.text = "Breathing Rate  $breathingRate brpm"
+                    breathingRateLabel.text = "$breathingRate bpm"
                 }
 
                 metrics.breathing.upperTraceList.forEach { sample ->
-                    if (sample.timestamp > latestBreathingTimestamp) {
-                        latestBreathingTimestamp = sample.timestamp
-                        breathingGraphView.appendValue(sample.value)
+                    if (sample.timestamp > latestChestTimestamp) {
+                        latestChestTimestamp = sample.timestamp
+                        chestGraphView.appendValue(sample.value)
+                    }
+                }
+
+                metrics.breathing.lowerTraceList.forEach { sample ->
+                    if (sample.timestamp > latestAbdomenTimestamp) {
+                        latestAbdomenTimestamp = sample.timestamp
+                        abdomenGraphView.appendValue(sample.value)
                     }
                 }
             }
@@ -264,7 +287,7 @@ class MainActivity : ComponentActivity() {
                     .filter { it.confidence > 0f }
                     .maxByOrNull { it.confidence } ?: return@observe
                 val expressionName = topScore.type.expressionName() ?: return@observe
-                expressionLabel.text = "$expressionName  ${(topScore.confidence * 100).roundToInt()}%"
+                expressionLabel.text = "%-8.8s %3d%%".format(expressionName, topScore.confidence.roundToInt())
             }
         }
 
@@ -272,27 +295,70 @@ class MainActivity : ComponentActivity() {
 
     private fun buildUi() {
         val root = FrameLayout(this).apply {
-            setBackgroundColor(Color.BLACK)
+            background = GradientDrawable(
+                GradientDrawable.Orientation.TOP_BOTTOM,
+                intArrayOf(0xFF0B1020.toInt(), 0xFF05070C.toInt()),
+            )
         }
 
         val previewView = PreviewView(this).apply {
             contentDescription = "SmartSpectra preview output"
             setBackgroundColor(Color.BLACK)
             scaleType = PreviewView.ScaleType.FILL_CENTER
-            implementationMode = PreviewView.ImplementationMode.PERFORMANCE
+            implementationMode = PreviewView.ImplementationMode.COMPATIBLE
         }
         sdk.config.previewSurfaceProvider = previewView.surfaceProvider
+        val previewParams = FrameLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            dp(465),
+            Gravity.TOP,
+        ).apply { topMargin = dp(33) }
+        root.addView(previewView, previewParams)
         root.addView(
-            previewView,
+            View(this).apply {
+                background = GradientDrawable(
+                    GradientDrawable.Orientation.TOP_BOTTOM,
+                    intArrayOf(0x33000000, 0x00000000, 0xCC05070C.toInt()),
+                )
+            },
             FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
+                dp(465),
+                Gravity.TOP,
+            ).apply { topMargin = dp(33) },
+        )
+
+        val topPanel = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(14), dp(33), dp(14), 0)
+        }
+        root.addView(
+            topPanel,
+            FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                Gravity.TOP,
             ),
         )
 
+        val topRow = horizontalRow()
+        statusLabel = statusPill("Status", "Idle", CORAL)
+        validationLabel = statusPill("Validation", "--", AMBER)
+        toggleButton = Button(this).apply {
+            text = "Start"
+            setAllCaps(false)
+            setTextColor(Color.BLACK)
+            backgroundTintList = ColorStateList.valueOf(Color.WHITE)
+            setOnClickListener { toggleProcessing() }
+        }
+        topRow.addView(statusLabel, weightedParams(endMargin = dp(8)))
+        topRow.addView(validationLabel, weightedParams(endMargin = dp(8)))
+        topRow.addView(toggleButton, LinearLayout.LayoutParams(dp(92), dp(42)))
+        topPanel.addView(topRow)
+
         val panel = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(dp(16), dp(12), dp(16), dp(18))
+            setPadding(dp(14), 0, dp(14), 0)
         }
         root.addView(
             panel,
@@ -300,77 +366,35 @@ class MainActivity : ComponentActivity() {
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 Gravity.BOTTOM,
-            ),
+            ).apply { bottomMargin = dp(60) },
         )
 
-        heartRateLabel = textView(sizeSp = 28f, color = CORAL, bold = true)
-        panel.addView(
-            card {
-                addView(textView("Heart Rate", sizeSp = 12f, color = TEXT_MUTED))
-                addView(heartRateLabel, matchWrapTopMargin(dp(2)))
-            },
-            matchWrapBottomMargin(dp(8)),
-        )
+        heartRateLabel = textView(sizeSp = 23f, color = CORAL, bold = true)
+        breathingRateLabel = textView(sizeSp = 23f, color = TEAL, bold = true)
+        val rateRow = horizontalRow()
+        rateRow.addView(metricCard("Pulse Rate", heartRateLabel, CORAL), weightedParams(endMargin = dp(8)))
+        rateRow.addView(metricCard("Breathing Rate", breathingRateLabel, TEAL), weightedParams())
+        panel.addView(rateRow, matchWrapBottomMargin(dp(10)))
 
-        expressionLabel = textView(sizeSp = 18f, color = TEXT_PRIMARY, bold = true)
-        panel.addView(
-            card {
-                addView(textView("Expression", sizeSp = 12f, color = TEXT_MUTED))
-                addView(expressionLabel, matchWrapTopMargin(dp(2)))
-            },
-            matchWrapBottomMargin(dp(8)),
-        )
-
-        breathingRateLabel = textView(sizeSp = 12f, color = TEXT_MUTED)
-        breathingGraphView = SignalGraphView(this, TEAL)
-        panel.addView(
-            card {
-                addView(breathingRateLabel)
-                addView(
-                    breathingGraphView,
-                    LinearLayout.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        dp(72),
-                    ).apply { topMargin = dp(4) },
-                )
-            },
-            matchWrapBottomMargin(dp(8)),
-        )
+        hrvLabel = textView(sizeSp = 23f, color = TEXT_PRIMARY, bold = true)
+        expressionLabel = textView(sizeSp = 20f, color = TEXT_PRIMARY, bold = true).apply {
+            typeface = android.graphics.Typeface.create(android.graphics.Typeface.MONOSPACE, android.graphics.Typeface.BOLD)
+            includeFontPadding = false
+        }
+        val summaryRow = horizontalRow()
+        summaryRow.addView(metricCard("HRV RMSSD", hrvLabel, MINT), weightedParams(endMargin = dp(8)))
+        summaryRow.addView(metricCard("Expression", expressionLabel, AMBER), weightedParams())
+        panel.addView(summaryRow, matchWrapBottomMargin(dp(10)))
 
         bloodPressureGraphView = SignalGraphView(this, VIOLET)
-        panel.addView(
-            card {
-                addView(textView("Blood Pressure Trace", sizeSp = 12f, color = TEXT_MUTED))
-                addView(
-                    bloodPressureGraphView,
-                    LinearLayout.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        dp(72),
-                    ).apply { topMargin = dp(4) },
-                )
-            },
-            matchWrapBottomMargin(dp(8)),
-        )
+        panel.addView(waveformCard("Arterial Pressure", bloodPressureGraphView), matchWrapBottomMargin(dp(10)))
 
-        statusLabel = textView(sizeSp = 12f, color = TEXT_MUTED).apply {
-            gravity = Gravity.CENTER
-        }
-        panel.addView(statusLabel)
-
-        toggleButton = Button(this).apply {
-            text = "Start"
-            setAllCaps(false)
-            setTextColor(TEXT_PRIMARY)
-            backgroundTintList = ColorStateList.valueOf(CORAL)
-            setOnClickListener { toggleProcessing() }
-        }
-        panel.addView(
-            toggleButton,
-            LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                dp(48),
-            ).apply { topMargin = dp(10) },
-        )
+        chestGraphView = SignalGraphView(this, TEAL)
+        abdomenGraphView = SignalGraphView(this, BLUE)
+        val breathingRow = horizontalRow()
+        breathingRow.addView(waveformCard("Chest Waveform", chestGraphView), weightedParams(endMargin = dp(8)))
+        breathingRow.addView(waveformCard("Abdomen Waveform", abdomenGraphView), weightedParams())
+        panel.addView(breathingRow, matchHeight(dp(126)))
 
         setContentView(root)
     }
@@ -394,7 +418,7 @@ class MainActivity : ComponentActivity() {
             resetMeasurementUi()
             runCatching { sdk.start() }
                 .onFailure {
-                    statusLabel.text = "Error: ${it.message ?: "Unknown error"}"
+                    statusLabel.text = "Error: ${it.message ?: "Unknown"}"
                 }
         }
     }
@@ -402,22 +426,22 @@ class MainActivity : ComponentActivity() {
     private fun updateProcessingStatus(status: ProcessingStatus?) {
         when (status) {
             ProcessingStatus.IDLE -> {
-                statusLabel.text = "Idle"
+                statusLabel.text = "Status: Idle"
                 toggleButton.text = "Start"
                 toggleButton.isEnabled = true
             }
             ProcessingStatus.STARTING -> {
-                statusLabel.text = "Starting"
+                statusLabel.text = "Status: Starting"
                 toggleButton.text = "Starting..."
                 toggleButton.isEnabled = false
             }
             ProcessingStatus.RUNNING -> {
-                statusLabel.text = "Running"
+                statusLabel.text = "Status: Running"
                 toggleButton.text = "Stop"
                 toggleButton.isEnabled = true
             }
             ProcessingStatus.STOPPING -> {
-                statusLabel.text = "Stopping"
+                statusLabel.text = "Status: Stopping"
                 toggleButton.text = "Stopping..."
                 toggleButton.isEnabled = false
             }
@@ -430,13 +454,16 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun resetMeasurementUi() {
-        latestBreathingTimestamp = Long.MIN_VALUE
+        latestChestTimestamp = Long.MIN_VALUE
+        latestAbdomenTimestamp = Long.MIN_VALUE
         latestPressureTimestamp = Long.MIN_VALUE
-        breathingGraphView.reset()
+        chestGraphView.reset()
+        abdomenGraphView.reset()
         bloodPressureGraphView.reset()
         heartRateLabel.text = "-- bpm"
         expressionLabel.text = "--"
-        breathingRateLabel.text = "Breathing Rate"
+        breathingRateLabel.text = "-- bpm"
+        hrvLabel.text = "-- ms"
     }
 
     private fun card(buildChildren: LinearLayout.() -> Unit): LinearLayout =
@@ -448,6 +475,41 @@ class MainActivity : ComponentActivity() {
             }
             setPadding(dp(12), dp(8), dp(12), dp(8))
             buildChildren()
+        }
+
+    private fun metricCard(title: String, value: TextView, accent: Int): LinearLayout =
+        card {
+            addView(textView(title, sizeSp = 12f, color = TEXT_MUTED, bold = true))
+            addView(value, matchWrapTopMargin(dp(4)))
+        }.apply {
+            background = GradientDrawable().apply {
+                setColor(CARD_OVERLAY)
+                setStroke(dp(1), colorWithAlpha(accent, 70))
+                cornerRadius = dp(20).toFloat()
+            }
+        }
+
+    private fun waveformCard(title: String, graphView: SignalGraphView): LinearLayout =
+        card {
+            addView(textView(title, sizeSp = 12f, color = TEXT_PRIMARY, bold = true))
+            addView(graphView, matchHeight(dp(78)).apply { topMargin = dp(6) })
+        }
+
+    private fun statusPill(title: String, value: String, accent: Int): TextView =
+        textView("$title: $value", sizeSp = 12f, color = TEXT_PRIMARY, bold = true).apply {
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(dp(10), 0, dp(10), 0)
+            background = GradientDrawable().apply {
+                setColor(0x26FFFFFF)
+                setStroke(dp(1), colorWithAlpha(accent, 90))
+                cornerRadius = dp(18).toFloat()
+            }
+        }
+
+    private fun horizontalRow(): LinearLayout =
+        LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
         }
 
     private fun textView(
@@ -468,13 +530,27 @@ class MainActivity : ComponentActivity() {
             ViewGroup.LayoutParams.WRAP_CONTENT,
         ).apply { this.bottomMargin = bottomMargin }
 
+    private fun matchHeight(height: Int): LinearLayout.LayoutParams =
+        LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            height,
+        )
+
     private fun matchWrapTopMargin(topMargin: Int): LinearLayout.LayoutParams =
         LinearLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.WRAP_CONTENT,
         ).apply { this.topMargin = topMargin }
 
+    private fun weightedParams(endMargin: Int = 0): LinearLayout.LayoutParams =
+        LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f).apply {
+            marginEnd = endMargin
+        }
+
     private fun dp(value: Int): Int = (value * resources.displayMetrics.density).roundToInt()
+
+    private fun colorWithAlpha(color: Int, alpha: Int): Int =
+        Color.argb(alpha, Color.red(color), Color.green(color), Color.blue(color))
 
     private fun ExpressionType.expressionName(): String? =
         when (this) {

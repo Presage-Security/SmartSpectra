@@ -9,7 +9,7 @@ description: Solutions to common build, runtime, and integration issues with the
 
 ### Package not found in Xcode
 
-Ensure you're adding the package via **File → Add Package Dependencies...**, entering `https://github.com/Presage-Security/SmartSpectra-Swift`, and selecting **Branch → main**. Specific version tags may not exist — branch is required.
+Ensure you're adding the package via **File → Add Package Dependencies...**, entering `https://github.com/Presage-Security/SmartSpectra-Swift`, and selecting a stable version such as `3.0.0` for repeatable builds. Use **Branch → main** only when testing the latest final public release before pinning a version.
 
 If you pasted a subdirectory URL such as `/tree/main/swift/sdk`, replace it with the repository root URL above. Swift Package Manager resolves the package from the repo root.
 
@@ -171,4 +171,4 @@ For older-to-current mappings, see the [iOS Migration Guide](migration-guide.md)
 
 - Email: [support@presagetech.com](mailto:support@presagetech.com)
 - [Submit a GitHub issue](https://github.com/Presage-Security/SmartSpectra-Swift/issues)
-- API reference: [Swift API reference](https://docs.presagetech.com/docs/swift/api-reference)
+- API reference: [Swift API reference](https://smartspectra.presagetech.com/docs/swift/api-reference)
