@@ -29,13 +29,14 @@ void AddLatestMeasurementLine(std::vector<std::string>& lines,
                               const std::string& label,
                               int count,
                               const Getter& getter,
-                              const std::string& unit) {
+                              const std::string& unit,
+                              int precision = 1) {
     if (count == 0) {
         return;
     }
 
     const auto& measurement = getter(count - 1);
-    lines.push_back(label + ": " + FormatFloat(measurement.value()) + unit);
+    lines.push_back(label + ": " + FormatFloat(measurement.value(), precision) + unit);
 }
 
 template <typename Getter>
@@ -87,6 +88,19 @@ NSArray<NSNumber *> *ArterialPressureTraceFromMetrics(const ss::Metrics& metrics
     return array;
 }
 
+NSArray<NSNumber *> *EdaTraceFromMetrics(const ss::Metrics& metrics) {
+    NSMutableArray<NSNumber *> *array = [NSMutableArray array];
+    if (!metrics.has_eda()) {
+        return array;
+    }
+
+    const auto& eda = metrics.eda();
+    for (int index = 0; index < eda.trace_size(); ++index) {
+        [array addObject:@(eda.trace(index).value())];
+    }
+    return array;
+}
+
 std::vector<std::string> BuildMetricLines(const ss::Metrics& metrics) {
     std::vector<std::string> lines;
 
@@ -130,6 +144,17 @@ std::vector<std::string> BuildMetricLines(const ss::Metrics& metrics) {
             cardio.pulse_rate_size(),
             [&cardio](int index) -> const auto& { return cardio.pulse_rate(index); },
             " bpm");
+    }
+
+    if (metrics.has_eda()) {
+        const auto& eda = metrics.eda();
+        AddLatestMeasurementLine(
+            lines,
+            "EDA level",
+            eda.trace_size(),
+            [&eda](int index) -> const auto& { return eda.trace(index); },
+            "",
+            3);
     }
 
     return lines;
@@ -284,6 +309,7 @@ void DispatchDiagnostics(__weak SmartSpectraRunner *weakRunner, NSString *diagno
     config.api_key = std::string(apiKey.UTF8String);
     config.requested_metrics = ss::SmartSpectraConfig::DefaultSupportedMetrics();
     config.AddMetrics(ss::SmartSpectraConfig::CardioMetrics());
+    config.AddMetrics(ss::SmartSpectraConfig::EdaMetrics());
 
     auto spectra = std::make_unique<ss::SmartSpectra>(std::move(config));
     __weak SmartSpectraRunner *weakSelf = self;
@@ -311,12 +337,14 @@ void DispatchDiagnostics(__weak SmartSpectraRunner *weakRunner, NSString *diagno
         std::vector<std::string> metric_lines = BuildMetricLines(metrics);
         NSArray<NSNumber *> *breathing_trace = BreathingTraceFromMetrics(metrics);
         NSArray<NSNumber *> *arterial_pressure_trace = ArterialPressureTraceFromMetrics(metrics);
+        NSArray<NSNumber *> *eda_trace = EdaTraceFromMetrics(metrics);
         NSArray<NSString *> *lines = NSArrayFromLines(metric_lines);
         dispatch_async(dispatch_get_main_queue(), ^{
             SmartSpectraRunner *runner = weakSelf;
             [runner.delegate smartSpectraRunnerDidUpdateMetrics:lines timestampUs:timestamp_us];
             [runner.delegate smartSpectraRunnerDidUpdateBreathingTrace:breathing_trace
                                                  arterialPressureTrace:arterial_pressure_trace
+                                                              edaTrace:eda_trace
                                                            timestampUs:timestamp_us];
         });
     });

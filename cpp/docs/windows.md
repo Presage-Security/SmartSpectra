@@ -23,14 +23,13 @@ specific need.
 
 ### Prerequisites
 
-Install **Visual Studio Build Tools 2022 or later** with the **Desktop development with C++** workload.
+Install [Visual Studio Build Tools 2022](https://visualstudio.microsoft.com/visual-cpp-build-tools/)
+or later with the **Desktop development with C++** workload.
 
-You can use either the full Visual Studio IDE or the standalone Build Tools:
-
-- **Full IDE**: [Visual Studio 2022](https://visualstudio.microsoft.com/vs/) — recommended if you want the Visual Studio CMake project UI shown in the example below.
-- **Build Tools only**: [Visual Studio Build Tools 2022](https://visualstudio.microsoft.com/visual-cpp-build-tools/) — lighter install for command-line builds.
-
-During installation, select the **Desktop development with C++** workload. CMake and the x64 build tools are included automatically.
+During installation, select the **Desktop development with C++** workload and
+make sure **C++ CMake tools for Windows** is selected. The workload installs
+the MSVC compiler, Windows SDK, CMake, and the developer command prompt needed
+for the quickstart below.
 
 You also need an **API key** from [physiology.presagetech.com](https://physiology.presagetech.com).
 
@@ -47,14 +46,40 @@ bundled resources must stay in the locations expected by the package.
 
 No SDK-specific OS permission setup is required on Windows.
 
-## Example: Visual Studio CMake Project
+## Example: CMake Project
 
-This walkthrough sets up a minimal CMake project in Visual Studio that reads
-from a camera and prints vitals to the console.
+This walkthrough sets up a minimal CMake project that reads from a camera and
+prints vitals to the console.
 
-### 1. Create the project files
+### Result you should get
 
-Create a folder, for example `C:\Projects\HelloVitals`, and add these three
+At the end, the app should show console output with:
+
+- a successful CMake configure and build
+- `Processing... Press Ctrl+C to stop.`
+- `Cardio metrics:` log lines when cardio metrics are available
+- `Breathing metrics:` log lines when breathing metrics are available
+- a clean exit after the sample stops
+
+![SmartSpectra C++ quickstart demo](images/cpp-quickstart.gif)
+
+### 1. Open the developer command prompt
+
+Open the Windows **Start** menu and search for `x64 Developer Command Prompt`.
+Choose the x64 developer command prompt installed by Visual Studio Build Tools.
+
+For a default Build Tools installation, that shortcut launches:
+
+```bat
+C:\Windows\System32\cmd.exe /k ""C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\Common7\Tools\VsDevCmd.bat" -arch=x64 -host_arch=x64"
+```
+
+If you installed Build Tools somewhere else, update the `VsDevCmd.bat` path to
+match that installation.
+
+### 2. Create the project files
+
+Create a folder, for example `C:\Projects\HelloVitals`, and add these two
 files inside it.
 
 **`CMakeLists.txt`**:
@@ -65,44 +90,29 @@ project(HelloVitals CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-list(APPEND CMAKE_PREFIX_PATH $ENV{SMARTSPECTRA_SDK_PATH})
-find_package(SmartSpectra REQUIRED)
+set(SMARTSPECTRA_SDK_DIR "$ENV{SMARTSPECTRA_SDK_PATH}")
+if (SMARTSPECTRA_SDK_DIR STREQUAL "")
+    message(FATAL_ERROR "SMARTSPECTRA_SDK_PATH is not set.")
+endif ()
+
+list(APPEND CMAKE_PREFIX_PATH "${SMARTSPECTRA_SDK_DIR}")
+find_package(SmartSpectra CONFIG REQUIRED)
 
 add_executable(hello_vitals hello_vitals.cpp)
 target_link_libraries(hello_vitals SmartSpectra::SDK)
 
-# Copy SmartSpectra runtime DLLs (and their dependencies) next to the exe
-# so it can be launched directly from Visual Studio or Explorer without
-# having to put the SDK bin directory on PATH.
+# Stage the Windows runtime files next to the executable.
 add_custom_command(TARGET hello_vitals POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            $<TARGET_RUNTIME_DLLS:hello_vitals> $<TARGET_FILE_DIR:hello_vitals>
-    COMMAND_EXPAND_LISTS)
+            "${SMARTSPECTRA_SDK_DIR}/bin/smartspectra.dll"
+            "${SMARTSPECTRA_SDK_DIR}/bin/smartspectra_capi.dll"
+            "${SMARTSPECTRA_SDK_DIR}/bin/opencv_world4100.dll"
+            "$<TARGET_FILE_DIR:hello_vitals>"
+    COMMAND ${CMAKE_COMMAND} -E echo
+            "resource_root_dir=${SMARTSPECTRA_SDK_DIR}/share/smartspectra"
+            > "$<TARGET_FILE_DIR:hello_vitals>/physiology_edge_manifest.txt"
+    VERBATIM)
 ```
-
-**`CMakeSettings.json`** — tells Visual Studio where the extracted SDK is:
-
-```json
-{
-  "configurations": [
-    {
-      "name": "x64-Release",
-      "generator": "Visual Studio 17 2022",
-      "configurationType": "Release",
-      "buildRoot": "${projectDir}\\out\\build\\${name}",
-      "variables": [
-        {
-          "name": "CMAKE_PREFIX_PATH",
-          "value": "C:\\SmartSpectra",
-          "type": "PATH"
-        }
-      ]
-    }
-  ]
-}
-```
-
-Replace `C:\\SmartSpectra` with the folder where you extracted the ZIP.
 
 **`hello_vitals.cpp`**:
 
@@ -164,36 +174,30 @@ int main(int argc, char** argv) {
 }
 ```
 
-### 2. Open the project in Visual Studio
-
-1. Open Visual Studio 2022.
-2. Choose **Open a local folder** and select `C:\Projects\HelloVitals`.
-3. Visual Studio detects `CMakeLists.txt` and configures the project automatically.
-   The **Output** window shows CMake configuration progress.
-4. Wait for the **CMake generation finished** message in the Output window before building.
-
-If Visual Studio does not pick up the SDK path from `CMakeSettings.json`,
-open **Project → CMake Settings** and verify that `CMAKE_PREFIX_PATH` points
-to your extracted SDK folder.
-
 ### 3. Build
 
-Select **x64-Release** from the configuration dropdown in the toolbar, then
-choose **Build → Build All** (or press `Ctrl+Shift+B`).
+Navigate to your project folder with the two files, for example:
 
-The compiled executable is placed in
-`out\build\x64-Release\Release\hello_vitals.exe`.
+```bat
+cd /d C:\Projects\HelloVitals
+```
+
+Configure and build with CMake. Update `C:\SmartSpectra` if you extracted the
+SDK somewhere else.
+
+```bat
+set "SMARTSPECTRA_SDK_PATH=C:\SmartSpectra" && cmake -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release && cmake --build build
+```
 
 ### 4. Run
 
 Replace `"YOUR_API_KEY"` in `hello_vitals.cpp` with your key from
 [physiology.presagetech.com](https://physiology.presagetech.com) and rebuild.
 
-Then either press `Ctrl+F5` (**Debug → Start Without Debugging**) in Visual
-Studio, or run the executable directly:
+Run the executable from the same developer command prompt:
 
-```powershell
-.\out\build\x64-Release\Release\hello_vitals.exe
+```bat
+.\build\hello_vitals.exe
 ```
 
 The SDK DLLs are copied next to `hello_vitals.exe` by the post-build step in
@@ -201,6 +205,33 @@ The SDK DLLs are copied next to `hello_vitals.exe` by the post-build step in
 
 You should see breathing and cardio metrics printed to the console within a few
 seconds of the camera starting.
+
+## What success looks like
+
+When your program is running, you should see all of these:
+
+- `Processing... Press Ctrl+C to stop.` prints after launch
+- the camera starts without a source creation error
+- `Cardio metrics:` or `Breathing metrics:` logs print while you sit centered and well-lit
+- the process exits without a `Stop failed` message
+
+## Expected API key check
+
+The first measurement should start after the executable launches with a valid
+API key. If startup fails with an authentication error, verify that
+`YOUR_API_KEY` was replaced in `hello_vitals.cpp` and that the key is authorized
+for this app.
+
+## Common manual mistakes
+
+If the console output does not match the target state, check these first:
+
+- the ZIP was extracted into a different folder than `SMARTSPECTRA_SDK_PATH`
+- the project was built outside the x64 developer command prompt
+- `YOUR_API_KEY` was not replaced before rebuilding
+- the post-build step did not copy the SDK DLLs next to the executable
+- another app is already using the camera
+- the executable is an older build from before the latest source change
 
 ## Additional Details
 

@@ -5,9 +5,9 @@ description: Get started with SmartSpectra C++ across Linux, macOS, and Windows.
 
 # SmartSpectra C++ SDK
 
-Cross-platform C++ SDK for measuring vitals (pulse, breathing, blood pressure,
-and more) from a camera. Headless by default with optional preview frames;
-runs on Linux, macOS, and Windows.
+Cross-platform C++ SDK for measuring vitals and waveform shapes (pulse,
+breathing, relative blood pressure, and more) from a camera. Headless by default
+with optional preview frames; runs on Linux, macOS, and Windows.
 
 ## Supported Platforms
 
@@ -15,9 +15,9 @@ runs on Linux, macOS, and Windows.
 | --- | --- | --- |
 | Ubuntu 22.04 / Mint 21 (amd64) | Experimental | Debian package available |
 | Ubuntu 22.04 / Mint 21 (arm64) | Experimental | Debian package available |
+| Ubuntu 24.04 / Mint 22 (amd64) | Experimental | Debian package available via `packages.presagetech.com` apt channel |
 | macOS Apple Silicon (14.0+) | Supported | Homebrew package available |
 | Windows 10 / 11 (x64) | Experimental | ZIP distribution available |
-| Ubuntu 24.04 / Mint 22 | Coming soon | — |
 | macOS Intel | Not supported | — |
 | Debian 12 | Not supported | — |
 | RHEL 9 / Fedora 41 | Not supported | — |
@@ -41,7 +41,7 @@ protobuf, curl, or OpenSSL separately on any platform.
 
 Each guide is self-contained: prerequisites → install → first running build.
 
-- [**Linux Quickstart (Ubuntu/Mint)**](docs/linux.md) — apt-based install, amd64 + arm64
+- [**Linux Quickstart (Ubuntu/Mint)**](docs/linux/index.md) — apt-based install for Ubuntu 22.04 / Mint 21 (amd64 + arm64) or Ubuntu 24.04 / Mint 22 (amd64)
 - [**macOS Quickstart**](docs/macos.md) — Homebrew formula, Apple Silicon
 - [**Windows Quickstart**](docs/windows.md) — prebuilt ZIP from GitHub Releases
 
@@ -49,7 +49,7 @@ Each guide is self-contained: prerequisites → install → first running build.
 
 The quickstarts intentionally request only the breathing and cardio metric
 bundles, which is enough to see live values on the console. See the
-[C++ API reference](https://docs.presagetech.com/docs/cpp/api-reference) for
+[C++ API reference](https://smartspectra.presagetech.com/docs/cpp/api-reference) for
 the full `requested_metrics` catalog and custom-input pipeline.
 
 ## Going further
@@ -59,7 +59,7 @@ Once your first build runs:
 - [Configure which metrics to compute](docs/metrics.md)
 - [Headless mode](docs/headless-mode.md) — C++ is headless by default; see the guide for video output callbacks
 - [Migration guide](docs/migration-guide.md) — upgrading from v1.x or v2.x
-- [API reference](https://docs.presagetech.com/docs/cpp/api-reference)
+- [API reference](https://smartspectra.presagetech.com/docs/cpp/api-reference)
 
 ## Bugs & Troubleshooting
 

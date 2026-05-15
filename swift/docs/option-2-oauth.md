@@ -18,6 +18,22 @@ You will touch exactly these things:
 
 You do not need to create any new Swift files.
 
+## Result you should get
+
+At the end, the app should show:
+
+- `Status` and `Validation` at the top
+- live camera preview
+- pulse rate, breathing rate, HRV RMSSD, and expression cards
+- white labels for those four cards
+- confidence-colored pulse and breath-rate values
+- one large arterial pressure waveform
+- chest and abdomen breathing waveforms
+- guidance text below the breathing waveforms
+- one portrait screen with no scrolling
+
+![SmartSpectra iOS quickstart demo](ios-quickstart.gif)
+
 ## Step 1 — Create the project
 
 In Xcode, create a new iOS app project:
@@ -43,8 +59,8 @@ In Xcode:
 
 1. Click `File` → `Add Package Dependencies...`
 2. Paste `https://github.com/Presage-Security/SmartSpectra-Swift/`
-3. When Xcode asks how to resolve the package, choose `Branch`
-4. Enter `main`
+3. For repeatable builds, choose `Exact Version` and enter a released tag such as `3.0.0`
+4. Use `Branch` → `main` only when testing the latest final public release before pinning a version
 5. Add the package to the `Cool Vitals` app target
 
 Manual check:
@@ -177,31 +193,11 @@ struct ContentView: View {
 
     private var latestExpressionLabel: String {
         guard let score = latestExpressionScore else { return "--" }
-        return "\(expressionName(score.type)) • \(confidenceText(score.confidence))"
-    }
-
-    private var expressionBreakdown: String {
-        guard !latestExpressionScores.isEmpty else { return "Reads from metrics.face.expression.last?.scores" }
-
-        let sortedScores = latestExpressionScores.sorted { left, right in
-            left.confidence > right.confidence
-        }
-
-        let topScores = sortedScores.prefix(2).map { score in
-            let label = expressionName(score.type)
-            let percent = confidenceText(score.confidence)
-            return "\(label) \(percent)"
-        }
-
-        return topScores.joined(separator: " · ")
-    }
-
-    private var pulseConfidenceText: String {
-        confidenceText(pulseRateBuffer.last?.confidence)
-    }
-
-    private var breathingConfidenceText: String {
-        confidenceText(breathingRateBuffer.last?.confidence)
+        let name = String(expressionName(score.type).prefix(8))
+        let paddedName = name + String(repeating: " ", count: max(0, 8 - name.count))
+        let percent = confidenceText(score.confidence)
+        let paddedPercent = String(repeating: " ", count: max(0, 4 - percent.count)) + percent
+        return "\(paddedName) \(paddedPercent)"
     }
 
     private var pulseConfidenceColor: Color {
@@ -259,20 +255,6 @@ struct ContentView: View {
         }
     }
 
-    private var validationHint: String {
-        sdk.validationStatus?.hint ?? "Keep one face centered, upper chest visible, and use bright even light."
-    }
-
-    private var signalSummaryText: String {
-        if let error = sdk.error?.localizedDescription, !error.isEmpty {
-            return error
-        }
-        if let validationStatus = sdk.validationStatus, validationStatus.code != .ok {
-            return validationStatus.hint
-        }
-        return "Low-confidence values can spike early. Wait for camera tuning to finish, then hold still for a few seconds."
-    }
-
     var body: some View {
         GeometryReader { geometry in
             let compact = geometry.size.height < 820
@@ -281,11 +263,8 @@ struct ContentView: View {
             let previewHeight = min(max(geometry.size.height * 0.26, 190), 250)
 
             VStack(spacing: topSpacing) {
-                VStack(spacing: topSpacing) {
-                    statusBar(compact: compact)
-                    instructionsCard(compact: compact)
-                }
-                .zIndex(1)
+                statusBar(compact: compact)
+                    .zIndex(1)
 
                 previewCard
                     .frame(height: previewHeight)
@@ -293,20 +272,16 @@ struct ContentView: View {
 
                 HStack(spacing: topSpacing) {
                     metricCard(
-                        title: "Pulse",
+                        title: "Pulse Rate",
                         value: pulseRateText,
-                        subtitle: "",
                         valueColor: pulseConfidenceColor,
-                        subtitleColor: pulseConfidenceColor.opacity(0.92),
                         accent: .red,
                         compact: compact
                     )
                     metricCard(
-                        title: "Breath Rate",
+                        title: "Breathing Rate",
                         value: breathingRateText,
-                        subtitle: "",
                         valueColor: breathingConfidenceColor,
-                        subtitleColor: breathingConfidenceColor.opacity(0.92),
                         accent: .cyan,
                         compact: compact
                     )
@@ -317,27 +292,23 @@ struct ContentView: View {
                     metricCard(
                         title: "HRV RMSSD",
                         value: hrvText,
-                        subtitle: "Latest stable HRV sample",
                         valueColor: .white,
-                        subtitleColor: Color.secondary,
                         accent: .mint,
                         compact: compact
                     )
                     metricCard(
                         title: "Expression",
                         value: latestExpressionLabel,
-                        subtitle: expressionBreakdown,
                         valueColor: .white,
-                        subtitleColor: Color.secondary,
                         accent: .orange,
-                        compact: compact
+                        compact: compact,
+                        monospacedValue: true
                     )
                 }
                 .frame(maxHeight: compact ? 82 : 92)
 
                 waveformCard(
                     title: "Arterial Pressure",
-                    subtitle: "Buffered arterial pressure trace with more vertical headroom",
                     samples: arterialPressureSamples,
                     accent: .purple,
                     compact: compact,
@@ -348,7 +319,6 @@ struct ContentView: View {
                 HStack(spacing: topSpacing) {
                     waveformCard(
                         title: "Chest Waveform",
-                        subtitle: "Buffered chest breathing trace",
                         samples: chestSamples,
                         accent: .cyan,
                         compact: compact,
@@ -356,7 +326,6 @@ struct ContentView: View {
                     )
                     waveformCard(
                         title: "Abdomen Waveform",
-                        subtitle: "Buffered abdomen breathing trace",
                         samples: abdomenSamples,
                         accent: .blue,
                         compact: compact,
@@ -435,11 +404,10 @@ struct ContentView: View {
     private func metricCard(
         title: String,
         value: String,
-        subtitle: String,
         valueColor: Color,
-        subtitleColor: Color,
         accent: Color,
-        compact: Bool
+        compact: Bool,
+        monospacedValue: Bool = false
     ) -> some View {
         VStack(alignment: .leading, spacing: compact ? 6 : 8) {
             HStack(spacing: 6) {
@@ -452,23 +420,18 @@ struct ContentView: View {
             }
 
             Text(value)
-                .font(.system(size: compact ? 21 : 24, weight: .bold, design: .rounded))
+                .font(.system(size: compact ? 21 : 24, weight: .bold, design: monospacedValue ? .monospaced : .rounded))
                 .foregroundStyle(valueColor)
                 .monospacedDigit()
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
 
-            Text(subtitle)
-                .font(.caption2)
-                .foregroundStyle(subtitleColor)
-                .lineLimit(2)
         }
         .dashboardCard()
     }
 
     private func waveformCard(
         title: String,
-        subtitle: String,
         samples: [Double],
         accent: Color,
         compact: Bool,
@@ -479,10 +442,6 @@ struct ContentView: View {
                 Text(title)
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.white)
-                Text(subtitle)
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
             }
 
             ZStack {
@@ -496,12 +455,6 @@ struct ContentView: View {
                         verticalPaddingFraction: prominence == .primary ? 0.14 : 0.08
                     )
                     .padding(prominence == .primary ? 8 : 10)
-                } else {
-                    Text("Waiting for stable data")
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 8)
                 }
             }
             .frame(maxHeight: .infinity)
@@ -510,22 +463,6 @@ struct ContentView: View {
                     .stroke(accent.opacity(0.3), lineWidth: 1)
             )
         }
-        .dashboardCard()
-    }
-
-    private func instructionsCard(compact: Bool) -> some View {
-        VStack(alignment: .leading, spacing: compact ? 4 : 6) {
-            Text(validationHint)
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(.white)
-                .lineLimit(2)
-
-            Text(signalSummaryText)
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-                .lineLimit(2)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
         .dashboardCard()
     }
 
@@ -744,7 +681,7 @@ Do not use the simulator.
 
 ## What success looks like
 
-If the install is correct, you should see all of these:
+When your program is running, you should see all of these:
 
 - `Status` and `Validation` chips are visible at the top
 - the preview is below the chips

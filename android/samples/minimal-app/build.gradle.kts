@@ -5,6 +5,12 @@ plugins {
 }
 
 val androidNdkVersion = rootProject.extra["androidNdkVersion"] as String
+val minimalAppApiKey = providers.gradleProperty("minimalAppApiKey")
+    .orElse(providers.environmentVariable("SMARTSPECTRA_API_KEY"))
+    .orElse("")
+
+fun String.asBuildConfigString(): String =
+    replace("\\", "\\\\").replace("\"", "\\\"")
 
 extensions.configure<com.android.build.api.dsl.ApplicationExtension>("android") {
     namespace = "com.presagetech.smartspectra_minimal"
@@ -19,12 +25,22 @@ extensions.configure<com.android.build.api.dsl.ApplicationExtension>("android") 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    buildFeatures {
+        buildConfig = true
+    }
+
     buildTypes {
         debug {
             isMinifyEnabled = false
+            buildConfigField(
+                "String",
+                "SMARTSPECTRA_API_KEY",
+                "\"${minimalAppApiKey.get().asBuildConfigString()}\"",
+            )
         }
         release {
             isMinifyEnabled = false
+            buildConfigField("String", "SMARTSPECTRA_API_KEY", "\"\"")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt")
             )
@@ -53,4 +69,9 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.2.1")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.10.0")
     implementation("com.google.android.material:material:1.13.0")
+
+    androidTestImplementation("androidx.test:core-ktx:1.7.0")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")
+    androidTestImplementation("androidx.test.ext:junit:1.3.0")
+    androidTestImplementation("androidx.test:runner:1.7.0")
 }

@@ -26,7 +26,7 @@ class MainActivity : AppCompatActivity() {
     private val sdk by lazy { SmartSpectraSdk.shared }
 
     // Set your API key from https://physiology.presagetech.com
-    private val apiKey = "YOUR_API_KEY"
+    private var apiKey = "YOUR_API_KEY"
 
     private lateinit var previewImage: ImageView
     private lateinit var heartRateLabel: TextView

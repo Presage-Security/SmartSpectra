@@ -38,6 +38,56 @@ sdk.metrics.observe(viewLifecycleOwner) { metrics ->
 
 Set `requestedMetrics = null` to return to the default breathing-only set. Cardio fields are empty unless you request a cardio metric such as `PULSE_RATE`.
 
+## Metric Update Patterns
+
+`SmartSpectraSdk.metrics` publishes the latest SDK metrics payload. Each payload
+contains the samples that became available since the previous metrics update; it
+is not guaranteed to contain every requested field every time.
+
+| Metric category | Examples | Expected cadence | Empty/null behavior |
+| --- | --- | --- | --- |
+| Peak/event-driven rate metrics | `breathing.rateList`, `cardio.pulseRateList`, `cardio.hrvList` | Updated when a new physiological event, cycle, or analysis window produces a value | Lists may be empty between valid updates during active capture |
+| Frame-driven metrics | `face.expressionList`, `face.landmarksList`, `face.blinkingList`, `face.talkingList`, breathing trace lists | Updated near device frame cadence, with SDK callbacks rate-limited to about 30 Hz | Usually present more continuously when the metric is enabled and the input signal is valid |
+
+For example, `metrics?.cardio?.pulseRateList?.lastOrNull()?.value` and
+`metrics?.breathing?.rateList?.lastOrNull()?.value` may temporarily evaluate to
+`null` between valid updates. This is expected and does not mean capture stopped
+or the metric was disabled. By contrast, face expression samples are frame-driven,
+so `metrics?.face?.expressionList?.lastOrNull()` can appear continuously while
+face metrics are enabled and the face signal is valid.
+
+Recommended UI handling:
+
+- Keep the last valid rate sample in app state and update it only when the list
+  contains a new sample.
+- Show an initial loading or placeholder state until the first valid sample
+  arrives.
+- Do not overwrite a displayed pulse rate or breathing rate with `null` only
+  because one metrics payload has no new sample.
+- Clear retained values when a capture session starts, stops, or when your app
+  intentionally changes the requested metric set.
+- Prefer sample timestamps, and `stable` when present, to decide whether a
+  retained value is fresh enough for your UI.
+
+```kotlin
+var lastPulseRate: Double? = null
+
+sdk.metrics.observe(viewLifecycleOwner) { metrics ->
+    val pulse = metrics
+        ?.cardio
+        ?.pulseRateList
+        ?.lastOrNull { it.timestamp > 0 }
+        ?.value
+
+    if (pulse != null) {
+        lastPulseRate = pulse
+        pulseRateLabel.text = String.format(Locale.ROOT, "%.0f bpm", pulse)
+    } else if (lastPulseRate == null) {
+        pulseRateLabel.text = "-- bpm"
+    }
+}
+```
+
 ## Advanced
 
 Request additional metrics only when your app needs them:
@@ -103,4 +153,4 @@ Face {
 }
 ```
 
-See [Data Types](https://docs.presagetech.com/docs/data-types) for the complete protobuf schema.
+See [Data Types](https://smartspectra.presagetech.com/docs/data-types) for the complete protobuf schema.

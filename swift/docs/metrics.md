@@ -37,6 +37,51 @@ if let metrics = sdk.metrics {
 
 Set `requestedMetrics = nil` to return to the default breathing-only set. Cardio fields are empty unless you request a cardio metric such as `.pulseRate`.
 
+## Metric Update Patterns
+
+`SmartSpectraSDK.metrics` exposes the latest SDK metrics payload. Each payload
+contains the samples that became available since the previous metrics update; it
+is not guaranteed to contain every requested field every time.
+
+| Metric category | Examples | Expected cadence | Empty/null behavior |
+| --- | --- | --- | --- |
+| Peak/event-driven rate metrics | `metrics.breathing.rate`, `metrics.cardio.pulseRate`, `metrics.cardio.hrv` | Updated when a new physiological event, cycle, or analysis window produces a value | Arrays may be empty between valid updates during active capture |
+| Frame-driven metrics | `metrics.face.expression`, `metrics.face.landmarks`, `metrics.face.blinking`, `metrics.face.talking`, breathing traces | Updated near device frame cadence, with SDK callbacks rate-limited to about 30 Hz | Usually present more continuously when the metric is enabled and the input signal is valid |
+
+For example, `sdk.metrics?.cardio.pulseRate.last?.value` and
+`sdk.metrics?.breathing.rate.last?.value` may temporarily evaluate to `nil`
+between valid updates. This is expected and does not mean capture stopped or the
+metric was disabled. By contrast, face expression samples are frame-driven, so
+`sdk.metrics?.face.expression.last` can appear continuously while face metrics
+are enabled and the face signal is valid.
+
+Recommended UI handling:
+
+- Keep the last valid rate sample in app state and update it only when the array
+  contains a new sample.
+- Show an initial loading or placeholder state until the first valid sample
+  arrives.
+- Do not overwrite a displayed pulse rate or breathing rate with `nil` only
+  because one metrics payload has no new sample.
+- Clear retained values when a capture session starts, stops, or when your app
+  intentionally changes the requested metric set.
+- Prefer sample timestamps, and `stable` when present, to decide whether a
+  retained value is fresh enough for your UI.
+
+```swift
+private var lastPulseRate: Double?
+
+func pulseRateText(from metrics: Metrics?) -> String {
+    if let pulse = metrics?.cardio.pulseRate.last(where: { $0.timestamp > 0 })?.value {
+        lastPulseRate = pulse
+        return "\(Int(pulse.rounded())) bpm"
+    }
+
+    guard let lastPulseRate else { return "-- bpm" }
+    return "\(Int(lastPulseRate.rounded())) bpm"
+}
+```
+
 ## Advanced
 
 Request additional metrics only when your app needs them:
@@ -101,4 +146,4 @@ Face {
 }
 ```
 
-See [Data Types](https://docs.presagetech.com/docs/data-types) for the complete protobuf schema.
+See [Data Types](https://smartspectra.presagetech.com/docs/data-types) for the complete protobuf schema.

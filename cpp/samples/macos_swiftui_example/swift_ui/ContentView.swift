@@ -5,6 +5,7 @@ struct ContentView: View {
 
     private let coral = Color(red: 1.0, green: 0.42, blue: 0.42)
     private let teal = Color(red: 0.31, green: 0.80, blue: 0.77)
+    private let mint = Color(red: 0.40, green: 0.85, blue: 0.55)
 
     var body: some View {
         HStack(spacing: 0) {
@@ -112,6 +113,16 @@ struct ContentView: View {
                     icon: "wind",
                     color: teal,
                     points: model.breathingTraceHistory
+                )
+
+                VitalTile(
+                    title: "EDA",
+                    value: model.edaLevelText,
+                    unit: "a.u.",
+                    confidence: "",
+                    icon: "waveform.path.ecg",
+                    color: mint,
+                    points: model.edaTraceHistory
                 )
             }
         }

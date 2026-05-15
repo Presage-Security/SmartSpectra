@@ -9,6 +9,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)smartSpectraRunnerDidUpdateMetrics:(NSArray<NSString *> *)metrics timestampUs:(long long)timestampUs;
 - (void)smartSpectraRunnerDidUpdateBreathingTrace:(NSArray<NSNumber *> *)breathingTrace
                             arterialPressureTrace:(NSArray<NSNumber *> *)arterialPressureTrace
+                                         edaTrace:(NSArray<NSNumber *> *)edaTrace
                                       timestampUs:(long long)timestampUs;
 - (void)smartSpectraRunnerDidUpdateDiagnostics:(NSString *)diagnostics;
 - (void)smartSpectraRunnerDidFail:(NSString *)message;
