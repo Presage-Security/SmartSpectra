@@ -6,7 +6,7 @@ Set your SmartSpectra API key directly in `MainActivity.kt`:
 private val apiKey = "YOUR_API_KEY"
 ```
 
-Obtain a key from <https://physiology.presagetech.com>.
+Obtain a key from <https://physiology.presagetech.com/auth/login>.
 
 Build and install:
 

@@ -7,7 +7,7 @@ description: Install the SmartSpectra C++ SDK on Ubuntu and Linux Mint. Pick the
 
 > **Warning — Experimental platform:** Linux support for the SmartSpectra C++
 > SDK is experimental. If you have any issues running SmartSpectra,
-> [contact Presage support](https://physiology.presagetech.com) for assistance.
+> [contact Presage support](mailto:support@presagetech.com) for assistance.
 
 The Presage apt repository ships two suites. Pick the guide that matches your
 host:

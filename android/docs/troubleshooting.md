@@ -143,7 +143,7 @@ Observe that error to surface recovery UI and retry after the user grants access
 ### Auth errors (401 / 403)
 
 1. Verify the API key string is correct in your code.
-2. Confirm your subscription is active at [physiology.presagetech.com](https://physiology.presagetech.com).
+2. Confirm your subscription is active at [physiology.presagetech.com](https://physiology.presagetech.com/auth/login).
 3. Check that the device has an active internet connection — the SDK requires network access for subscription validation.
 
 ### OAuth not working in local or debug builds
@@ -167,4 +167,5 @@ Register that fingerprint under **Account → Registered App for OAuth** alongsi
 
 - Email: [support@presagetech.com](mailto:support@presagetech.com)
 - [Submit a GitHub issue](https://github.com/Presage-Security/SmartSpectra/issues)
-- [FAQ and developer portal](https://physiology.presagetech.com)
+- [Docs and FAQ](https://smartspectra.presagetech.com)
+- [Developer Admin Portal](https://physiology.presagetech.com/auth/login)

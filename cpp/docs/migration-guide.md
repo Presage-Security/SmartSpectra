@@ -201,11 +201,10 @@ declarations. Related platform surfaces are documented separately:
   consumers building against the new Android SDK release should update their
   generated-proto imports as part of the Android upgrade. See the Android
   Migration Guide for the platform-specific import examples.
-- **Python proto wheel (`Physiology-Edge-Protobuf`)**: the top-level
-  `physiology` package name and the wheel name itself are unchanged in
-  v3.0. The sub-package was renamed (`physiology.modules.messages.*` →
-  `physiology.smartspectra.messages.*`) to track the C++ rename. See the
-  "Python Proto Wheel" section below for the import examples.
+- **Python proto wheel (`SmartSpectra-Messages`)**: the internal Python wheel
+  now publishes the generated protobuf modules under `smartspectra.messages.*`
+  to match the SDK package identity. See the "Python Proto Wheel" section below
+  for the import examples.
 
 The Android JNI-bound classes `com.presage.physiology.Messages` and
 `com.presage.physiology.emd.security.AndroidKeyStoreHelper` are pinned by
@@ -382,8 +381,8 @@ direct SDK surface instead of the old container surface:
 
 ### Python Proto Wheel
 
-The Python protobuf wheel sub-package was renamed to track the C++ rename. The
-top-level `physiology` package name is unchanged; only the sub-package flips:
+The internal Python protobuf wheel now publishes the generated modules under
+the SmartSpectra package identity:
 
 ```python
 # Before:
@@ -391,6 +390,6 @@ import physiology.modules.messages.metrics_pb2 as metrics
 from physiology.modules.messages import status_pb2
 
 # After:
-import physiology.smartspectra.messages.metrics_pb2 as metrics
-from physiology.smartspectra.messages import status_pb2
+import smartspectra.messages.metrics_pb2 as metrics
+from smartspectra.messages import status_pb2
 ```

@@ -11,10 +11,12 @@
 // Usage:
 //   ./full_example --api_key=YOUR_KEY [--camera_device_index=0] [--input_video_path=video.mp4]
 
+#include <algorithm>
 #include <atomic>
 #include <chrono>
 #include <filesystem>
 #include <fstream>
+#include <iostream>
 #include <mutex>
 #include <string>
 #include <thread>
@@ -25,7 +27,6 @@
 #include <absl/flags/usage.h>
 #include <absl/strings/str_cat.h>
 #include <absl/strings/str_join.h>
-#include <glog/logging.h>
 #include <google/protobuf/util/json_util.h>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
@@ -49,7 +50,7 @@ spectra::FrameTransform ParseFrameTransform(const std::string& s) {
     if (s == "rot180" || s == "180" || s == "rotate180") return spectra::FrameTransform::kRotate180;
     if (s == "mirror_h" || s == "mirror_horizontal") return spectra::FrameTransform::kMirrorHorizontal;
     if (s == "mirror_v" || s == "mirror_vertical") return spectra::FrameTransform::kMirrorVertical;
-    LOG(WARNING) << "Unknown input_transform_mode '" << s << "', using none";
+    std::cerr << "Unknown input_transform_mode '" << s << "', using none\n";
     return spectra::FrameTransform::kNone;
 }
 
@@ -65,7 +66,7 @@ ABSL_FLAG(std::string, input_transform_mode, "none",
 // endregion ===========================================================================================================
 // region ======================== GUI / INTERACTION SETTINGS ==========================================================
 ABSL_FLAG(bool, headless, false, "Disable GUI.");
-ABSL_FLAG(bool, also_log_to_stderr, false, "Log to stderr as well.");
+ABSL_FLAG(bool, also_log_to_stderr, false, "Accepted for compatibility; logs are printed to stdout/stderr.");
 ABSL_FLAG(int, interframe_delay, 20, "Delay (ms) between frames for cv::waitKey.");
 // endregion ===========================================================================================================
 // region ======================== GRAPH SETTINGS =====================================================================
@@ -127,16 +128,10 @@ spectra::gui::ConfidenceSample ToHrvSample(const presage::smartspectra::Hrv& val
 }
 
 int main(int argc, char** argv) {
-    google::InitGoogleLogging(argv[0]);
-
     absl::SetProgramUsageMessage(
         "Run Presage SmartSpectra C++ REST Continuous Example.\n"
         "Hit 'q' to quit.");
     absl::ParseCommandLine(argc, argv);
-
-    if (absl::GetFlag(FLAGS_also_log_to_stderr)) {
-        google::SetStderrLogging(google::INFO);
-    }
 
     int verbosity = absl::GetFlag(FLAGS_verbosity);
     bool headless = absl::GetFlag(FLAGS_headless);
@@ -157,9 +152,16 @@ int main(int argc, char** argv) {
     }
     config.enable_accumulated_output = use_accumulated && save_metrics;
 
+    // Capture before config is moved into SmartSpectra; the HUD layout and the
+    // OnMetrics gate both key off whether EDA was requested at config time.
+    const bool eda_requested =
+        std::find(config.requested_metrics.begin(),
+                  config.requested_metrics.end(),
+                  spectra::MetricType::EDA_TRACE) != config.requested_metrics.end();
+
     spectra::SmartSpectra smart_spectra(std::move(config));
 
-    LOG(INFO) << "SmartSpectra version: " << spectra::SmartSpectra::version;
+    std::cout << "SmartSpectra version: " << spectra::SmartSpectra::version << '\n';
 
     auto frame_transform = ParseFrameTransform(absl::GetFlag(FLAGS_input_transform_mode));
 
@@ -169,7 +171,8 @@ int main(int argc, char** argv) {
                           frame_transform == spectra::FrameTransform::kRotate90CCW);
     HudLayout layout = GetHudLayout(portrait_mode);
 
-    spectra::gui::OpenCvHud hud(layout.hud_left_margin, 0, layout.hud_width, layout.hud_height);
+    spectra::gui::OpenCvHud hud(layout.hud_left_margin, 0, layout.hud_width, layout.hud_height,
+                                eda_requested);
 
     const int plot_h = 100, plot_label_w = 150, step = 110, label_off = 10;
     const int label_x = layout.hud_left_margin + layout.additional_plotters_width + label_off;
@@ -212,7 +215,7 @@ int main(int argc, char** argv) {
     smart_spectra.SetOnMetrics(
         [&hud, &hud_mutex, &accumulated_metrics, &abdomen_plotter,
          &glute_plotter, &knee_plotter,
-         enable_hud, save_metrics, use_accumulated, portrait_mode, verbosity](
+         enable_hud, save_metrics, use_accumulated, portrait_mode, eda_requested, verbosity](
             const presage::smartspectra::Metrics& metrics, int64_t) {
             {
                 std::lock_guard<std::mutex> lock(hud_mutex);
@@ -232,6 +235,12 @@ int main(int argc, char** argv) {
                     if (!metrics.cardio().hrv().empty()) {
                         hud.UpdateWithEdgeHrv(ToHrvSample(*metrics.cardio().hrv().rbegin()));
                     }
+                    if (eda_requested) {
+                        // Gated on the requested-metrics config at startup, not the
+                        // per-frame proto contents — the HUD only has an EDA row to
+                        // update when EDA was requested.
+                        hud.UpdateWithEdgeEda(ToTraceSamples(metrics.eda().trace()));
+                    }
                 }
                 if (portrait_mode) {
                     if (!metrics.breathing().lower_trace().empty())
@@ -248,7 +257,7 @@ int main(int argc, char** argv) {
             if (verbosity > 1) {
                 std::string json;
                 google::protobuf::util::JsonPrintOptions opts;
-                opts.always_print_primitive_fields = true;
+                opts.always_print_fields_with_no_presence = true;
                 if (verbosity < 4) opts.add_whitespace = false;
                 google::protobuf::util::MessageToJsonString(metrics, &json, opts);
                 std::cout << "Metrics";
@@ -264,7 +273,7 @@ int main(int argc, char** argv) {
                 auto path = std::filesystem::path(output_dir) / "accumulated_metrics.json";
                 std::string json;
                 google::protobuf::util::JsonPrintOptions opts;
-                opts.always_print_primitive_fields = true;
+                opts.always_print_fields_with_no_presence = true;
                 if (verbosity < 4) opts.add_whitespace = false;
                 google::protobuf::util::MessageToJsonString(metrics, &json, opts);
                 std::ofstream(path) << json;
@@ -274,7 +283,7 @@ int main(int argc, char** argv) {
     }
 
     smart_spectra.SetOnError([](const presage::smartspectra::SmartSpectraError& error) {
-        LOG(ERROR) << error.FullMessage();
+        std::cerr << error.FullMessage() << '\n';
     });
 
     // --- Display frame buffer (populated by OnVideoOutput callback for both modes) ---
@@ -306,9 +315,9 @@ int main(int argc, char** argv) {
                 .SetFrameTransform(frame_transform)
                 .Build();
         if (!source_error.ok()) {
-            LOG(ERROR) << (source_error.message.empty()
-                               ? "No camera available on this platform."
-                               : source_error.message);
+            std::cerr << (source_error.message.empty()
+                              ? "No camera available on this platform."
+                              : source_error.message) << '\n';
             return EXIT_FAILURE;
         }
     } else {
@@ -319,16 +328,16 @@ int main(int argc, char** argv) {
                 .SetFrameTransform(frame_transform)
                 .Build();
         if (!source_error.ok()) {
-            LOG(ERROR) << (source_error.message.empty()
-                               ? "Failed to open video file: " + video_path
-                               : source_error.message);
+            std::cerr << (source_error.message.empty()
+                              ? "Failed to open video file: " + video_path
+                              : source_error.message) << '\n';
             return EXIT_FAILURE;
         }
     }
 
     // --- Start (Initialize + begin session) ---
     if (const auto err = smart_spectra.Start(); !err.ok()) {
-        LOG(ERROR) << err.FullMessage();
+        std::cerr << err.FullMessage() << '\n';
         return EXIT_FAILURE;
     }
 
@@ -338,7 +347,7 @@ int main(int argc, char** argv) {
 
     // --- Frame loop ---
     auto log_render_err = [](bool ok, const char* what) {
-        if (!ok) LOG(WARNING) << what << " render skipped";
+        if (!ok) std::cerr << what << " render skipped\n";
     };
     const auto edge_color = cv::Scalar(0, 165, 255);
     int interframe_delay = absl::GetFlag(FLAGS_interframe_delay);
@@ -388,7 +397,7 @@ int main(int argc, char** argv) {
     }
 
     if (const auto err = smart_spectra.Stop(); !err.ok()) {
-        LOG(ERROR) << "Stop failed: " << err.message;
+        std::cerr << "Stop failed: " << err.message << '\n';
     }
 
     // Save accumulated metrics (non-accumulated-stream mode)
@@ -402,6 +411,6 @@ int main(int argc, char** argv) {
     }
 
     if (!headless) cv::destroyAllWindows();
-    LOG(INFO) << "Done.";
+    std::cout << "Done.\n";
     return 0;
 }

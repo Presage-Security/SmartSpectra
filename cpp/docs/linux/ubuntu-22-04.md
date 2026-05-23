@@ -7,7 +7,7 @@ description: Install the SmartSpectra C++ SDK on Ubuntu 22.04 or Linux Mint 21 (
 
 > **Warning — Experimental platform:** Linux support for the SmartSpectra C++
 > SDK is experimental. If you have any issues running SmartSpectra,
-> [contact Presage support](https://physiology.presagetech.com) for assistance.
+> [contact Presage support](mailto:support@presagetech.com) for assistance.
 
 This guide covers the `jammy` apt suite, which supports both `amd64` and
 `arm64`. If you are on Ubuntu 24.04 / Mint 22, follow the
@@ -19,8 +19,9 @@ This guide covers the `jammy` apt suite, which supports both `amd64` and
 
 - **CMake 3.22.1 or later** (the version shipped with Ubuntu 22.04 / Mint 21 is sufficient)
 - **C++17 compiler** such as GCC or Clang
-- **`curl`, `gpg`, and `pkg-config`** — used by the install and verify steps below. Install with `sudo apt install curl gpg pkg-config` if they are not already present.
-- **API key** from [physiology.presagetech.com](https://physiology.presagetech.com)
+- **Vulkan-capable graphics driver** — Linux builds use Vulkan inference by default. The SDK package installs the Vulkan loader dependency through apt, but the host must provide a working Vulkan driver.
+- **`cmake`, `curl`, `gpg`, and `pkg-config`** — used by the build, install, and verify steps below. Install with `sudo apt install cmake curl gpg pkg-config` if they are not already present.
+- **API key** from [physiology.presagetech.com](https://physiology.presagetech.com/auth/login)
 
 ### Add the SDK
 
@@ -39,6 +40,17 @@ Add the `jammy` apt source:
 echo "deb [signed-by=/etc/apt/keyrings/presage-archive-keyring.gpg] https://packages.presagetech.com/apt/ubuntu jammy main" \
   | sudo tee /etc/apt/sources.list.d/presage-technologies.list
 ```
+
+> **Installing an RC build?** Keep the same signing-key setup, but use the
+> `jammy-rc` apt source instead of `jammy`:
+>
+> ```bash
+> echo "deb [signed-by=/etc/apt/keyrings/presage-archive-keyring.gpg] https://packages.presagetech.com/apt/ubuntu jammy-rc main" \
+>   | sudo tee /etc/apt/sources.list.d/presage-technologies.list
+> ```
+>
+> Then run the same `sudo apt update` and
+> `sudo apt install libsmartspectra-dev` commands below.
 
 Install the SDK:
 
@@ -89,7 +101,7 @@ At the end, the app should show console output with:
 
 ### Step 1 - Get an API key
 
-1. Open the Presage Developer Admin Service [Portal](https://physiology.presagetech.com).
+1. Open the Presage [Developer Admin Portal Registration](https://physiology.presagetech.com/auth/register).
 2. Register or log in.
 3. Copy your API key from the portal.
 

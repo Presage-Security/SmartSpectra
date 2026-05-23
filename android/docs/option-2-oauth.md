@@ -103,7 +103,7 @@ This file is not created by Android Studio and is not included automatically whe
 
 You need to get it from Presage first:
 
-1. Sign in to the Presage developer portal: `https://physiology.presagetech.com/`
+1. Sign in to the Presage developer portal: `https://physiology.presagetech.com/auth/login`
 2. Open **Account** → **Registered App for OAuth**
 3. Select `Android`
 4. Enter your Android App ID. For this quickstart, use `com.example.coolvitals`.

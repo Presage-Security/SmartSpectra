@@ -1,6 +1,6 @@
 plugins {
-    id("com.android.application") version "9.2.0" apply false
-    id("com.android.library") version "9.2.0" apply false
+    id("com.android.application") version "9.2.1" apply false
+    id("com.android.library") version "9.2.1" apply false
     id("org.jetbrains.dokka") version "2.2.0" apply false
     id("io.github.gradle-nexus.publish-plugin") version "2.0.0"
 }

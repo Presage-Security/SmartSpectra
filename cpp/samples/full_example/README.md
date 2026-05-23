@@ -23,11 +23,13 @@ The full example shows how to:
 cmake --build build --target full_example
 
 # Run with camera input
-./build/samples/full_example/full_example --also_log_to_stderr --camera_device_index=0 --api_key=YOUR_API_KEY_HERE
+./build/samples/full_example/full_example --camera_device_index=0 --api_key=YOUR_API_KEY_HERE
 
 # Run with video file input
-./build/samples/full_example/full_example --also_log_to_stderr --input_video_path=/path/to/video.mp4 --api_key=YOUR_API_KEY_HERE
+./build/samples/full_example/full_example --input_video_path=/path/to/video.mp4 --api_key=YOUR_API_KEY_HERE
 ```
+
+Adding `eda` to `--requested_metrics` (e.g. `--requested_metrics=pulse_rate,arterial_pressure_trace,chest_trace,abdomen_trace,breathing_rate,eda`) surfaces the streaming EDA trace as a fourth HUD row beneath the breathing rows.
 
 ## macOS Signing
 

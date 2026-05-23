@@ -7,7 +7,7 @@ description: Install the SmartSpectra C++ SDK on Ubuntu 24.04 or Linux Mint 22 (
 
 > **Warning — Experimental platform:** Linux support for the SmartSpectra C++
 > SDK is experimental. If you have any issues running SmartSpectra,
-> [contact Presage support](https://physiology.presagetech.com) for assistance.
+> [contact Presage support](mailto:support@presagetech.com) for assistance.
 
 This guide covers the `noble` apt suite, which currently supports `amd64`
 only. An `arm64` build for Ubuntu 24.04 / Mint 22 will follow in a later
@@ -20,8 +20,9 @@ release. If you are on Ubuntu 22.04 / Mint 21, follow the
 
 - **CMake 3.22.1 or later** (the version shipped with Ubuntu 24.04 / Mint 22 is sufficient)
 - **C++17 compiler** such as GCC or Clang
-- **`curl`, `gpg`, and `pkg-config`** — used by the install and verify steps below. Install with `sudo apt install curl gpg pkg-config` if they are not already present.
-- **API key** from [physiology.presagetech.com](https://physiology.presagetech.com)
+- **Vulkan-capable graphics driver** — Linux builds use Vulkan inference by default. The SDK package installs the Vulkan loader dependency through apt, but the host must provide a working Vulkan driver.
+- **`cmake`, `curl`, `gpg`, and `pkg-config`** — used by the build, install, and verify steps below. Install with `sudo apt install cmake curl gpg pkg-config` if they are not already present.
+- **API key** from [physiology.presagetech.com](https://physiology.presagetech.com/auth/login)
 
 ### Add the SDK
 
@@ -42,6 +43,17 @@ echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/presage-archive-keyring.gpg] h
   | sudo tee /etc/apt/sources.list.d/presage-technologies.list
 ```
 
+> **Installing an RC build?** Keep the same signing-key setup, but use the
+> `noble-rc` apt source instead of `noble`:
+>
+> ```bash
+> echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/presage-archive-keyring.gpg] https://packages.presagetech.com/apt/ubuntu noble-rc main" \
+>   | sudo tee /etc/apt/sources.list.d/presage-technologies.list
+> ```
+>
+> Then run the same `sudo apt update` and
+> `sudo apt install libsmartspectra-dev` commands below.
+
 Install the SDK:
 
 ```bash
@@ -54,8 +66,8 @@ apt repository.
 
 The SmartSpectra SDK package is self-contained. You do not need to install
 protobuf, curl, OpenSSL, or other SDK runtime libraries separately. On
-`noble`, `libsmartspectra-dev` depends on the distro `libopencv-dev (>= 4.6.0)`
-shipped in `noble-universe`; apt pulls it in automatically when you install
+`noble`, `libsmartspectra-dev` depends on the distro OpenCV runtime packages
+shipped in `noble-universe`; apt pulls them in automatically when you install
 the package.
 
 Verify that the package is visible to build tools:
@@ -93,7 +105,7 @@ At the end, the app should show console output with:
 
 ### Step 1 - Get an API key
 
-1. Open the Presage Developer Admin Service [Portal](https://physiology.presagetech.com).
+1. Open the Presage [Developer Admin Portal Registration](https://physiology.presagetech.com/auth/register).
 2. Register or log in.
 3. Copy your API key from the portal.
 

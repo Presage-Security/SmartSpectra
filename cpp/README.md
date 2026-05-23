@@ -32,7 +32,7 @@ All platforms need:
 
 - **CMake 3.22.1+**
 - **C++17 compiler** (GCC, Clang, or MSVC 2022)
-- An **API key** from [physiology.presagetech.com](https://physiology.presagetech.com)
+- An **API key** from [physiology.presagetech.com](https://physiology.presagetech.com/auth/login)
 
 The SDK package is self-contained — you do not need to install OpenCV,
 protobuf, curl, or OpenSSL separately on any platform.

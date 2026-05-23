@@ -8,11 +8,11 @@
 // Usage:
 //   ./smart_spectra_example --api_key=YOUR_KEY [--camera_device_index=0] [--input_video_path=path.mp4]
 
+#include <iostream>
 #include <string>
 
 #include <absl/flags/flag.h>
 #include <absl/flags/parse.h>
-#include <glog/logging.h>
 #include <google/protobuf/util/json_util.h>
 
 #include <smartspectra/smartspectra.h>
@@ -26,8 +26,6 @@ ABSL_FLAG(int, camera_device_index, 0, "The index of the camera device to use.")
 ABSL_FLAG(std::string, input_video_path, "", "Path to video file (omit for camera).");
 
 int main(int argc, char** argv) {
-    google::InitGoogleLogging(argv[0]);
-    google::SetStderrLogging(google::INFO);
     absl::ParseCommandLine(argc, argv);
 
     // --- Set up SmartSpectra (frames in, vitals out) ---
@@ -40,25 +38,25 @@ int main(int argc, char** argv) {
     smart_spectra.SetOnMetrics(
         [](const spectra::Metrics& m, int64_t ts) {
             if (m.has_breathing() && m.breathing().rate_size() > 0) {
-                LOG(INFO) << "[edge] BR="
+                std::cout << "[edge] BR="
                           << m.breathing().rate(m.breathing().rate_size() - 1).value()
-                          << " ts=" << ts;
+                          << " ts=" << ts << '\n';
             }
             if (m.has_cardio() && m.cardio().pulse_rate_size() > 0) {
-                LOG(INFO) << "[edge] PR="
+                std::cout << "[edge] PR="
                           << m.cardio().pulse_rate(m.cardio().pulse_rate_size() - 1).value()
-                          << " ts=" << ts;
+                          << " ts=" << ts << '\n';
             }
         });
 
     smart_spectra.SetOnValidationStatusChanged(
         [](const spectra::ValidationStatus& vs, int64_t ts) {
-            LOG(INFO) << "[validation] " << vs.code
-                      << " hint=" << vs.hint << " ts=" << ts;
+            std::cout << "[validation] " << vs.code
+                      << " hint=" << vs.hint << " ts=" << ts << '\n';
         });
 
     smart_spectra.SetOnError([](const spectra::SmartSpectraError& error) {
-        LOG(ERROR) << error.FullMessage();
+        std::cerr << error.FullMessage() << '\n';
     });
 
     // --- Video source ---
@@ -66,32 +64,34 @@ int main(int argc, char** argv) {
     if (!video_path.empty()) {
         const auto source_error = smart_spectra.UseFile(video_path).Build();
         if (!source_error.ok()) {
-            LOG(ERROR) << "SmartSpectra::UseFile failed: " << source_error.message;
+            std::cerr << "SmartSpectra::UseFile failed: "
+                      << source_error.message << '\n';
             return EXIT_FAILURE;
         }
     } else {
         const auto source_error =
             smart_spectra.UseCamera(absl::GetFlag(FLAGS_camera_device_index)).Build();
         if (!source_error.ok()) {
-            LOG(ERROR) << "SmartSpectra::UseCamera failed: " << source_error.message;
+            std::cerr << "SmartSpectra::UseCamera failed: "
+                      << source_error.message << '\n';
             return EXIT_FAILURE;
         }
     }
 
     if (const auto err = smart_spectra.Start(); !err.ok()) {
-        LOG(ERROR) << err.FullMessage();
+        std::cerr << err.FullMessage() << '\n';
         return EXIT_FAILURE;
     }
 
-    LOG(INFO) << "Running... (Ctrl+C to stop)";
+    std::cout << "Running... (Ctrl+C to stop)\n";
 
     // Blocks until EOF (file source) or Stop() (camera source).
     smart_spectra.WaitUntilComplete();
 
     if (const auto err = smart_spectra.Stop(); !err.ok()) {
-        LOG(ERROR) << "Stop failed: " << err.message;
+        std::cerr << "Stop failed: " << err.message << '\n';
     }
 
-    LOG(INFO) << "Done.";
+    std::cout << "Done.\n";
     return 0;
 }

@@ -22,7 +22,7 @@ specific need.
 
 - **Xcode** with Command Line Tools (provides a C++17 toolchain and the Swift compiler)
 - **Homebrew**
-- **API key** from [physiology.presagetech.com](https://physiology.presagetech.com)
+- **API key** from [physiology.presagetech.com](https://physiology.presagetech.com/auth/login)
 - **Apple Development signing identity** — required for SDK startup on macOS
 
 Install Xcode Command Line Tools if you do not have them:
@@ -95,7 +95,7 @@ At the end, the sample app should show:
 - waveform or trend traces for supported metrics
 - a start/stop control for processing
 
-![SmartSpectra C++ quickstart demo](images/cpp-quickstart.gif)
+![SmartSpectra C++ macOS quickstart demo](images/macos-quickstart.gif)
 
 ### Clone and verify the environment
 

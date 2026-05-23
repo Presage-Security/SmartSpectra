@@ -25,10 +25,10 @@ class MainActivity : AppCompatActivity() {
 
     // (Required) Authentication. Only need to use one of the two options: API Key or OAuth below
     // Authentication with OAuth is currently only supported for apps in the Play Store
-    // Option 1: (Authentication with API Key) Set the API key. Obtain the API key from https://physiology.presagetech.com. Leave default or remove if you want to use OAuth. OAuth overrides the API key.
+    // Option 1: (Authentication with API Key) Set the API key. Obtain the API key from https://physiology.presagetech.com/auth/login. Leave default or remove if you want to use OAuth. OAuth overrides the API key.
     private var apiKey = "YOUR_API_KEY"
 
-    // Option 2: (OAuth) If you want to use OAuth, copy the OAuth config (`presage_services.xml`) from PresageTech's developer portal (<https://physiology.presagetech.com/>) to your src/main/res/xml/ directory.
+    // Option 2: (OAuth) If you want to use OAuth, copy the OAuth config (`presage_services.xml`) from PresageTech's developer portal (<https://physiology.presagetech.com/auth/login>) to your src/main/res/xml/ directory.
     // No additional code is needed for OAuth.
 
     //Check for optional SDK configuration inside of the `CheckupFragment` and `HeadlessProcessingFragment`

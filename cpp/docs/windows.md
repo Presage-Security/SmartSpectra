@@ -7,7 +7,7 @@ description: Install and build the SmartSpectra C++ SDK on Windows.
 
 > **Warning — Experimental platform:** Windows support for the SmartSpectra
 > C++ SDK is experimental. If you have any issues running SmartSpectra,
-> [contact Presage support](https://physiology.presagetech.com) for assistance.
+> [contact Presage support](mailto:support@presagetech.com) for assistance.
 
 ## Supported Platforms
 
@@ -31,7 +31,7 @@ make sure **C++ CMake tools for Windows** is selected. The workload installs
 the MSVC compiler, Windows SDK, CMake, and the developer command prompt needed
 for the quickstart below.
 
-You also need an **API key** from [physiology.presagetech.com](https://physiology.presagetech.com).
+You also need an **API key** from [physiology.presagetech.com](https://physiology.presagetech.com/auth/login).
 
 ### Add the SDK
 
@@ -61,7 +61,7 @@ At the end, the app should show console output with:
 - `Breathing metrics:` log lines when breathing metrics are available
 - a clean exit after the sample stops
 
-![SmartSpectra C++ quickstart demo](images/cpp-quickstart.gif)
+![SmartSpectra C++ Windows quickstart demo](images/win-quickstart.gif)
 
 ### 1. Open the developer command prompt
 
@@ -101,16 +101,22 @@ find_package(SmartSpectra CONFIG REQUIRED)
 add_executable(hello_vitals hello_vitals.cpp)
 target_link_libraries(hello_vitals SmartSpectra::SDK)
 
-# Stage the Windows runtime files next to the executable.
+# Write smartspectra_manifest.json next to the executable. The SDK dir
+# typically contains backslashes on Windows, so escape them (and any
+# embedded quotes) before interpolating into the JSON literal.
+string(REPLACE "\\" "\\\\" _smartspectra_manifest_root "${SMARTSPECTRA_SDK_DIR}/share/smartspectra")
+string(REPLACE "\"" "\\\"" _smartspectra_manifest_root "${_smartspectra_manifest_root}")
+file(GENERATE
+    OUTPUT "$<TARGET_FILE_DIR:hello_vitals>/smartspectra_manifest.json"
+    CONTENT "{\n  \"resource_root_dir\": \"${_smartspectra_manifest_root}\"\n}\n")
+
+# Stage the Windows runtime DLLs next to the executable.
 add_custom_command(TARGET hello_vitals POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
             "${SMARTSPECTRA_SDK_DIR}/bin/smartspectra.dll"
             "${SMARTSPECTRA_SDK_DIR}/bin/smartspectra_capi.dll"
             "${SMARTSPECTRA_SDK_DIR}/bin/opencv_world4100.dll"
             "$<TARGET_FILE_DIR:hello_vitals>"
-    COMMAND ${CMAKE_COMMAND} -E echo
-            "resource_root_dir=${SMARTSPECTRA_SDK_DIR}/share/smartspectra"
-            > "$<TARGET_FILE_DIR:hello_vitals>/physiology_edge_manifest.txt"
     VERBATIM)
 ```
 
@@ -192,7 +198,7 @@ set "SMARTSPECTRA_SDK_PATH=C:\SmartSpectra" && cmake -S . -B build -G "NMake Mak
 ### 4. Run
 
 Replace `"YOUR_API_KEY"` in `hello_vitals.cpp` with your key from
-[physiology.presagetech.com](https://physiology.presagetech.com) and rebuild.
+[physiology.presagetech.com](https://physiology.presagetech.com/auth/login) and rebuild.
 
 Run the executable from the same developer command prompt:
 
@@ -261,7 +267,7 @@ lib/
 bin/
   smartspectra.dll            # C++ SDK runtime DLL — must ship with your app
   smartspectra_capi.dll       # C ABI shim runtime DLL — required for FFI consumers
-  physiology_edge_manifest.txt
+  smartspectra_manifest.json
   opencv_world4100.dll        # OpenCV runtime dependency — must ship with your app
 share/smartspectra/           # Bundled graph and model resources
 ```

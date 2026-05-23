@@ -94,31 +94,33 @@ struct ContentView: View {
                     .background(Color.white.opacity(0.12), in: RoundedRectangle(cornerRadius: 8))
             }
 
-            HStack(spacing: 12) {
-                VitalTile(
-                    title: "Heart Rate",
-                    value: model.pulseRateText,
-                    unit: "bpm",
-                    confidence: model.pulseConfidenceText,
-                    icon: "heart.fill",
-                    color: coral,
-                    points: model.pulseTraceHistory.isEmpty ? model.pulseRateTrendHistory : model.pulseTraceHistory
-                )
+            VStack(spacing: 12) {
+                HStack(spacing: 12) {
+                    VitalTile(
+                        title: "Breathing Rate",
+                        value: model.breathingRateText,
+                        unit: "brpm",
+                        confidence: model.breathingConfidenceText,
+                        icon: "wind",
+                        color: teal,
+                        points: model.breathingTraceHistory
+                    )
 
-                VitalTile(
-                    title: "Breathing Rate",
-                    value: model.breathingRateText,
-                    unit: "brpm",
-                    confidence: model.breathingConfidenceText,
-                    icon: "wind",
-                    color: teal,
-                    points: model.breathingTraceHistory
-                )
+                    VitalTile(
+                        title: "Heart Rate",
+                        value: model.pulseRateText,
+                        unit: "bpm",
+                        confidence: model.pulseConfidenceText,
+                        icon: "heart.fill",
+                        color: coral,
+                        points: model.pulseTraceHistory.isEmpty ? model.pulseRateTrendHistory : model.pulseTraceHistory
+                    )
+                }
 
                 VitalTile(
                     title: "EDA",
                     value: model.edaLevelText,
-                    unit: "a.u.",
+                    unit: "",
                     confidence: "",
                     icon: "waveform.path.ecg",
                     color: mint,

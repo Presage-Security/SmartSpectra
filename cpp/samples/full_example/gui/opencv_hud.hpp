@@ -22,13 +22,15 @@ class OpenCvHud {
 public:
     OpenCvHud(
         int x, int y, int width, int height,
+        bool enable_eda = false,
         int max_trace_points = 300,
         cv::Scalar pulse_confident_color = cv::Scalar(0, 255, 0), // green
         cv::Scalar pulse_unconfident_color = cv::Scalar(0, 0, 255), // red
         cv::Scalar breathing_upper_confident_color = cv::Scalar(255, 255, 0), // cyan
         cv::Scalar breathing_upper_unconfident_color = cv::Scalar(0, 0, 255), // red
         cv::Scalar breathing_lower_confident_color = cv::Scalar(255, 0, 0), // blue
-        cv::Scalar breathing_lower_unconfident_color = cv::Scalar(0, 0, 255) // red
+        cv::Scalar breathing_lower_unconfident_color = cv::Scalar(0, 0, 255), // red
+        cv::Scalar eda_color = cv::Scalar(0, 165, 255) // bright orange (BGR)
     );
 
     void UpdateWithEdgeCardio(const std::vector<TraceSample>& arterial_pressure_trace,
@@ -37,6 +39,7 @@ public:
                                  const std::vector<TraceSample>& lower_trace,
                                  const std::vector<ConfidenceSample>& breathing_rate);
     void UpdateWithEdgeHrv(const ConfidenceSample& hrv);
+    void UpdateWithEdgeEda(const std::vector<TraceSample>& eda_trace);
     bool Render(cv::Mat& image);
 
     static const int minimal_width; // derived
@@ -59,6 +62,7 @@ private:
     std::unique_ptr<MetricsGroup> pulse_group;
     std::unique_ptr<MetricsGroup> upper_breathing_group;
     std::unique_ptr<MetricsGroup> lower_breathing_group;
+    std::unique_ptr<MetricsGroup> eda_group;
 
 };
 

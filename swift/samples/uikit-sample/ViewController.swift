@@ -14,6 +14,8 @@ class ViewController: UIViewController {
     @IBOutlet private var breathingRateLabel: UILabel!
     @IBOutlet private var breathingGraphView: LineGraphView!
     @IBOutlet private var bloodPressureGraphView: LineGraphView!
+    @IBOutlet private var edaLabel: UILabel!
+    @IBOutlet private var edaGraphView: LineGraphView!
     @IBOutlet private var statusLabel: UILabel!
     @IBOutlet private var toggleButton: UIButton!
     @IBOutlet private var bottomPanel: UIView!
@@ -23,6 +25,7 @@ class ViewController: UIViewController {
     private let coralColor = UIColor(red: 1.0, green: 0.42, blue: 0.42, alpha: 1.0)
     private let tealColor = UIColor(red: 0.31, green: 0.80, blue: 0.77, alpha: 1.0)
     private let violetColor = UIColor(red: 0.65, green: 0.55, blue: 0.98, alpha: 1.0)
+    private let mintColor = UIColor(red: 0.49, green: 0.89, blue: 0.65, alpha: 1.0)
 
     private let sdk = SmartSpectraSDK.shared
     private let gradientLayer = CAGradientLayer()
@@ -39,7 +42,10 @@ class ViewController: UIViewController {
 
         sdk.config.apiKey = API_KEY
         sdk.config.imageOutputEnabled = true
-        sdk.config.requestedMetrics = SmartSpectraConfig.cardioMetrics + SmartSpectraConfig.breathingMetrics
+        sdk.config.requestedMetrics =
+            SmartSpectraConfig.cardioMetrics +
+            SmartSpectraConfig.breathingMetrics +
+            SmartSpectraConfig.edaMetrics
 
         // Panel gradient
         gradientLayer.colors = [
@@ -61,6 +67,7 @@ class ViewController: UIViewController {
         // Graphs
         breathingGraphView.lineColor = tealColor
         bloodPressureGraphView.lineColor = violetColor
+        edaGraphView.lineColor = mintColor
 
         // Button
         applyButtonStyle(title: "Start", isPrimary: true)
@@ -225,10 +232,26 @@ class ViewController: UIViewController {
         }
 
         if let latest = metrics.breathing.rate.last {
-            breathingRateLabel.text = "Breathing Rate \u{2014} \(Int(latest.value)) brpm"
+            let value = "\(Int(latest.value))"
+            let unit = " brpm"
+            let attr = NSMutableAttributedString(string: value + unit)
+            attr.addAttributes([
+                .font: UIFont.systemFont(ofSize: 28, weight: .bold),
+                .foregroundColor: tealColor,
+            ], range: NSRange(location: 0, length: value.count))
+            attr.addAttributes([
+                .font: UIFont.systemFont(ofSize: 14, weight: .medium),
+                .foregroundColor: UIColor.white.withAlphaComponent(0.5),
+            ], range: NSRange(location: value.count, length: unit.count))
+            breathingRateLabel.attributedText = attr
         }
         breathingGraphView.append(contentsOf: metrics.breathing.upperTrace.map(\.value))
         bloodPressureGraphView.append(contentsOf: metrics.cardio.arterialPressureTrace.map(\.value))
+
+        if let latest = metrics.eda.trace.last {
+            edaLabel.text = String(format: "EDA  %+.3f", latest.value)
+        }
+        edaGraphView.append(contentsOf: metrics.eda.trace.map(\.value))
     }
 
     // MARK: - Status
@@ -277,7 +300,7 @@ class ViewController: UIViewController {
         insightButton.configuration?.showsActivityIndicator = true
         insightLabel.text = "Analyzing\u{2026}"
         do {
-            try sdk.requestInsight("Summarize my current vital signs and flag anything unusual.")
+            try sdk.requestInsight("Give a short, user-friendly analysis of the current heart rate, breathing rate, blood pressure trace, and electrodermal activity.")
         } catch {
             insightLabel.text = "Error: \(Self.userFacingMessage(for: error))"
             insightButton.isEnabled = true
@@ -293,10 +316,12 @@ class ViewController: UIViewController {
                 } else {
                     heartRateLabel.text = "-- bpm"
                     heartRateLabel.textColor = coralColor
-                    breathingRateLabel.text = "Breathing Rate"
+                    breathingRateLabel.text = "-- brpm"
+                    edaLabel.text = "EDA"
                     insightLabel.text = "Tap Ask AI to get an analysis of your vitals."
                     breathingGraphView.reset()
                     bloodPressureGraphView.reset()
+                    edaGraphView.reset()
                     try await sdk.start()
                 }
             } catch {

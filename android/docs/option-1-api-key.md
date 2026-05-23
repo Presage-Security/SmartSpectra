@@ -33,7 +33,7 @@ At the end, the app should show:
 
 ### Create an Account
 
-1. Navigate to the Presage Developer Admin Service [Portal](https://physiology.presagetech.com)
+1. Navigate to the Presage [Developer Admin Portal Registration](https://physiology.presagetech.com/auth/register)
 2. Click **Register** and fill in your email, password, and other required fields.
 3. Check your email for a confirmation link and follow it to activate your account.
 

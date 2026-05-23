@@ -12,6 +12,7 @@
 
 #include <atomic>
 #include <chrono>
+#include <iostream>
 #include <mutex>
 #include <sstream>
 #include <string>
@@ -21,7 +22,6 @@
 #include <absl/flags/flag.h>
 #include <absl/flags/parse.h>
 #include <absl/flags/usage.h>
-#include <glog/logging.h>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 
@@ -117,7 +117,6 @@ void DrawLabeledBox(cv::Mat& canvas, const cv::Rect& rect, const std::string& ti
 }  // namespace
 
 int main(int argc, char** argv) {
-    google::InitGoogleLogging(argv[0]);
     absl::SetProgramUsageMessage(
         "SmartSpectra insights example. Type a prompt and press Enter to "
         "request an insight; Esc or 'q' quits.");
@@ -175,7 +174,7 @@ int main(int argc, char** argv) {
         });
 
     smart_spectra.SetOnError([](const spectra::SmartSpectraError& err) {
-        LOG(ERROR) << err.FullMessage();
+        std::cerr << err.FullMessage() << '\n';
     });
 
     // Insight response sink — updated from a background thread.
@@ -205,7 +204,7 @@ int main(int argc, char** argv) {
                              .SetFps(absl::GetFlag(FLAGS_capture_fps))
                              .Build();
         if (!err.ok()) {
-            LOG(ERROR) << "Camera setup failed: " << err.FullMessage();
+            std::cerr << "Camera setup failed: " << err.FullMessage() << '\n';
             return EXIT_FAILURE;
         }
     } else {
@@ -213,13 +212,13 @@ int main(int argc, char** argv) {
                              .SetInterframeDelay(absl::GetFlag(FLAGS_interframe_delay))
                              .Build();
         if (!err.ok()) {
-            LOG(ERROR) << "Video file setup failed: " << err.FullMessage();
+            std::cerr << "Video file setup failed: " << err.FullMessage() << '\n';
             return EXIT_FAILURE;
         }
     }
 
     if (const auto err = smart_spectra.Start(); !err.ok()) {
-        LOG(ERROR) << err.FullMessage();
+        std::cerr << err.FullMessage() << '\n';
         return EXIT_FAILURE;
     }
 
@@ -300,7 +299,7 @@ int main(int argc, char** argv) {
     }
 
     if (const auto err = smart_spectra.Stop(); !err.ok()) {
-        LOG(ERROR) << "Stop failed: " << err.FullMessage();
+        std::cerr << "Stop failed: " << err.FullMessage() << '\n';
     }
     cv::destroyAllWindows();
     return 0;

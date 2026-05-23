@@ -18,7 +18,7 @@ This repository hosts SmartSpectra SDK from PresageTech for measuring vitals suc
 ## Getting Started
 
 To get started, follow the instructions for one of our currently supported platforms. Each platform has its own integration guide and example applications to help you get up and running quickly.
-Documentation is available at <https://docs.physiology.presagetech.com/>.
+Documentation is available at <https://smartspectra.presagetech.com/>.
 
 ## Features
 

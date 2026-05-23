@@ -28,7 +28,7 @@ Use `./minimal_example --help=main` to print the flag list.
 
 ## What it does
 
-1. Initializes glog and parses Abseil flags.
+1. Parses Abseil flags.
 2. Configures SmartSpectra with the default supported metrics and your API key.
 3. Registers `SetOnMetrics` and `SetOnError` callbacks before starting.
 4. Builds an input source from the default camera (`UseCamera()`).

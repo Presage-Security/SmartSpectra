@@ -55,7 +55,7 @@ If the user previously denied camera access, the SDK surfaces an action to open 
 
 1. Verify your API key is correct, or that your OAuth plist is present and valid.
 2. Ensure the device has an active internet connection.
-3. Check that the key or app registration is active in [physiology.presagetech.com](https://physiology.presagetech.com).
+3. Check that the key or app registration is active in [physiology.presagetech.com](https://physiology.presagetech.com/auth/login).
 
 If processing fails immediately with a missing-auth error, make sure you set `sdk.config.apiKey = "YOUR_KEY"` before calling `try await SmartSpectraSDK.shared.start()`.
 

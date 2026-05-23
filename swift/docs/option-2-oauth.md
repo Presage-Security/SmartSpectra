@@ -78,6 +78,8 @@ In Xcode:
 **NOTE** `Ctrl + Click` on the `Custom iOS Target Properties` and click `Add Row`
 4. Set the value to `This app needs camera access to measure vitals.`
 
+![FindInfo](FindInfo.png)
+
 ## Step 4 — Get `PresageService-Info.plist`
 
 This file does **not** come from Xcode.
@@ -88,7 +90,7 @@ This file is **not** already inside your app project unless you or your team alr
 
 You need to get it from Presage first:
 
-1. Sign in to the Presage developer portal: `https://physiology.presagetech.com/`
+1. Sign in to the Presage developer portal: `https://physiology.presagetech.com/auth/login`
 2. Register for OAuth in the [Presage developer portal](https://physiology.presagetech.com/portal/apps)
     - Your Bundle Identifier found in: `Signing & Capabilities` is what goes in the Application ID field
     - Your Team ID found in your [Apple Developer Account](https://developer.apple.com) in the `Membership Details` is what goes in the Organization ID field

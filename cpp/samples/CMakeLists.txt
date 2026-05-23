@@ -6,8 +6,11 @@
 #
 # Each `add_subdirectory(...)` line below is a portable CLI sample binary
 # built and shipped with the public C++ SDK. App-style samples
-# (`macos_swiftui_example`, `winui3_example`) live alongside this tree
-# but are built outside this aggregate by their own platform tooling.
+# (`macos_swiftui_example`, `winui3_example`, `debian-app-example`) live
+# alongside this tree but are built outside this aggregate by their own
+# platform tooling. `debian-app-example` in particular is built standalone
+# against an extracted SmartSpectra Linux SDK release tarball — see
+# `smartspectra/cpp/samples/debian-app-example/README.md`.
 cmake_minimum_required(VERSION 3.22.1)
 project(SmartSpectraExamples CXX)
 
@@ -44,9 +47,11 @@ function(smartspectra_stage_windows_runtime target_name)
             "No SmartSpectra runtime DLLs found in ${_smartspectra_sdk_dir}/bin.")
     endif ()
 
+    string(REPLACE "\\" "\\\\" _smartspectra_manifest_root "${_smartspectra_sdk_dir}/share/smartspectra")
+    string(REPLACE "\"" "\\\"" _smartspectra_manifest_root "${_smartspectra_manifest_root}")
     file(GENERATE
-        OUTPUT "$<TARGET_FILE_DIR:${target_name}>/physiology_edge_manifest.txt"
-        CONTENT "resource_root_dir=${_smartspectra_sdk_dir}/share/smartspectra\n")
+        OUTPUT "$<TARGET_FILE_DIR:${target_name}>/smartspectra_manifest.json"
+        CONTENT "{\n  \"resource_root_dir\": \"${_smartspectra_manifest_root}\"\n}\n")
 
     add_custom_command(TARGET ${target_name} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different

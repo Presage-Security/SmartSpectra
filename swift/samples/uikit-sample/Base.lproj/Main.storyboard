@@ -38,43 +38,82 @@
                                         <rect key="frame" x="16" y="20" width="361" height="380"/>
                                         <subviews>
 
-                                            <!-- Heart Rate row -->
-                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="card-02-hr">
-                                                <rect key="frame" x="0" y="0" width="361" height="56"/>
+                                            <!-- Heart Rate + Breathing Rate row (50 : 50) -->
+                                            <stackView opaque="NO" contentMode="scaleToFill" axis="horizontal" alignment="fill" spacing="8" distribution="fillEqually" translatesAutoresizingMaskIntoConstraints="NO" id="stk-02-hr-br">
+                                                <rect key="frame" x="0" y="0" width="361" height="110"/>
                                                 <subviews>
-                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Heart Rate" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="lbl-02-hr-title">
-                                                        <rect key="frame" x="16" y="10" width="80" height="16"/>
-                                                        <fontDescription key="fontDescription" style="UICTFontTextStyleCaption1"/>
-                                                        <color key="textColor" white="1" alpha="0.5" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                                    </label>
-                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="-- bpm" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="lbl-03-hr-value">
-                                                        <rect key="frame" x="16" y="28" width="329" height="20"/>
-                                                        <fontDescription key="fontDescription" type="system" weight="bold" pointSize="28"/>
-                                                        <color key="textColor" red="1.0" green="0.42" blue="0.42" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                                    </label>
-                                                </subviews>
-                                                <color key="backgroundColor" white="1" alpha="0.08" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                                <constraints>
-                                                    <constraint firstItem="lbl-02-hr-title" firstAttribute="top" secondItem="card-02-hr" secondAttribute="top" constant="10" id="hr-c01"/>
-                                                    <constraint firstItem="lbl-02-hr-title" firstAttribute="leading" secondItem="card-02-hr" secondAttribute="leading" constant="16" id="hr-c02"/>
-                                                    <constraint firstItem="lbl-03-hr-value" firstAttribute="top" secondItem="lbl-02-hr-title" secondAttribute="bottom" constant="2" id="hr-c04"/>
-                                                    <constraint firstItem="lbl-03-hr-value" firstAttribute="leading" secondItem="card-02-hr" secondAttribute="leading" constant="16" id="hr-c05"/>
-                                                    <constraint firstAttribute="trailing" secondItem="lbl-03-hr-value" secondAttribute="trailing" constant="16" id="hr-c06"/>
-                                                    <constraint firstAttribute="bottom" secondItem="lbl-03-hr-value" secondAttribute="bottom" constant="10" id="hr-c07"/>
-                                                </constraints>
-                                                <userDefinedRuntimeAttributes>
-                                                    <userDefinedRuntimeAttribute type="boolean" keyPath="layer.masksToBounds" value="YES"/>
-                                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
-                                                        <real key="value" value="12"/>
-                                                    </userDefinedRuntimeAttribute>
-                                                </userDefinedRuntimeAttributes>
-                                            </view>
+                                                    <!-- Heart Rate card -->
+                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="card-02-hr">
+                                                        <rect key="frame" x="0" y="0" width="264" height="56"/>
+                                                        <subviews>
+                                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Heart Rate" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="lbl-02-hr-title">
+                                                                <rect key="frame" x="16" y="10" width="80" height="16"/>
+                                                                <fontDescription key="fontDescription" style="UICTFontTextStyleCaption1"/>
+                                                                <color key="textColor" white="1" alpha="0.5" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                            </label>
+                                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="-- bpm" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="lbl-03-hr-value">
+                                                                <rect key="frame" x="16" y="28" width="232" height="20"/>
+                                                                <fontDescription key="fontDescription" type="system" weight="bold" pointSize="28"/>
+                                                                <color key="textColor" red="1.0" green="0.42" blue="0.42" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                            </label>
+                                                        </subviews>
+                                                        <color key="backgroundColor" white="1" alpha="0.08" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                        <constraints>
+                                                            <constraint firstItem="lbl-02-hr-title" firstAttribute="top" secondItem="card-02-hr" secondAttribute="top" constant="10" id="hr-c01"/>
+                                                            <constraint firstItem="lbl-02-hr-title" firstAttribute="leading" secondItem="card-02-hr" secondAttribute="leading" constant="16" id="hr-c02"/>
+                                                            <constraint firstItem="lbl-03-hr-value" firstAttribute="top" secondItem="lbl-02-hr-title" secondAttribute="bottom" constant="2" id="hr-c04"/>
+                                                            <constraint firstItem="lbl-03-hr-value" firstAttribute="leading" secondItem="card-02-hr" secondAttribute="leading" constant="16" id="hr-c05"/>
+                                                            <constraint firstAttribute="trailing" secondItem="lbl-03-hr-value" secondAttribute="trailing" constant="16" id="hr-c06"/>
+                                                            <constraint firstAttribute="bottom" secondItem="lbl-03-hr-value" secondAttribute="bottom" constant="10" id="hr-c07"/>
+                                                        </constraints>
+                                                        <userDefinedRuntimeAttributes>
+                                                            <userDefinedRuntimeAttribute type="boolean" keyPath="layer.masksToBounds" value="YES"/>
+                                                            <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                                                <real key="value" value="12"/>
+                                                            </userDefinedRuntimeAttribute>
+                                                        </userDefinedRuntimeAttributes>
+                                                    </view>
 
-                                            <!-- Breathing graph card -->
-                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="card-03-br">
-                                                <rect key="frame" x="0" y="66" width="361" height="110"/>
+                                                    <!-- Breathing Rate value card (no trace; trace lives in card-07-br-trace) -->
+                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="card-03-br">
+                                                        <rect key="frame" x="180" y="0" width="173" height="56"/>
+                                                        <subviews>
+                                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Breathing Rate" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="lbl-04-br-title">
+                                                                <rect key="frame" x="16" y="10" width="141" height="16"/>
+                                                                <fontDescription key="fontDescription" style="UICTFontTextStyleCaption1"/>
+                                                                <color key="textColor" white="1" alpha="0.5" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                            </label>
+                                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="-- brpm" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="YES" minimumScaleFactor="0.7" translatesAutoresizingMaskIntoConstraints="NO" id="lbl-04-br-value">
+                                                                <rect key="frame" x="16" y="28" width="141" height="20"/>
+                                                                <fontDescription key="fontDescription" type="system" weight="bold" pointSize="28"/>
+                                                                <color key="textColor" red="0.31" green="0.80" blue="0.77" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                            </label>
+                                                        </subviews>
+                                                        <color key="backgroundColor" white="1" alpha="0.08" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                        <constraints>
+                                                            <constraint firstItem="lbl-04-br-title" firstAttribute="top" secondItem="card-03-br" secondAttribute="top" constant="10" id="br-c01"/>
+                                                            <constraint firstItem="lbl-04-br-title" firstAttribute="leading" secondItem="card-03-br" secondAttribute="leading" constant="16" id="br-c02"/>
+                                                            <constraint firstAttribute="trailing" secondItem="lbl-04-br-title" secondAttribute="trailing" constant="16" id="br-c03"/>
+                                                            <constraint firstItem="lbl-04-br-value" firstAttribute="top" secondItem="lbl-04-br-title" secondAttribute="bottom" constant="2" id="br-c04"/>
+                                                            <constraint firstItem="lbl-04-br-value" firstAttribute="leading" secondItem="card-03-br" secondAttribute="leading" constant="16" id="br-c05"/>
+                                                            <constraint firstAttribute="trailing" secondItem="lbl-04-br-value" secondAttribute="trailing" constant="16" id="br-c06"/>
+                                                            <constraint firstAttribute="bottom" secondItem="lbl-04-br-value" secondAttribute="bottom" constant="10" id="br-c07"/>
+                                                        </constraints>
+                                                        <userDefinedRuntimeAttributes>
+                                                            <userDefinedRuntimeAttribute type="boolean" keyPath="layer.masksToBounds" value="YES"/>
+                                                            <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                                                <real key="value" value="12"/>
+                                                            </userDefinedRuntimeAttribute>
+                                                        </userDefinedRuntimeAttributes>
+                                                    </view>
+                                                </subviews>
+                                            </stackView>
+
+                                            <!-- Breathing trace card -->
+                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="card-07-br-trace">
+                                                <rect key="frame" x="0" y="120" width="361" height="110"/>
                                                 <subviews>
-                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Breathing Rate" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="lbl-04-br-title">
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Breathing Trace" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="lbl-10-br-trace-title">
                                                         <rect key="frame" x="12" y="8" width="337" height="16"/>
                                                         <fontDescription key="fontDescription" style="UICTFontTextStyleCaption1"/>
                                                         <color key="textColor" white="1" alpha="0.5" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -86,13 +125,13 @@
                                                 </subviews>
                                                 <color key="backgroundColor" white="1" alpha="0.08" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                 <constraints>
-                                                    <constraint firstItem="lbl-04-br-title" firstAttribute="top" secondItem="card-03-br" secondAttribute="top" constant="8" id="br-c01"/>
-                                                    <constraint firstItem="lbl-04-br-title" firstAttribute="leading" secondItem="card-03-br" secondAttribute="leading" constant="12" id="br-c02"/>
-                                                    <constraint firstAttribute="trailing" secondItem="lbl-04-br-title" secondAttribute="trailing" constant="12" id="br-c03"/>
-                                                    <constraint firstItem="grp-01-breathing" firstAttribute="top" secondItem="lbl-04-br-title" secondAttribute="bottom" constant="4" id="br-c04"/>
-                                                    <constraint firstItem="grp-01-breathing" firstAttribute="leading" secondItem="card-03-br" secondAttribute="leading" constant="8" id="br-c05"/>
-                                                    <constraint firstAttribute="trailing" secondItem="grp-01-breathing" secondAttribute="trailing" constant="8" id="br-c06"/>
-                                                    <constraint firstAttribute="bottom" secondItem="grp-01-breathing" secondAttribute="bottom" constant="8" id="br-c07"/>
+                                                    <constraint firstItem="lbl-10-br-trace-title" firstAttribute="top" secondItem="card-07-br-trace" secondAttribute="top" constant="8" id="brt-c01"/>
+                                                    <constraint firstItem="lbl-10-br-trace-title" firstAttribute="leading" secondItem="card-07-br-trace" secondAttribute="leading" constant="12" id="brt-c02"/>
+                                                    <constraint firstAttribute="trailing" secondItem="lbl-10-br-trace-title" secondAttribute="trailing" constant="12" id="brt-c03"/>
+                                                    <constraint firstItem="grp-01-breathing" firstAttribute="top" secondItem="lbl-10-br-trace-title" secondAttribute="bottom" constant="4" id="brt-c04"/>
+                                                    <constraint firstItem="grp-01-breathing" firstAttribute="leading" secondItem="card-07-br-trace" secondAttribute="leading" constant="8" id="brt-c05"/>
+                                                    <constraint firstAttribute="trailing" secondItem="grp-01-breathing" secondAttribute="trailing" constant="8" id="brt-c06"/>
+                                                    <constraint firstAttribute="bottom" secondItem="grp-01-breathing" secondAttribute="bottom" constant="8" id="brt-c07"/>
                                                     <constraint firstItem="grp-01-breathing" firstAttribute="height" constant="74" id="grp-h-01"/>
                                                 </constraints>
                                                 <userDefinedRuntimeAttributes>
@@ -127,6 +166,39 @@
                                                     <constraint firstAttribute="trailing" secondItem="grp-02-bp" secondAttribute="trailing" constant="8" id="bp-c06"/>
                                                     <constraint firstAttribute="bottom" secondItem="grp-02-bp" secondAttribute="bottom" constant="8" id="bp-c07"/>
                                                     <constraint firstItem="grp-02-bp" firstAttribute="height" constant="74" id="grp-h-02"/>
+                                                </constraints>
+                                                <userDefinedRuntimeAttributes>
+                                                    <userDefinedRuntimeAttribute type="boolean" keyPath="layer.masksToBounds" value="YES"/>
+                                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                                        <real key="value" value="12"/>
+                                                    </userDefinedRuntimeAttribute>
+                                                </userDefinedRuntimeAttributes>
+                                            </view>
+
+                                            <!-- EDA graph card -->
+                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="card-06-eda">
+                                                <rect key="frame" x="0" y="296" width="361" height="110"/>
+                                                <subviews>
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="EDA" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="lbl-09-eda-title">
+                                                        <rect key="frame" x="12" y="8" width="337" height="16"/>
+                                                        <fontDescription key="fontDescription" style="UICTFontTextStyleCaption1"/>
+                                                        <color key="textColor" white="1" alpha="0.5" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                    </label>
+                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" customClass="LineGraphView" customModuleProvider="target" id="grp-03-eda">
+                                                        <rect key="frame" x="8" y="28" width="345" height="74"/>
+                                                        <color key="backgroundColor" red="0" green="0" blue="0" alpha="0" colorSpace="custom" customColorSpace="sRGB"/>
+                                                    </view>
+                                                </subviews>
+                                                <color key="backgroundColor" white="1" alpha="0.08" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                <constraints>
+                                                    <constraint firstItem="lbl-09-eda-title" firstAttribute="top" secondItem="card-06-eda" secondAttribute="top" constant="8" id="eda-c01"/>
+                                                    <constraint firstItem="lbl-09-eda-title" firstAttribute="leading" secondItem="card-06-eda" secondAttribute="leading" constant="12" id="eda-c02"/>
+                                                    <constraint firstAttribute="trailing" secondItem="lbl-09-eda-title" secondAttribute="trailing" constant="12" id="eda-c03"/>
+                                                    <constraint firstItem="grp-03-eda" firstAttribute="top" secondItem="lbl-09-eda-title" secondAttribute="bottom" constant="4" id="eda-c04"/>
+                                                    <constraint firstItem="grp-03-eda" firstAttribute="leading" secondItem="card-06-eda" secondAttribute="leading" constant="8" id="eda-c05"/>
+                                                    <constraint firstAttribute="trailing" secondItem="grp-03-eda" secondAttribute="trailing" constant="8" id="eda-c06"/>
+                                                    <constraint firstAttribute="bottom" secondItem="grp-03-eda" secondAttribute="bottom" constant="8" id="eda-c07"/>
+                                                    <constraint firstItem="grp-03-eda" firstAttribute="height" constant="74" id="grp-h-03"/>
                                                 </constraints>
                                                 <userDefinedRuntimeAttributes>
                                                     <userDefinedRuntimeAttribute type="boolean" keyPath="layer.masksToBounds" value="YES"/>
@@ -237,12 +309,14 @@
                         <outlet property="statusLabel" destination="lbl-01-status" id="con-02"/>
                         <outlet property="toggleButton" destination="btn-01-toggle" id="con-03"/>
                         <outlet property="heartRateLabel" destination="lbl-03-hr-value" id="con-05"/>
-                        <outlet property="breathingRateLabel" destination="lbl-04-br-title" id="con-08"/>
+                        <outlet property="breathingRateLabel" destination="lbl-04-br-value" id="con-08"/>
                         <outlet property="breathingGraphView" destination="grp-01-breathing" id="con-06"/>
                         <outlet property="bloodPressureGraphView" destination="grp-02-bp" id="con-07"/>
                         <outlet property="bottomPanel" destination="panel-01-bottom" id="con-10"/>
                         <outlet property="insightLabel" destination="lbl-08-insight-body" id="con-11"/>
                         <outlet property="insightButton" destination="btn-02-insight" id="con-13"/>
+                        <outlet property="edaLabel" destination="lbl-09-eda-title" id="con-14"/>
+                        <outlet property="edaGraphView" destination="grp-03-eda" id="con-15"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>

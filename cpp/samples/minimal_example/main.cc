@@ -9,10 +9,10 @@
 //   ./minimal_example --api_key=YOUR_KEY
 
 #include <string>
+#include <iostream>
 
 #include <absl/flags/flag.h>
 #include <absl/flags/parse.h>
-#include <glog/logging.h>
 #include <google/protobuf/util/json_util.h>
 
 #include <smartspectra/smartspectra.h>
@@ -24,8 +24,6 @@ namespace spectra = presage::smartspectra;
 ABSL_FLAG(std::string, api_key, "", "API key for the Physiology service.");
 
 int main(int argc, char** argv) {
-    google::InitGoogleLogging(argv[0]);
-    google::SetStderrLogging(google::INFO);
     absl::ParseCommandLine(argc, argv);
 
     spectra::SmartSpectraConfig config;
@@ -41,34 +39,34 @@ int main(int argc, char** argv) {
             // can overwhelm log output if whitespace is enabled
             options.add_whitespace = false;
             google::protobuf::util::MessageToJsonString(m, &json, options);
-            LOG(INFO) << "Got edge metrics at " << ts << " microseconds: " << json;
+            std::cout << "Got edge metrics at " << ts << " microseconds: " << json << '\n';
         }
     );
 
     smart_spectra.SetOnError([](const spectra::SmartSpectraError& error) {
-        LOG(ERROR) << error.FullMessage();
+        std::cerr << error.FullMessage() << '\n';
     });
 
     const auto source_error = smart_spectra.UseCamera().Build();
     if (!source_error.ok()) {
-        LOG(ERROR) << "SmartSpectra::UseCamera failed: " << source_error.message;
+        std::cerr << "SmartSpectra::UseCamera failed: " << source_error.message << '\n';
         return EXIT_FAILURE;
     }
 
     if (const auto err = smart_spectra.Start(); !err.ok()) {
-        LOG(ERROR) << err.FullMessage();
+        std::cerr << err.FullMessage() << '\n';
         return EXIT_FAILURE;
     }
 
-    LOG(INFO) << "Running... (Ctrl+C to stop)";
+    std::cout << "Running... (Ctrl+C to stop)\n";
 
     // Blocks until EOF (file source) or Stop() (camera source).
     smart_spectra.WaitUntilComplete();
 
     if (const auto err = smart_spectra.Stop(); !err.ok()) {
-        LOG(ERROR) << "Stop failed: " << err.message;
+        std::cerr << "Stop failed: " << err.message << '\n';
     }
 
-    LOG(INFO) << "Done.";
+    std::cout << "Done.\n";
     return 0;
 }
