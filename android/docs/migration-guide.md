@@ -5,7 +5,7 @@ description: Android-specific migration notes for SmartSpectra SDK upgrades.
 
 # SmartSpectra Android SDK Migration Guide
 
-> Applies to SmartSpectra Android SDK v3.0 (current: v3.0.0-rc.14).
+> Applies to SmartSpectra Android SDK v3.x.
 > Migrating from a v3.0 release-candidate prior to rc.12, or from v2.x.
 
 ## Edge Metrics Migration

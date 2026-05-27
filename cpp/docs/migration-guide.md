@@ -5,7 +5,34 @@ description: C++-specific migration notes for SmartSpectra SDK upgrades.
 
 # SmartSpectra C++ SDK Migration Guide
 
-> Applies to SmartSpectra C++ SDK v3.0 (current: v3.0.0-rc.14).
+> Applies to SmartSpectra C++ SDK v3.x.
+
+## C++ SDK v3.1.0-rc.4 Migration
+
+### `MetricsToJsonSoA` return type
+
+`presage::smartspectra::MetricsToJsonSoA` previously returned `nlohmann::json` and required customers to have `nlohmann/json.hpp` reachable on their compile path through the bundled SDK headers. It now returns `absl::StatusOr<std::string>` — the SDK no longer ships `nlohmann/json.hpp` and the public header (`smartspectra/messages/metrics.h`) no longer references it.
+
+```cpp
+// Before (v3.1.0-rc.3 and earlier):
+#include <nlohmann/json.hpp>
+nlohmann::json j = presage::smartspectra::MetricsToJsonSoA(metrics);
+double pr = j["series"]["cardio.pulse_rate"]["values"][0];
+
+// After (v3.1.0-rc.4+):
+#include <absl/status/statusor.h>
+#include <string>
+auto json = presage::smartspectra::MetricsToJsonSoA(metrics);
+if (!json.ok()) {
+  // handle absl::InvalidArgumentError (serialization failure)
+}
+// Write the serialized JSON to a file / network / log, or parse it back
+// into a JSON object using the JSON library of your choice (nlohmann/json,
+// rapidjson, simdjson, etc.) — the SDK no longer opinionates this.
+std::string serialized = *json;
+```
+
+The on-the-wire JSON layout (`{"series": {"<name>": {"timestamps": [...], "values": [...]}, ...}}`) is unchanged.
 
 ## C++ SDK v3.0 Migration
 

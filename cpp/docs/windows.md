@@ -126,7 +126,6 @@ add_custom_command(TARGET hello_vitals POST_BUILD
 #include <smartspectra/smartspectra.h>
 #include <smartspectra/smartspectra_config.h>
 #include <smartspectra/messages/metrics.h>
-#include <glog/logging.h>
 #include <chrono>
 #include <iostream>
 #include <string>
@@ -135,9 +134,6 @@ add_custom_command(TARGET hello_vitals POST_BUILD
 namespace spectra = presage::smartspectra;
 
 int main(int argc, char** argv) {
-    google::InitGoogleLogging(argv[0]);
-    google::SetStderrLogging(google::INFO);
-
     std::string api_key = "YOUR_API_KEY";
 
     spectra::SmartSpectraConfig config;
@@ -148,26 +144,26 @@ int main(int argc, char** argv) {
     spectra::SmartSpectra spectra(config);
     spectra.SetOnMetrics([](const presage::smartspectra::Metrics& metrics, int64_t) {
         if (metrics.has_cardio()) {
-            LOG(INFO) << "Cardio metrics: " << metrics.cardio().ShortDebugString();
+            std::cerr << "Cardio metrics: " << metrics.cardio().ShortDebugString() << "\n";
         }
         if (metrics.has_breathing()) {
-            LOG(INFO) << "Breathing metrics: " << metrics.breathing().ShortDebugString();
+            std::cerr << "Breathing metrics: " << metrics.breathing().ShortDebugString() << "\n";
         }
     });
     spectra.SetOnError([](const spectra::SmartSpectraError& error) {
-        LOG(ERROR) << "Error [" << static_cast<int>(error.code)
-                   << "]: " << error.message;
+        std::cerr << "Error [" << static_cast<int>(error.code)
+                  << "]: " << error.message << "\n";
     });
 
     const auto source_error =
         spectra.UseCamera().SetResolution(1280, 720).SetFps(30).Build();
     if (!source_error.ok()) {
-        LOG(ERROR) << "Failed to create camera source: " << source_error.message;
+        std::cerr << "Failed to create camera source: " << source_error.message << "\n";
         return 1;
     }
 
     if (const auto err = spectra.Start(); !err.ok()) {
-        LOG(ERROR) << "Failed to start: " << err.message;
+        std::cerr << "Failed to start: " << err.message << "\n";
         return 1;
     }
 

@@ -121,7 +121,6 @@ entire file:
 #include <smartspectra/smartspectra.h>
 #include <smartspectra/smartspectra_config.h>
 #include <smartspectra/messages/metrics.h>
-#include <glog/logging.h>
 #include <chrono>
 #include <cstdlib>
 #include <iostream>
@@ -131,9 +130,6 @@ entire file:
 namespace spectra = presage::smartspectra;
 
 int main(int argc, char** argv) {
-    google::InitGoogleLogging(argv[0]);
-    FLAGS_alsologtostderr = true;
-
     std::string api_key;
     if (argc > 1) api_key = argv[1];
     else if (auto* k = std::getenv("SMARTSPECTRA_API_KEY")) api_key = k;
@@ -152,26 +148,26 @@ int main(int argc, char** argv) {
     spectra::SmartSpectra sdk(config);
     sdk.SetOnMetrics([](const spectra::Metrics& metrics, int64_t) {
         if (metrics.has_cardio()) {
-            LOG(INFO) << "Cardio metrics: " << metrics.cardio().ShortDebugString();
+            std::cerr << "Cardio metrics: " << metrics.cardio().ShortDebugString() << "\n";
         }
         if (metrics.has_breathing()) {
-            LOG(INFO) << "Breathing metrics: " << metrics.breathing().ShortDebugString();
+            std::cerr << "Breathing metrics: " << metrics.breathing().ShortDebugString() << "\n";
         }
     });
     sdk.SetOnError([](const spectra::SmartSpectraError& error) {
-        LOG(ERROR) << "Error [" << static_cast<int>(error.code)
-                   << "]: " << error.message;
+        std::cerr << "Error [" << static_cast<int>(error.code)
+                  << "]: " << error.message << "\n";
     });
 
     const auto source_error =
         sdk.UseCamera().SetResolution(1280, 720).SetFps(30).Build();
     if (!source_error.ok()) {
-        LOG(ERROR) << "Failed to create camera source: " << source_error.message;
+        std::cerr << "Failed to create camera source: " << source_error.message << "\n";
         return 1;
     }
 
     if (const auto err = sdk.Start(); !err.ok()) {
-        LOG(ERROR) << "Failed to start: " << err.message;
+        std::cerr << "Failed to start: " << err.message << "\n";
         return 1;
     }
 
