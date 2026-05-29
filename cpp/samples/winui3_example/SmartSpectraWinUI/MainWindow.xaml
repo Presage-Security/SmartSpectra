@@ -70,6 +70,8 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="12"/>
                     <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="12"/>
+                    <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <Grid Grid.Column="0">
                     <TextBlock Text="Breathing" Foreground="#80FFFFFF" FontSize="11"
@@ -81,6 +83,12 @@
                     <TextBlock Text="Arterial Pressure" Foreground="#80FFFFFF" FontSize="11"
                                VerticalAlignment="Top"/>
                     <Canvas x:Name="BpCanvas" Margin="0,18,0,0"
+                            SizeChanged="OnGraphCanvasSizeChanged"/>
+                </Grid>
+                <Grid Grid.Column="4">
+                    <TextBlock x:Name="EdaText" Text="EDA" Foreground="#80FFFFFF" FontSize="11"
+                               VerticalAlignment="Top"/>
+                    <Canvas x:Name="EdaCanvas" Margin="0,18,0,0"
                             SizeChanged="OnGraphCanvasSizeChanged"/>
                 </Grid>
             </Grid>

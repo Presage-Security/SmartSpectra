@@ -18,7 +18,7 @@ clone, build, and run example applications against an installed SDK.
 
 Install the SDK for your platform from the C++ SDK documentation:
 
-<https://docs.physiology.presagetech.com/docs/cpp>
+<https://smartspectra.presagetech.com/docs/cpp>
 
 Portable CLI samples built by the aggregate `CMakeLists.txt`:
 
@@ -37,9 +37,9 @@ App-style samples built by platform-specific tooling:
 ## Prerequisites
 
 1. Install the SmartSpectra C++ SDK for your platform:
-   <https://docs.physiology.presagetech.com/docs/cpp>
+   <https://smartspectra.presagetech.com/docs/cpp>
 2. Register and obtain a Presage Technologies Physiology API key from
-   <https://physiology.presagetech.com/>.
+   <https://physiology.presagetech.com/auth/register>.
 3. Install the build tools required by your platform. The SDK installation guide
    lists the CMake, compiler, and package-manager setup for Linux, macOS, and
    Windows.
@@ -84,14 +84,14 @@ Run the full example, substituting `<YOUR_API_KEY_HERE>` with your Physiology AP
 key:
 
 ```bash
-./build/full_example/full_example --also_log_to_stderr \
+./build/full_example/full_example \
   --camera_device_index=0 --api_key=<YOUR_API_KEY_HERE>
 ```
 
 On Windows Visual Studio builds, run the selected configuration output:
 
 ```powershell
-.\build\full_example\Release\full_example.exe --also_log_to_stderr `
+.\build\full_example\Release\full_example.exe `
   --camera_device_index=0 --api_key=<YOUR_API_KEY_HERE>
 ```
 
@@ -210,7 +210,7 @@ Use an app-style wrapper for the sample executable:
 10. Run the sample through the bundle executable:
 
     ```bash
-    ./FullExample.app/Contents/MacOS/full_example --also_log_to_stderr \
+    ./FullExample.app/Contents/MacOS/full_example \
       --camera_device_index=0 --api_key=<YOUR_API_KEY_HERE>
     ```
 

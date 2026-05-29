@@ -15,9 +15,9 @@ with optional preview frames; runs on Linux, macOS, and Windows.
 | --- | --- | --- |
 | Ubuntu 22.04 / Mint 21 (amd64) | Experimental | Debian package available |
 | Ubuntu 22.04 / Mint 21 (arm64) | Experimental | Debian package available |
+| Ubuntu 24.04 / Mint 22 (amd64) | Experimental | Debian package available via `packages.presagetech.com` apt channel |
 | macOS Apple Silicon (14.0+) | Supported | Homebrew package available |
 | Windows 10 / 11 (x64) | Experimental | ZIP distribution available |
-| Ubuntu 24.04 / Mint 22 | Coming soon | — |
 | macOS Intel | Not supported | — |
 | Debian 12 | Not supported | — |
 | RHEL 9 / Fedora 41 | Not supported | — |
@@ -32,7 +32,7 @@ All platforms need:
 
 - **CMake 3.22.1+**
 - **C++17 compiler** (GCC, Clang, or MSVC 2022)
-- An **API key** from [physiology.presagetech.com](https://physiology.presagetech.com)
+- An **API key** from [physiology.presagetech.com](https://physiology.presagetech.com/auth/login)
 
 The SDK package is self-contained — you do not need to install OpenCV,
 protobuf, curl, or OpenSSL separately on any platform.
@@ -41,7 +41,7 @@ protobuf, curl, or OpenSSL separately on any platform.
 
 Each guide is self-contained: prerequisites → install → first running build.
 
-- [**Linux Quickstart (Ubuntu/Mint)**](docs/linux.md) — apt-based install, amd64 + arm64
+- [**Linux Quickstart (Ubuntu/Mint)**](docs/linux/index.md) — apt-based install for Ubuntu 22.04 / Mint 21 (amd64 + arm64) or Ubuntu 24.04 / Mint 22 (amd64)
 - [**macOS Quickstart**](docs/macos.md) — Homebrew formula, Apple Silicon
 - [**Windows Quickstart**](docs/windows.md) — prebuilt ZIP from GitHub Releases
 
@@ -52,12 +52,17 @@ bundles, which is enough to see live values on the console. See the
 [C++ API reference](https://smartspectra.presagetech.com/docs/cpp/api-reference) for
 the full `requested_metrics` catalog and custom-input pipeline.
 
+If you need to redistribute a Linux desktop app without requiring end users to
+configure the Presage apt source, see
+[Redistribute SmartSpectra on Linux](../docs/redistribute_smartspectra_on_linux.md).
+
 ## Going further
 
 Once your first build runs:
 
 - [Configure which metrics to compute](docs/metrics.md)
 - [Headless mode](docs/headless-mode.md) — C++ is headless by default; see the guide for video output callbacks
+- [Redistribute SmartSpectra on Linux](../docs/redistribute_smartspectra_on_linux.md) — bundle the published Linux SDK tarball into your own `.deb`
 - [Migration guide](docs/migration-guide.md) — upgrading from v1.x or v2.x
 - [API reference](https://smartspectra.presagetech.com/docs/cpp/api-reference)
 

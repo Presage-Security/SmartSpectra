@@ -5,6 +5,7 @@ struct ContentView: View {
 
     private let coral = Color(red: 1.0, green: 0.42, blue: 0.42)
     private let teal = Color(red: 0.31, green: 0.80, blue: 0.77)
+    private let mint = Color(red: 0.40, green: 0.85, blue: 0.55)
 
     var body: some View {
         HStack(spacing: 0) {
@@ -93,25 +94,37 @@ struct ContentView: View {
                     .background(Color.white.opacity(0.12), in: RoundedRectangle(cornerRadius: 8))
             }
 
-            HStack(spacing: 12) {
-                VitalTile(
-                    title: "Heart Rate",
-                    value: model.pulseRateText,
-                    unit: "bpm",
-                    confidence: model.pulseConfidenceText,
-                    icon: "heart.fill",
-                    color: coral,
-                    points: model.pulseTraceHistory.isEmpty ? model.pulseRateTrendHistory : model.pulseTraceHistory
-                )
+            VStack(spacing: 12) {
+                HStack(spacing: 12) {
+                    VitalTile(
+                        title: "Breathing Rate",
+                        value: model.breathingRateText,
+                        unit: "brpm",
+                        confidence: model.breathingConfidenceText,
+                        icon: "wind",
+                        color: teal,
+                        points: model.breathingTraceHistory
+                    )
+
+                    VitalTile(
+                        title: "Heart Rate",
+                        value: model.pulseRateText,
+                        unit: "bpm",
+                        confidence: model.pulseConfidenceText,
+                        icon: "heart.fill",
+                        color: coral,
+                        points: model.pulseTraceHistory.isEmpty ? model.pulseRateTrendHistory : model.pulseTraceHistory
+                    )
+                }
 
                 VitalTile(
-                    title: "Breathing Rate",
-                    value: model.breathingRateText,
-                    unit: "brpm",
-                    confidence: model.breathingConfidenceText,
-                    icon: "wind",
-                    color: teal,
-                    points: model.breathingTraceHistory
+                    title: "EDA",
+                    value: model.edaLevelText,
+                    unit: "",
+                    confidence: "",
+                    icon: "waveform.path.ecg",
+                    color: mint,
+                    points: model.edaTraceHistory
                 )
             }
         }

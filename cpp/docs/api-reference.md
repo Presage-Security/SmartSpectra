@@ -118,6 +118,10 @@ description: API Reference for the SmartSpectra SDK.
   ```
 
 - ```cpp
+  static const std::vector<MetricType>& EdaMetrics()
+  ```
+
+- ```cpp
   void AddMetrics(const std::vector<MetricType>& metrics)
   ```
 

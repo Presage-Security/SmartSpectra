@@ -5,13 +5,12 @@
     android:layout_height="match_parent"
     android:background="@color/sample_background_dark">
 
-    <ImageView
-        android:id="@+id/preview_image"
+    <androidx.camera.view.PreviewView
+        android:id="@+id/preview_view"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:contentDescription="@string/preview_content_description"
         android:background="@android:color/black"
-        android:scaleType="centerCrop"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -126,6 +125,39 @@
                     android:layout_height="72dp"
                     android:layout_marginTop="4dp"
                     app:graphColor="@color/sample_violet" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            app:cardBackgroundColor="@android:color/transparent"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="0dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingHorizontal="12dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp">
+
+                <TextView
+                    android:id="@+id/eda_label"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="4dp"
+                    android:textColor="@color/sample_text_muted"
+                    android:textSize="12sp" />
+
+                <com.presagetech.smartspectra_minimal.SignalGraphView
+                    android:id="@+id/eda_graph_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="72dp"
+                    android:layout_marginTop="4dp"
+                    app:graphColor="@color/sample_mint" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 

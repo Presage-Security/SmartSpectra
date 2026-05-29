@@ -31,11 +31,13 @@ At the end, the app should show:
 - guidance text below the breathing waveforms
 - one portrait screen with no scrolling
 
+![SmartSpectra iOS quickstart demo](ios-quickstart.gif)
+
 ## Register for your free API Key
 
 ### Create an Account
 
-1. Navigate to the Presage Developer Admin Service [Portal](https://physiology.presagetech.com)
+1. Navigate to the Presage [Developer Admin Portal Registration](https://physiology.presagetech.com/auth/register)
 2. Click **Register** and fill in your email, password, and other required fields.
 3. Check your email for a confirmation link and follow it to activate your account.
 
@@ -89,6 +91,8 @@ In Xcode:
 **NOTE** `Ctrl + Click` on the `Custom iOS Target Properties` and click `Add Row`
 4. Set the value to `This app needs camera access to measure vitals.`
 
+![FindInfo](FindInfo.png)
+
 Manual check:
 
 - The app target now has a camera usage description
@@ -101,7 +105,7 @@ In Xcode:
 2. Delete everything in the file
 3. Paste the full file below
 4. Replace `YOUR_API_KEY` with your real API key  
-    **NOTE:** Login or Register at the [Presage developer portal](https://physiology.presagetech.com) for your API Key
+    **NOTE:** [Log in](https://physiology.presagetech.com/auth/login) or [register](https://physiology.presagetech.com/auth/register) at the Presage developer portal for your API key.
 
 Paste this entire file:
 
@@ -666,7 +670,7 @@ Do not use the simulator.
 
 ## What success looks like
 
-If the install is correct, you should see all of these:
+When your program is running, you should see all of these:
 
 - `Status` and `Validation` chips are visible at the top
 - the preview is below the chips

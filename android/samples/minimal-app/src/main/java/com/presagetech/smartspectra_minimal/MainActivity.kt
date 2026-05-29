@@ -8,10 +8,10 @@ package com.presagetech.smartspectra_minimal
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.button.MaterialButton
@@ -25,14 +25,16 @@ import kotlinx.coroutines.launch
 class MainActivity : AppCompatActivity() {
     private val sdk by lazy { SmartSpectraSdk.shared }
 
-    // Set your API key from https://physiology.presagetech.com
-    private val apiKey = "YOUR_API_KEY"
+    // Set your API key from https://physiology.presagetech.com/auth/login
+    private var apiKey = "YOUR_API_KEY"
 
-    private lateinit var previewImage: ImageView
+    private lateinit var previewView: PreviewView
     private lateinit var heartRateLabel: TextView
     private lateinit var breathingRateLabel: TextView
     private lateinit var breathingGraphView: SignalGraphView
     private lateinit var bloodPressureGraphView: SignalGraphView
+    private lateinit var edaLabel: TextView
+    private lateinit var edaGraphView: SignalGraphView
     private lateinit var statusLabel: TextView
     private lateinit var toggleButton: MaterialButton
     private lateinit var insightLabel: TextView
@@ -41,6 +43,7 @@ class MainActivity : AppCompatActivity() {
     private var pendingInsightRequestId: Int? = null
     private var latestBreathingTimestamp: Long = Long.MIN_VALUE
     private var latestPressureTimestamp: Long = Long.MIN_VALUE
+    private var latestEdaTimestamp: Long = Long.MIN_VALUE
 
     private val cameraPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission(),
@@ -55,16 +58,22 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         sdk.config.apiKey = apiKey
-        sdk.config.imageOutputEnabled = true
+        sdk.config.imageOutputEnabled = false
         sdk.config.cameraPosition = CameraPosition.FRONT
-        sdk.config.requestedMetrics = SmartSpectraConfig.breathingMetrics + SmartSpectraConfig.cardioMetrics
+        sdk.config.requestedMetrics =
+            SmartSpectraConfig.breathingMetrics +
+            SmartSpectraConfig.cardioMetrics +
+            SmartSpectraConfig.edaMetrics
         setContentView(R.layout.activity_main)
 
-        previewImage = findViewById(R.id.preview_image)
+        previewView = findViewById(R.id.preview_view)
+        sdk.config.previewSurfaceProvider = previewView.surfaceProvider
         heartRateLabel = findViewById(R.id.heart_rate_label)
         breathingRateLabel = findViewById(R.id.breathing_rate_label)
         breathingGraphView = findViewById(R.id.breathing_graph_view)
         bloodPressureGraphView = findViewById(R.id.blood_pressure_graph_view)
+        edaLabel = findViewById(R.id.eda_label)
+        edaGraphView = findViewById(R.id.eda_graph_view)
         statusLabel = findViewById(R.id.status_label)
         toggleButton = findViewById(R.id.toggle_button)
         insightLabel = findViewById(R.id.insight_label)
@@ -96,9 +105,6 @@ class MainActivity : AppCompatActivity() {
             if (error != null) {
                 statusLabel.text = getString(R.string.status_error, error.message)
             }
-        }
-        sdk.imageOutput.observe(this) { bitmap ->
-            previewImage.setImageBitmap(bitmap)
         }
         sdk.metrics.observe(this) { metrics ->
             if (metrics == null) return@observe
@@ -136,6 +142,19 @@ class MainActivity : AppCompatActivity() {
                 if (newPressureSamples.isNotEmpty()) {
                     latestPressureTimestamp = newPressureSamples.last().timestamp
                     bloodPressureGraphView.appendValues(newPressureSamples.map { it.value })
+                }
+            }
+
+            if (metrics.hasEda()) {
+                val newEdaSamples = metrics.eda.traceList
+                    .filter { it.timestamp > latestEdaTimestamp }
+                if (newEdaSamples.isNotEmpty()) {
+                    latestEdaTimestamp = newEdaSamples.last().timestamp
+                    edaGraphView.appendValues(newEdaSamples.map { it.value })
+                    edaLabel.text = getString(
+                        R.string.eda_value_format,
+                        newEdaSamples.last().value,
+                    )
                 }
             }
         }
@@ -202,7 +221,6 @@ class MainActivity : AppCompatActivity() {
     private fun updateProcessingStatus(status: ProcessingStatus?) {
         when (status) {
             ProcessingStatus.IDLE -> {
-                previewImage.setImageBitmap(null)
                 statusLabel.text = getString(R.string.status_idle)
                 toggleButton.text = getString(R.string.toggle_start)
                 toggleButton.isEnabled = true
@@ -223,7 +241,6 @@ class MainActivity : AppCompatActivity() {
                 toggleButton.isEnabled = false
             }
             ProcessingStatus.ERROR -> {
-                previewImage.setImageBitmap(null)
                 toggleButton.text = getString(R.string.toggle_start)
                 toggleButton.isEnabled = true
             }
@@ -234,15 +251,17 @@ class MainActivity : AppCompatActivity() {
     private fun resetGraphs() {
         latestBreathingTimestamp = Long.MIN_VALUE
         latestPressureTimestamp = Long.MIN_VALUE
+        latestEdaTimestamp = Long.MIN_VALUE
         breathingGraphView.reset()
         bloodPressureGraphView.reset()
+        edaGraphView.reset()
     }
 
     private fun resetMeasurementUi() {
         resetGraphs()
-        previewImage.setImageBitmap(null)
         heartRateLabel.text = getString(R.string.heart_rate_placeholder)
         breathingRateLabel.text = getString(R.string.breathing_rate_placeholder)
+        edaLabel.text = getString(R.string.eda_placeholder)
         insightLabel.text = getString(R.string.insight_placeholder)
         pendingInsightRequestId = null
         insightButton.text = getString(R.string.insight_button)

@@ -1,0 +1,17 @@
+#!/usr/bin/env sh
+# Copyright (C) 2026 Presage Technologies, Inc.
+# SPDX-License-Identifier: LicenseRef-Proprietary
+#
+# debian-app-example postrm.
+#
+# Removes the per-app ldconfig fragment written by postinst on remove/purge,
+# then re-runs ldconfig so the cache no longer maps libsmartspectra.so /
+# libopencv_*.so.411 to the now-removed /opt/debian-app-example/lib/.
+set -e
+
+case "$1" in
+    purge|remove)
+        rm -f /etc/ld.so.conf.d/debian-app-example.conf
+        /usr/sbin/ldconfig || true
+        ;;
+esac

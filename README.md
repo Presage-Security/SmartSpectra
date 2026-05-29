@@ -7,6 +7,7 @@ This repository hosts SmartSpectra SDK from PresageTech for measuring vitals suc
 - [SmartSpectra SDK](#smartspectra-sdk)
   - [Getting Started](#getting-started)
   - [Features](#features)
+  - [Model Cards and Limitations](#model-cards-and-limitations)
   - [Authentication](#authentication)
   - [Platform-Specific Guides](#platform-specific-guides)
     - [Android](#android)
@@ -17,7 +18,7 @@ This repository hosts SmartSpectra SDK from PresageTech for measuring vitals suc
 ## Getting Started
 
 To get started, follow the instructions for one of our currently supported platforms. Each platform has its own integration guide and example applications to help you get up and running quickly.
-Documentation is available at <https://docs.physiology.presagetech.com/>.
+Documentation is available at <https://smartspectra.presagetech.com/>.
 
 ## Features
 
@@ -38,6 +39,19 @@ Documentation is available at <https://docs.physiology.presagetech.com/>.
 
 - **Camera Selection**  
   Front or rear facing camera selection on iOS or Android and specification of camera input for applications using the C++ SDK.
+
+## Model Cards and Limitations
+
+Model cards include:
+
+- Relative arterial pressure waveform
+- Heart rate variability
+- Pulse rate
+- Face analysis
+- Breathing rate
+- Upper and lower breathing waveforms
+
+Review the [SmartSpectra model cards and limitations](docs/model-cards-and-limitations.md) for metric-specific operating ranges, validation notes, and known limitations.
 
 ## Authentication
 
@@ -75,6 +89,8 @@ For C++ integration on Windows, macOS, and Linux, refer to the [C++ README](cpp/
 - Supported systems and architectures.
 - Installation via the prebuilt ZIP (Windows), Homebrew (macOS), or apt (Linux).
 - Build instructions and example applications.
+- A Linux redistribution path for bundling the published SDK tarball into your
+  own `.deb`: [Redistribute SmartSpectra on Linux](docs/redistribute_smartspectra_on_linux.md).
 
 ## Bugs & Troubleshooting
 

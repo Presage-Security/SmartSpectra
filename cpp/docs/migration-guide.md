@@ -5,7 +5,34 @@ description: C++-specific migration notes for SmartSpectra SDK upgrades.
 
 # SmartSpectra C++ SDK Migration Guide
 
-> Applies to SmartSpectra C++ SDK v3.0 (current: v3.0.0-rc.14).
+> Applies to SmartSpectra C++ SDK v3.x.
+
+## C++ SDK v3.1.0-rc.4 Migration
+
+### `MetricsToJsonSoA` return type
+
+`presage::smartspectra::MetricsToJsonSoA` previously returned `nlohmann::json` and required customers to have `nlohmann/json.hpp` reachable on their compile path through the bundled SDK headers. It now returns `absl::StatusOr<std::string>` — the SDK no longer ships `nlohmann/json.hpp` and the public header (`smartspectra/messages/metrics.h`) no longer references it.
+
+```cpp
+// Before (v3.1.0-rc.3 and earlier):
+#include <nlohmann/json.hpp>
+nlohmann::json j = presage::smartspectra::MetricsToJsonSoA(metrics);
+double pr = j["series"]["cardio.pulse_rate"]["values"][0];
+
+// After (v3.1.0-rc.4+):
+#include <absl/status/statusor.h>
+#include <string>
+auto json = presage::smartspectra::MetricsToJsonSoA(metrics);
+if (!json.ok()) {
+  // handle absl::InvalidArgumentError (serialization failure)
+}
+// Write the serialized JSON to a file / network / log, or parse it back
+// into a JSON object using the JSON library of your choice (nlohmann/json,
+// rapidjson, simdjson, etc.) — the SDK no longer opinionates this.
+std::string serialized = *json;
+```
+
+The on-the-wire JSON layout (`{"series": {"<name>": {"timestamps": [...], "values": [...]}, ...}}`) is unchanged.
 
 ## C++ SDK v3.0 Migration
 
@@ -201,11 +228,10 @@ declarations. Related platform surfaces are documented separately:
   consumers building against the new Android SDK release should update their
   generated-proto imports as part of the Android upgrade. See the Android
   Migration Guide for the platform-specific import examples.
-- **Python proto wheel (`Physiology-Edge-Protobuf`)**: the top-level
-  `physiology` package name and the wheel name itself are unchanged in
-  v3.0. The sub-package was renamed (`physiology.modules.messages.*` →
-  `physiology.smartspectra.messages.*`) to track the C++ rename. See the
-  "Python Proto Wheel" section below for the import examples.
+- **Python proto wheel (`SmartSpectra-Messages`)**: the internal Python wheel
+  now publishes the generated protobuf modules under `smartspectra.messages.*`
+  to match the SDK package identity. See the "Python Proto Wheel" section below
+  for the import examples.
 
 The Android JNI-bound classes `com.presage.physiology.Messages` and
 `com.presage.physiology.emd.security.AndroidKeyStoreHelper` are pinned by
@@ -382,8 +408,8 @@ direct SDK surface instead of the old container surface:
 
 ### Python Proto Wheel
 
-The Python protobuf wheel sub-package was renamed to track the C++ rename. The
-top-level `physiology` package name is unchanged; only the sub-package flips:
+The internal Python protobuf wheel now publishes the generated modules under
+the SmartSpectra package identity:
 
 ```python
 # Before:
@@ -391,6 +417,6 @@ import physiology.modules.messages.metrics_pb2 as metrics
 from physiology.modules.messages import status_pb2
 
 # After:
-import physiology.smartspectra.messages.metrics_pb2 as metrics
-from physiology.smartspectra.messages import status_pb2
+import smartspectra.messages.metrics_pb2 as metrics
+from smartspectra.messages import status_pb2
 ```

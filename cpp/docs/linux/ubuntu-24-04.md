@@ -1,61 +1,74 @@
 ---
-title: C++ on Linux
-description: Install the SmartSpectra C++ SDK package and build Linux apps on Ubuntu and Linux Mint.
+title: Ubuntu 24.04 / Mint 22
+description: Install the SmartSpectra C++ SDK on Ubuntu 24.04 or Linux Mint 22 (noble) for amd64.
 ---
 
-# SmartSpectra C++ Quickstart — Linux (Ubuntu/Mint)
+# SmartSpectra C++ Quickstart — Ubuntu 24.04 / Mint 22
 
 > **Warning — Experimental platform:** Linux support for the SmartSpectra C++
 > SDK is experimental. If you have any issues running SmartSpectra,
-> [contact Presage support](https://physiology.presagetech.com) for assistance.
+> [contact Presage support](mailto:support@presagetech.com) for assistance.
 
-## Supported Platforms
-
-| Platform | Status | Notes |
-| -------- | ------ | ----- |
-| Ubuntu 22.04 / Mint 21 (amd64) | Experimental | Debian package available |
-| Ubuntu 22.04 / Mint 21 (arm64) | Experimental | Debian package available |
-| Ubuntu 24.04 / Mint 22 | Coming soon | — |
-| Debian 12 | Not supported | — |
-| RHEL 9 / Fedora 41 | Not supported | — |
-
-For platforms marked "Not supported" or anything not listed above, contact
-[support@presagetech.com](mailto:support@presagetech.com) if you have a
-specific need.
+This guide covers the `noble` apt suite, which currently supports `amd64`
+only. An `arm64` build for Ubuntu 24.04 / Mint 22 will follow in a later
+release. If you are on Ubuntu 22.04 / Mint 21, follow the
+[Ubuntu 22.04 / Mint 21 guide](ubuntu-22-04.md) instead.
 
 ## Installation
 
 ### Prerequisites
 
-- **CMake 3.22.1 or later** (the version shipped with Ubuntu 22.04 / Mint 21 is sufficient)
+- **CMake 3.22.1 or later** (the version shipped with Ubuntu 24.04 / Mint 22 is sufficient)
 - **C++17 compiler** such as GCC or Clang
-- **`curl`, `gpg`, and `pkg-config`** — used by the install and verify steps below. Install with `sudo apt install curl gpg pkg-config` if they are not already present.
-- **API key** from [physiology.presagetech.com](https://physiology.presagetech.com)
+- **Vulkan-capable graphics driver** — Linux builds use Vulkan inference by default. The SDK package installs the Vulkan loader dependency through apt, but the host must provide a working Vulkan driver.
+- **`cmake`, `curl`, `gpg`, and `pkg-config`** — used by the build, install, and verify steps below. Install with `sudo apt install cmake curl gpg pkg-config` if they are not already present.
+- **API key** from [physiology.presagetech.com](https://physiology.presagetech.com/auth/login)
 
 ### Add the SDK
 
-The same `sources.list` entry serves both `amd64` and `arm64` Ubuntu 22.04
-hosts. APT selects the package matching your system's `dpkg --print-architecture`
-automatically.
+Install the Presage signing key:
 
 ```bash
 sudo install -d -m 0755 /etc/apt/keyrings
 curl -fsSL https://packages.presagetech.com/KEY.gpg \
   | sudo gpg --dearmor -o /etc/apt/keyrings/presage-archive-keyring.gpg
 sudo chmod 644 /etc/apt/keyrings/presage-archive-keyring.gpg
+```
 
-echo "deb [signed-by=/etc/apt/keyrings/presage-archive-keyring.gpg] https://packages.presagetech.com/apt/ubuntu jammy main" \
+Add the `noble` apt source. The `[arch=amd64]` restriction skips the suite on
+`arm64` hosts, which is not yet supported on `noble`:
+
+```bash
+echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/presage-archive-keyring.gpg] https://packages.presagetech.com/apt/ubuntu noble main" \
   | sudo tee /etc/apt/sources.list.d/presage-technologies.list
+```
 
+> **Installing an RC build?** Keep the same signing-key setup, but use the
+> `noble-rc` apt source instead of `noble`:
+>
+> ```bash
+> echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/presage-archive-keyring.gpg] https://packages.presagetech.com/apt/ubuntu noble-rc main" \
+>   | sudo tee /etc/apt/sources.list.d/presage-technologies.list
+> ```
+>
+> Then run the same `sudo apt update` and
+> `sudo apt install libsmartspectra-dev` commands below.
+
+Install the SDK:
+
+```bash
 sudo apt update
 sudo apt install libsmartspectra-dev
 ```
 
-The `signed-by=` source entry scopes the Presage signing key to the Presage apt
-repository.
+The `signed-by=` source entry scopes the Presage signing key to the Presage
+apt repository.
 
 The SmartSpectra SDK package is self-contained. You do not need to install
-OpenCV, protobuf, curl, OpenSSL, or other SDK runtime libraries separately.
+protobuf, curl, OpenSSL, or other SDK runtime libraries separately. On
+`noble`, `libsmartspectra-dev` depends on the distro OpenCV runtime packages
+shipped in `noble-universe`; apt pulls them in automatically when you install
+the package.
 
 Verify that the package is visible to build tools:
 
@@ -65,8 +78,8 @@ pkg-config --modversion SmartSpectra
 
 The command prints the installed SDK version (for example, `1.7.0`). If it
 prints nothing or reports that the package is missing, reinstall
-`libsmartspectra-dev` and confirm you are on a supported Ubuntu 22.04 or Mint
-21 `amd64` or `arm64` host.
+`libsmartspectra-dev` and confirm you are on a supported Ubuntu 24.04 /
+Mint 22 `amd64` host.
 
 ## Example
 
@@ -78,9 +91,21 @@ You will create exactly these files:
 1. `hello_vitals/hello_vitals.cpp`
 2. `hello_vitals/CMakeLists.txt`
 
+### Result you should get
+
+At the end, the app should show console output with:
+
+- a successful CMake configure and build
+- `Processing for 20 seconds...`
+- `Cardio metrics:` log lines when cardio metrics are available
+- `Breathing metrics:` log lines when breathing metrics are available
+- a clean exit after the 20-second sample run
+
+![SmartSpectra C++ quickstart demo](../images/cpp-quickstart.gif)
+
 ### Step 1 - Get an API key
 
-1. Open the Presage Developer Admin Service [Portal](https://physiology.presagetech.com).
+1. Open the Presage [Developer Admin Portal Registration](https://physiology.presagetech.com/auth/register).
 2. Register or log in.
 3. Copy your API key from the portal.
 
@@ -100,7 +125,6 @@ entire file:
 #include <smartspectra/smartspectra.h>
 #include <smartspectra/smartspectra_config.h>
 #include <smartspectra/messages/metrics.h>
-#include <glog/logging.h>
 #include <chrono>
 #include <cstdlib>
 #include <iostream>
@@ -110,9 +134,6 @@ entire file:
 namespace spectra = presage::smartspectra;
 
 int main(int argc, char** argv) {
-    google::InitGoogleLogging(argv[0]);
-    FLAGS_alsologtostderr = true;
-
     std::string api_key;
     if (argc > 1) api_key = argv[1];
     else if (auto* k = std::getenv("SMARTSPECTRA_API_KEY")) api_key = k;
@@ -131,26 +152,26 @@ int main(int argc, char** argv) {
     spectra::SmartSpectra sdk(config);
     sdk.SetOnMetrics([](const spectra::Metrics& metrics, int64_t) {
         if (metrics.has_cardio()) {
-            LOG(INFO) << "Cardio metrics: " << metrics.cardio().ShortDebugString();
+            std::cerr << "Cardio metrics: " << metrics.cardio().ShortDebugString() << "\n";
         }
         if (metrics.has_breathing()) {
-            LOG(INFO) << "Breathing metrics: " << metrics.breathing().ShortDebugString();
+            std::cerr << "Breathing metrics: " << metrics.breathing().ShortDebugString() << "\n";
         }
     });
     sdk.SetOnError([](const spectra::SmartSpectraError& error) {
-        LOG(ERROR) << "Error [" << static_cast<int>(error.code)
-                   << "]: " << error.message;
+        std::cerr << "Error [" << static_cast<int>(error.code)
+                  << "]: " << error.message << "\n";
     });
 
     const auto source_error =
         sdk.UseCamera().SetResolution(1280, 720).SetFps(30).Build();
     if (!source_error.ok()) {
-        LOG(ERROR) << "Failed to create camera source: " << source_error.message;
+        std::cerr << "Failed to create camera source: " << source_error.message << "\n";
         return 1;
     }
 
     if (const auto err = sdk.Start(); !err.ok()) {
-        LOG(ERROR) << "Failed to start: " << err.message;
+        std::cerr << "Failed to start: " << err.message << "\n";
         return 1;
     }
 
@@ -215,6 +236,33 @@ detected the app still runs and exits cleanly, but no metrics callbacks fire.
 An internet connection is required for subscription validation when using the
 standard SDK.
 
+## What success looks like
+
+When your program is running, you should see all of these:
+
+- `Processing for 20 seconds...` prints after launch
+- the camera starts without a source creation error
+- `Cardio metrics:` or `Breathing metrics:` logs print while you sit centered and well-lit
+- the process exits after the 20-second run without a `Stop failed` message
+
+## Expected API key check
+
+The first measurement should start after the executable launches with a valid
+API key argument or `SMARTSPECTRA_API_KEY` environment variable. If startup
+fails with an authentication error, verify that the key is authorized for this
+app and that your shell did not include extra quotes or whitespace.
+
+## Common manual mistakes
+
+If the console output does not match the target state, check these first:
+
+- the Presage apt source was added for the wrong Ubuntu or Mint suite
+- `libsmartspectra-dev` did not finish installing before CMake was run
+- the API key argument or `SMARTSPECTRA_API_KEY` environment variable is missing
+- another app is already using the camera
+- the host has no desktop keyring session; see [Running headless](#running-headless-docker-ci-no-desktop)
+- the binary is an older build from before the latest source change
+
 ## Running headless (Docker, CI, no desktop)
 
 A desktop Ubuntu or Mint session provides D-Bus and a Secret Service backend
@@ -266,9 +314,9 @@ Run a sample with your API key:
 
 ## Advanced apt workflows
 
-Most Linux users only need the stable `jammy` repository above. Use these when
-you intentionally need release-candidate packages, version pinning, or
-repository removal.
+Most users only need the stable `noble` repository above. Use these when you
+intentionally need release-candidate packages, version pinning, or repository
+removal.
 
 ### Pinning the installed SDK version
 
@@ -287,24 +335,24 @@ sudo apt-mark unhold libsmartspectra-dev
 
 ### Release-candidate channel
 
-Release-candidate builds are published to a parallel `jammy-rc` apt suite
+Release-candidate builds are published to the parallel `noble-rc` apt suite
 signed by the same Presage key:
 
 ```bash
-echo "deb [signed-by=/etc/apt/keyrings/presage-archive-keyring.gpg] https://packages.presagetech.com/apt/ubuntu jammy-rc main" \
+echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/presage-archive-keyring.gpg] https://packages.presagetech.com/apt/ubuntu noble-rc main" \
   | sudo tee /etc/apt/sources.list.d/presage-technologies-rc.list
 
-sudo apt update && sudo apt -t jammy-rc install libsmartspectra-dev
+sudo apt update && sudo apt -t noble-rc install libsmartspectra-dev
 ```
 
-Keep the stable `jammy` source configured alongside `jammy-rc`; the RC
-channel does not republish stable releases.
+Keep the stable `noble` source configured alongside `noble-rc`; the RC channel
+does not republish stable releases.
 
 ### Returning from RC to stable
 
 ```bash
 sudo apt update
-sudo apt install --reinstall -t jammy libsmartspectra-dev=$(apt-cache madison libsmartspectra-dev | awk '/jammy\/main/ {print $3; exit}')
+sudo apt install --reinstall -t noble libsmartspectra-dev=$(apt-cache madison libsmartspectra-dev | awk '/noble\/main/ {print $3; exit}')
 sudo rm -f /etc/apt/sources.list.d/presage-technologies-rc.list
 sudo rm -f /etc/apt/preferences.d/presage-rc
 sudo apt update
@@ -325,9 +373,9 @@ sudo apt update
 
 ## Next Steps
 
-- [Configure which metrics to compute](metrics.md)
-- [Run headless without video output](headless-mode.md)
-- [Migration Guide](migration-guide.md) for upgrading from older SDK versions
+- [Configure which metrics to compute](../metrics.md)
+- [Run headless without video output](../headless-mode.md)
+- [Migration Guide](../migration-guide.md) for upgrading from older SDK versions
 
 ## Documentation
 
@@ -335,7 +383,7 @@ API reference available at [C++ API Reference](https://smartspectra.presagetech.
 
 ## Troubleshooting
 
-If you are upgrading an older C++ integration, start with the [C++ Migration Guide](migration-guide.md).
+If you are upgrading an older C++ integration, start with the [C++ Migration Guide](../migration-guide.md).
 
 If your binary fails at startup with `Load secret 'key_id' failed: D-Bus
 Secret Service is not reachable`, you are on a host without a desktop session
@@ -346,7 +394,7 @@ D-Bus and keyring bootstrap.
 
 Older Debian instructions installed the Presage key in
 `/etc/apt/trusted.gpg.d/` and used a source line without `signed-by=`. If
-`apt update` reports `E: Conflicting values set for option Signed-By regarding source https://packages.presagetech.com/apt/ubuntu/ jammy`, remove the legacy key copy and run `apt update` again:
+`apt update` reports `E: Conflicting values set for option Signed-By regarding source https://packages.presagetech.com/apt/ubuntu/ noble`, remove the legacy key copy and run `apt update` again:
 
 ```bash
 sudo rm -f /etc/apt/trusted.gpg.d/presage-technologies.gpg

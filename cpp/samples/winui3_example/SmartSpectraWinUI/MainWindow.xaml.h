@@ -39,6 +39,7 @@ namespace winrt::SmartSpectraWinUI::implementation
         std::unique_ptr<presage::smartspectra::SmartSpectra> m_spectra;
         LineGraph m_breath_trace;
         LineGraph m_bp_trace;
+        LineGraph m_eda_trace;
         bool m_running = false;
         std::thread m_lifecycle_thread;
         std::mutex m_lifecycle_mutex;

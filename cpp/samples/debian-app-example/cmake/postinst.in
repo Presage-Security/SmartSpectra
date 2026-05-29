@@ -1,0 +1,21 @@
+#!/usr/bin/env sh
+# Copyright (C) 2026 Presage Technologies, Inc.
+# SPDX-License-Identifier: LicenseRef-Proprietary
+#
+# debian-app-example postinst.
+#
+# libsmartspectra.so (bundled at /opt/debian-app-example/lib/) has no
+# DT_RUNPATH — cc_shared_library strips $ORIGIN linkopts at link time. Its
+# DT_NEEDED libopencv_*.so.411 entries therefore must resolve via the system
+# loader cache. Register both the app's lib dir and the bundled OpenCV
+# subdir (which mirrors the SDK's own lib/smartspectra/ layout under
+# /usr/local/lib/smartspectra/) with ldconfig so the bundled libopencv
+# chain is discoverable at load time.
+set -e
+
+cat > /etc/ld.so.conf.d/debian-app-example.conf <<'EOF'
+/opt/debian-app-example/lib
+/opt/debian-app-example/lib/smartspectra
+EOF
+
+/usr/sbin/ldconfig

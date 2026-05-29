@@ -31,6 +31,8 @@ At the end, the app should show:
 - status text and a start/stop button
 - one portrait screen with no scrolling
 
+![SmartSpectra Android quickstart demo](../media/android-quickstart.gif)
+
 ## Step 1 — Create the project
 
 In Android Studio, create a new Android app project:
@@ -101,7 +103,7 @@ This file is not created by Android Studio and is not included automatically whe
 
 You need to get it from Presage first:
 
-1. Sign in to the Presage developer portal: `https://physiology.presagetech.com/`
+1. Sign in to the Presage developer portal: `https://physiology.presagetech.com/auth/login`
 2. Open **Account** → **Registered App for OAuth**
 3. Select `Android`
 4. Enter your Android App ID. For this quickstart, use `com.example.coolvitals`.
@@ -687,6 +689,39 @@ private class SignalGraphView(
 
 ```
 
+## Step 7 — Build and run on a phone
+
+In Android Studio:
+
+1. Choose a physical Android device as the run destination
+2. Build and run the app
+3. Allow camera access when Android asks
+4. Tap `Start`
+5. Wait a few seconds for camera tuning and signal stabilization
+
+## What success looks like
+
+When your program is running, you should see all of these:
+
+- `Status` and `Validation` chips are visible at the top
+- the `Start` button changes to `Stop` after processing starts
+- the camera preview is below the chips
+- pulse rate, breathing rate, HRV, and expression cards are visible
+- the arterial pressure waveform is larger than the breathing waveforms
+- chest and abdomen waveforms both appear on screen
+- the screen fits in portrait orientation without scrolling
+
 ## Expected OAuth check
 
 If OAuth is wired correctly, the app should start without setting `sdk.config.apiKey`. If startup fails with an authentication error, verify that `presage_services.xml` is present in `app/src/main/res/xml/` and that the OAuth app registration matches the installed app.
+
+## Common manual mistakes
+
+If the screen does not match the target state, check these first:
+
+- the dependency was added to the wrong Gradle module
+- Gradle sync did not complete after adding the SmartSpectra dependency
+- `MainActivity.kt` was only partially replaced
+- `presage_services.xml` is not in `app/src/main/res/xml/`
+- the OAuth app registration uses a different package name or signing certificate
+- the app is still running an older installed build on the phone

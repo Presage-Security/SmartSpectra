@@ -104,6 +104,7 @@ namespace winrt::SmartSpectraWinUI::implementation
         cfg.AddMetrics(spectra::SmartSpectraConfig::DefaultSupportedMetrics());
         cfg.AddMetrics(spectra::SmartSpectraConfig::CardioMetrics());
         cfg.AddMetrics(spectra::SmartSpectraConfig::FaceMetrics());
+        cfg.AddMetrics(spectra::SmartSpectraConfig::EdaMetrics());
         m_spectra = std::make_unique<spectra::SmartSpectra>(std::move(cfg));
 
         if (auto err = m_spectra->UseCamera().Build(); !err.ok()) {
@@ -146,6 +147,8 @@ namespace winrt::SmartSpectraWinUI::implementation
             std::optional<double> hrv_rmssd;
             std::vector<float> breath;
             std::vector<float> bp;
+            std::vector<float> eda;
+            std::optional<float> eda_latest;
             std::optional<spectra::ExpressionType> expr_type;
             std::optional<float> expr_conf;
             if (m.has_cardio() && m.cardio().pulse_rate_size() > 0) {
@@ -166,6 +169,13 @@ namespace winrt::SmartSpectraWinUI::implementation
                 bp.reserve(m.cardio().arterial_pressure_trace_size());
                 for (auto const& s : m.cardio().arterial_pressure_trace()) bp.push_back(s.value());
             }
+            if (m.has_eda()) {
+                eda.reserve(m.eda().trace_size());
+                for (auto const& s : m.eda().trace()) eda.push_back(s.value());
+                if (m.eda().trace_size() > 0) {
+                    eda_latest = m.eda().trace(m.eda().trace_size() - 1).value();
+                }
+            }
             if (m.has_face() && m.face().expression_size() > 0) {
                 auto const& latest = m.face().expression(m.face().expression_size() - 1);
                 spectra::ExpressionScore const* best = nullptr;
@@ -178,8 +188,9 @@ namespace winrt::SmartSpectraWinUI::implementation
                 }
             }
             if (auto self = weak.get()) {
-                self->m_ui_queue.TryEnqueue([weak, hr, br, hrv_rmssd, expr_type, expr_conf,
-                                             breath = std::move(breath), bp = std::move(bp)] {
+                self->m_ui_queue.TryEnqueue([weak, hr, br, hrv_rmssd, expr_type, expr_conf, eda_latest,
+                                             breath = std::move(breath), bp = std::move(bp),
+                                             eda = std::move(eda)] {
                     if (auto self = weak.get()) {
                         if (hr) {
                             wchar_t buf[64];
@@ -213,6 +224,16 @@ namespace winrt::SmartSpectraWinUI::implementation
                             self->m_bp_trace.appendN(bp.data(), bp.size());
                             self->RenderGraph(self->BpCanvas(), self->m_bp_trace,
                                               Color{255, 166, 140, 250});
+                        }
+                        if (!eda.empty()) {
+                            self->m_eda_trace.appendN(eda.data(), eda.size());
+                            self->RenderGraph(self->EdaCanvas(), self->m_eda_trace,
+                                              Color{255, 125, 226, 166});
+                        }
+                        if (eda_latest) {
+                            wchar_t buf[64];
+                            swprintf_s(buf, L"EDA  %+.3f", *eda_latest);
+                            self->EdaText().Text(buf);
                         }
                     }
                 });
@@ -319,14 +340,17 @@ namespace winrt::SmartSpectraWinUI::implementation
         }
         m_breath_trace.reset();
         m_bp_trace.reset();
+        m_eda_trace.reset();
         HeartRateText().Text(L"-- bpm");
         HrvText().Text(L"");
         BreathingRateText().Text(L"Breathing Rate");
+        EdaText().Text(L"EDA");
         ExpressionEmoji().Text(L"");
         ExpressionText().Text(L"");
         InsightText().Text(L"Tap Ask AI to get an analysis of your vitals.");
         BreathingCanvas().Children().Clear();
         BpCanvas().Children().Clear();
+        EdaCanvas().Children().Clear();
         RunLifecycleAsync([](spectra::SmartSpectra& spec) { (void)spec.Start(); });
     }
 
@@ -348,6 +372,7 @@ namespace winrt::SmartSpectraWinUI::implementation
                                               SizeChangedEventArgs const&) {
         RenderGraph(BreathingCanvas(), m_breath_trace, Color{255, 79, 204, 197});
         RenderGraph(BpCanvas(), m_bp_trace, Color{255, 166, 140, 250});
+        RenderGraph(EdaCanvas(), m_eda_trace, Color{255, 125, 226, 166});
     }
 
     void MainWindow::RebuildPreview(int w, int h) {

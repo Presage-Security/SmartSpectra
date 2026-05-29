@@ -7,7 +7,7 @@ description: Install and build the SmartSpectra C++ SDK on Windows.
 
 > **Warning — Experimental platform:** Windows support for the SmartSpectra
 > C++ SDK is experimental. If you have any issues running SmartSpectra,
-> [contact Presage support](https://physiology.presagetech.com) for assistance.
+> [contact Presage support](mailto:support@presagetech.com) for assistance.
 
 ## Supported Platforms
 
@@ -31,7 +31,7 @@ make sure **C++ CMake tools for Windows** is selected. The workload installs
 the MSVC compiler, Windows SDK, CMake, and the developer command prompt needed
 for the quickstart below.
 
-You also need an **API key** from [physiology.presagetech.com](https://physiology.presagetech.com).
+You also need an **API key** from [physiology.presagetech.com](https://physiology.presagetech.com/auth/login).
 
 ### Add the SDK
 
@@ -50,6 +50,18 @@ No SDK-specific OS permission setup is required on Windows.
 
 This walkthrough sets up a minimal CMake project that reads from a camera and
 prints vitals to the console.
+
+### Result you should get
+
+At the end, the app should show console output with:
+
+- a successful CMake configure and build
+- `Processing... Press Ctrl+C to stop.`
+- `Cardio metrics:` log lines when cardio metrics are available
+- `Breathing metrics:` log lines when breathing metrics are available
+- a clean exit after the sample stops
+
+![SmartSpectra C++ Windows quickstart demo](images/win-quickstart.gif)
 
 ### 1. Open the developer command prompt
 
@@ -89,16 +101,22 @@ find_package(SmartSpectra CONFIG REQUIRED)
 add_executable(hello_vitals hello_vitals.cpp)
 target_link_libraries(hello_vitals SmartSpectra::SDK)
 
-# Stage the Windows runtime files next to the executable.
+# Write smartspectra_manifest.json next to the executable. The SDK dir
+# typically contains backslashes on Windows, so escape them (and any
+# embedded quotes) before interpolating into the JSON literal.
+string(REPLACE "\\" "\\\\" _smartspectra_manifest_root "${SMARTSPECTRA_SDK_DIR}/share/smartspectra")
+string(REPLACE "\"" "\\\"" _smartspectra_manifest_root "${_smartspectra_manifest_root}")
+file(GENERATE
+    OUTPUT "$<TARGET_FILE_DIR:hello_vitals>/smartspectra_manifest.json"
+    CONTENT "{\n  \"resource_root_dir\": \"${_smartspectra_manifest_root}\"\n}\n")
+
+# Stage the Windows runtime DLLs next to the executable.
 add_custom_command(TARGET hello_vitals POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
             "${SMARTSPECTRA_SDK_DIR}/bin/smartspectra.dll"
             "${SMARTSPECTRA_SDK_DIR}/bin/smartspectra_capi.dll"
             "${SMARTSPECTRA_SDK_DIR}/bin/opencv_world4100.dll"
             "$<TARGET_FILE_DIR:hello_vitals>"
-    COMMAND ${CMAKE_COMMAND} -E echo
-            "resource_root_dir=${SMARTSPECTRA_SDK_DIR}/share/smartspectra"
-            > "$<TARGET_FILE_DIR:hello_vitals>/physiology_edge_manifest.txt"
     VERBATIM)
 ```
 
@@ -108,7 +126,6 @@ add_custom_command(TARGET hello_vitals POST_BUILD
 #include <smartspectra/smartspectra.h>
 #include <smartspectra/smartspectra_config.h>
 #include <smartspectra/messages/metrics.h>
-#include <glog/logging.h>
 #include <chrono>
 #include <iostream>
 #include <string>
@@ -117,9 +134,6 @@ add_custom_command(TARGET hello_vitals POST_BUILD
 namespace spectra = presage::smartspectra;
 
 int main(int argc, char** argv) {
-    google::InitGoogleLogging(argv[0]);
-    google::SetStderrLogging(google::INFO);
-
     std::string api_key = "YOUR_API_KEY";
 
     spectra::SmartSpectraConfig config;
@@ -130,26 +144,26 @@ int main(int argc, char** argv) {
     spectra::SmartSpectra spectra(config);
     spectra.SetOnMetrics([](const presage::smartspectra::Metrics& metrics, int64_t) {
         if (metrics.has_cardio()) {
-            LOG(INFO) << "Cardio metrics: " << metrics.cardio().ShortDebugString();
+            std::cerr << "Cardio metrics: " << metrics.cardio().ShortDebugString() << "\n";
         }
         if (metrics.has_breathing()) {
-            LOG(INFO) << "Breathing metrics: " << metrics.breathing().ShortDebugString();
+            std::cerr << "Breathing metrics: " << metrics.breathing().ShortDebugString() << "\n";
         }
     });
     spectra.SetOnError([](const spectra::SmartSpectraError& error) {
-        LOG(ERROR) << "Error [" << static_cast<int>(error.code)
-                   << "]: " << error.message;
+        std::cerr << "Error [" << static_cast<int>(error.code)
+                  << "]: " << error.message << "\n";
     });
 
     const auto source_error =
         spectra.UseCamera().SetResolution(1280, 720).SetFps(30).Build();
     if (!source_error.ok()) {
-        LOG(ERROR) << "Failed to create camera source: " << source_error.message;
+        std::cerr << "Failed to create camera source: " << source_error.message << "\n";
         return 1;
     }
 
     if (const auto err = spectra.Start(); !err.ok()) {
-        LOG(ERROR) << "Failed to start: " << err.message;
+        std::cerr << "Failed to start: " << err.message << "\n";
         return 1;
     }
 
@@ -180,7 +194,7 @@ set "SMARTSPECTRA_SDK_PATH=C:\SmartSpectra" && cmake -S . -B build -G "NMake Mak
 ### 4. Run
 
 Replace `"YOUR_API_KEY"` in `hello_vitals.cpp` with your key from
-[physiology.presagetech.com](https://physiology.presagetech.com) and rebuild.
+[physiology.presagetech.com](https://physiology.presagetech.com/auth/login) and rebuild.
 
 Run the executable from the same developer command prompt:
 
@@ -193,6 +207,33 @@ The SDK DLLs are copied next to `hello_vitals.exe` by the post-build step in
 
 You should see breathing and cardio metrics printed to the console within a few
 seconds of the camera starting.
+
+## What success looks like
+
+When your program is running, you should see all of these:
+
+- `Processing... Press Ctrl+C to stop.` prints after launch
+- the camera starts without a source creation error
+- `Cardio metrics:` or `Breathing metrics:` logs print while you sit centered and well-lit
+- the process exits without a `Stop failed` message
+
+## Expected API key check
+
+The first measurement should start after the executable launches with a valid
+API key. If startup fails with an authentication error, verify that
+`YOUR_API_KEY` was replaced in `hello_vitals.cpp` and that the key is authorized
+for this app.
+
+## Common manual mistakes
+
+If the console output does not match the target state, check these first:
+
+- the ZIP was extracted into a different folder than `SMARTSPECTRA_SDK_PATH`
+- the project was built outside the x64 developer command prompt
+- `YOUR_API_KEY` was not replaced before rebuilding
+- the post-build step did not copy the SDK DLLs next to the executable
+- another app is already using the camera
+- the executable is an older build from before the latest source change
 
 ## Additional Details
 
@@ -222,7 +263,7 @@ lib/
 bin/
   smartspectra.dll            # C++ SDK runtime DLL — must ship with your app
   smartspectra_capi.dll       # C ABI shim runtime DLL — required for FFI consumers
-  physiology_edge_manifest.txt
+  smartspectra_manifest.json
   opencv_world4100.dll        # OpenCV runtime dependency — must ship with your app
 share/smartspectra/           # Bundled graph and model resources
 ```

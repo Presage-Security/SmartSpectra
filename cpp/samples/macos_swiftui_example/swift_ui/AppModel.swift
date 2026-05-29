@@ -8,9 +8,11 @@ final class AppModel: NSObject, ObservableObject, SmartSpectraRunnerDelegate {
     @Published var pulseConfidenceText = ""
     @Published var breathingRateText = "--"
     @Published var breathingConfidenceText = ""
+    @Published var edaLevelText = "--"
     @Published var pulseRateTrendHistory: [Double] = []
     @Published var pulseTraceHistory: [Double] = []
     @Published var breathingTraceHistory: [Double] = []
+    @Published var edaTraceHistory: [Double] = []
     @Published var hasLiveMetrics = false
     @Published var processingStatus = "not started"
     @Published var validationStatus = "waiting"
@@ -38,9 +40,11 @@ final class AppModel: NSObject, ObservableObject, SmartSpectraRunnerDelegate {
         pulseConfidenceText = ""
         breathingRateText = "--"
         breathingConfidenceText = ""
+        edaLevelText = "--"
         pulseRateTrendHistory = []
         pulseTraceHistory = []
         breathingTraceHistory = []
+        edaTraceHistory = []
         hasLiveMetrics = false
         lastMetricTime = "never"
         diagnostics = "Frames: 0 | accepted: 0 | blocked: 0"
@@ -74,11 +78,16 @@ final class AppModel: NSObject, ObservableObject, SmartSpectraRunnerDelegate {
     func smartSpectraRunnerDidUpdateBreathingTrace(
         _ breathingTrace: [NSNumber],
         arterialPressureTrace: [NSNumber],
+        edaTrace: [NSNumber],
         timestampUs: Int64
     ) {
         append(breathingTrace, to: \.breathingTraceHistory)
         append(arterialPressureTrace, to: \.pulseTraceHistory)
-        if !breathingTrace.isEmpty || !arterialPressureTrace.isEmpty {
+        // EDA tonic varies on a longer timescale than pulse/breathing, so the
+        // tile needs a wider window before changes become visually apparent.
+        append(edaTrace, to: \.edaTraceHistory, maxPoints: 1024)
+        updateEdaLevel(from: edaTrace)
+        if !breathingTrace.isEmpty || !arterialPressureTrace.isEmpty || !edaTrace.isEmpty {
             hasLiveMetrics = true
             lastMetricTime = "\(timestampUs) us"
         }
@@ -89,10 +98,13 @@ final class AppModel: NSObject, ObservableObject, SmartSpectraRunnerDelegate {
             return
         }
 
-        self.metrics = metrics
+        updateVitalDisplays(from: metrics)
+        let tilePrefixes = ["Pulse rate:", "Breathing rate:", "EDA level:"]
+        self.metrics = metrics.filter { line in
+            !tilePrefixes.contains(where: line.hasPrefix)
+        }
         hasLiveMetrics = true
         lastMetricTime = "\(timestampUs) us"
-        updateVitalDisplays(from: metrics)
     }
 
     func smartSpectraRunnerDidUpdateDiagnostics(_ diagnostics: String) {
@@ -122,8 +134,33 @@ final class AppModel: NSObject, ObservableObject, SmartSpectraRunnerDelegate {
                 )
             } else if metric.hasPrefix("Breathing rate:") {
                 updateRate(metric, value: \.breathingRateText, confidence: \.breathingConfidenceText)
+            } else if metric.hasPrefix("EDA level:") {
+                updateEdaLevel(metric)
             }
         }
+    }
+
+    private func updateEdaLevel(_ line: String) {
+        guard let colon = line.firstIndex(of: ":") else {
+            return
+        }
+        let remainder = line[line.index(after: colon)...].trimmingCharacters(in: .whitespaces)
+        guard let firstToken = remainder.split(separator: " ").first,
+              let numericValue = Double(firstToken) else {
+            return
+        }
+        edaLevelText = formattedEdaValue(numericValue)
+    }
+
+    private func updateEdaLevel(from samples: [NSNumber]) {
+        guard let latestSample = samples.last?.doubleValue else {
+            return
+        }
+        edaLevelText = formattedEdaValue(latestSample)
+    }
+
+    private func formattedEdaValue(_ value: Double) -> String {
+        String(format: "%+.3f", value)
     }
 
     private func updateRate(
@@ -153,14 +190,18 @@ final class AppModel: NSObject, ObservableObject, SmartSpectraRunnerDelegate {
         }
     }
 
-    private func append(_ samples: [NSNumber], to historyKeyPath: ReferenceWritableKeyPath<AppModel, [Double]>) {
+    private func append(
+        _ samples: [NSNumber],
+        to historyKeyPath: ReferenceWritableKeyPath<AppModel, [Double]>,
+        maxPoints: Int = 80
+    ) {
         guard !samples.isEmpty else {
             return
         }
         var history = self[keyPath: historyKeyPath]
         history.append(contentsOf: samples.map(\.doubleValue))
-        if history.count > 80 {
-            history.removeFirst(history.count - 80)
+        if history.count > maxPoints {
+            history.removeFirst(history.count - maxPoints)
         }
         self[keyPath: historyKeyPath] = history
     }

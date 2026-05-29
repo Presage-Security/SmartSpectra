@@ -59,6 +59,55 @@ Requested metrics are validated against your subscription during SDK startup.
 If a metric is not authorized, it is omitted from the output. If the
 authorization request fails, `Start()` reports an error.
 
+## Metric Update Patterns
+
+`SetOnMetrics` receives the latest SDK metrics payload. Each payload contains the
+samples that became available since the previous metrics callback; it is not
+guaranteed to contain every requested field every time.
+
+| Metric category | Examples | Expected cadence | Empty behavior |
+| --- | --- | --- | --- |
+| Peak/event-driven rate metrics | `breathing().rate()`, `cardio().pulse_rate()`, `cardio().hrv()` | Updated when a new physiological event, cycle, or analysis window produces a value | Repeated fields may be empty between valid updates during active capture |
+| Frame-driven metrics | `face().expression()`, `face().landmarks()`, `face().blinking()`, `face().talking()`, breathing traces | Updated near device frame cadence, with SDK callbacks rate-limited to about 30 Hz | Usually present more continuously when the metric is enabled and the input signal is valid |
+
+For example, `metrics.cardio().pulse_rate_size()` and
+`metrics.breathing().rate_size()` may be `0` between valid updates. This is
+expected and does not mean capture stopped or the metric was disabled. By
+contrast, face expression samples are frame-driven, so
+`metrics.face().expression_size()` can be non-zero on most callbacks while face
+metrics are enabled and the face signal is valid.
+
+Recommended UI handling:
+
+- Keep the last valid rate sample in app state and update it only when the
+  repeated field contains a new sample.
+- Show an initial loading or placeholder state until the first valid sample
+  arrives.
+- Do not overwrite a displayed pulse rate or breathing rate just because one
+  metrics payload has no new sample.
+- Clear retained values when a capture session starts, stops, or when your app
+  intentionally changes the requested metric set.
+- Prefer sample timestamps, and `stable()` when present, to decide whether a
+  retained value is fresh enough for your UI.
+
+```cpp
+#include <optional>
+
+std::optional<float> last_pulse_rate;
+
+spectra.SetOnMetrics([&last_pulse_rate](const presage::smartspectra::Metrics& metrics, int64_t) {
+    if (metrics.has_cardio() && metrics.cardio().pulse_rate_size() > 0) {
+        const auto& pulse = metrics.cardio().pulse_rate(metrics.cardio().pulse_rate_size() - 1);
+        if (pulse.timestamp() > 0) {
+            last_pulse_rate = pulse.value();
+            LOG(INFO) << "Pulse rate: " << *last_pulse_rate;
+        }
+    } else if (!last_pulse_rate.has_value()) {
+        LOG(INFO) << "Pulse rate pending";
+    }
+});
+```
+
 ## Advanced
 
 Request additional metrics only when your app needs them:
@@ -69,6 +118,7 @@ config.AddMetrics({
     MetricType::PULSE_RATE,
     MetricType::ARTERIAL_PRESSURE_TRACE,
     MetricType::HRV,
+    MetricType::EDA_TRACE,
     MetricType::FACE_LANDMARKS,
     MetricType::BLINKING,
     MetricType::TALKING,
@@ -89,6 +139,11 @@ spectra.SetOnMetrics([](const presage::smartspectra::Metrics& metrics, int64_t) 
     if (metrics.has_cardio() && metrics.cardio().hrv_size() > 0) {
         const auto& hrv = metrics.cardio().hrv(metrics.cardio().hrv_size() - 1);
         LOG(INFO) << "HRV RMSSD: " << hrv.rmssd();
+    }
+
+    if (metrics.has_eda() && metrics.eda().trace_size() > 0) {
+        const auto& eda = metrics.eda().trace(metrics.eda().trace_size() - 1);
+        LOG(INFO) << "EDA trace: " << eda.value();
     }
 
     if (metrics.has_face() && metrics.face().landmarks_size() > 0) {
@@ -118,6 +173,7 @@ C++ uses the generated protobuf classes. Requested advanced metrics populate the
 ```cpp
 presage::smartspectra::Metrics {
     Breathing breathing;
+    Eda eda;
     Face face;
     Cardio cardio;
 }
@@ -137,6 +193,10 @@ Hrv {
     float confidence;
 }
 
+Eda {
+    repeated Measurement trace;
+}
+
 Face {
     repeated Landmarks landmarks;
     repeated DetectionStatus blinking;
@@ -145,12 +205,13 @@ Face {
 }
 ```
 
-See [Data Types](https://smartspectra.presagetech.com/docs/data-types) for the complete protobuf schema.
+EDA may take longer to produce its first sample than breathing or cardio outputs. See [Data Types](https://smartspectra.presagetech.com/docs/data-types) for the complete protobuf schema.
 
 ## Timing and Stability
 
 All measurement samples use `timestamp` values in microseconds. Trace metrics
-are produced at frame cadence when the underlying signal is available.
+are produced at frame cadence when the underlying signal is available; lower
+rate outputs such as EDA may arrive less frequently.
 
 Measurement types expose a `stable()` flag. Check it before using a sample for
 critical decisions or user-facing summaries:

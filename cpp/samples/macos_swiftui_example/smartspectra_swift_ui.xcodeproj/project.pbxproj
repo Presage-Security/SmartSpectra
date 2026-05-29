@@ -229,6 +229,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				OPENCV_INCLUDE_DIR = "$(HOMEBREW_PREFIX)/opt/opencv/include/opencv4";
 				OPENCV_LIB_DIR = "$(HOMEBREW_PREFIX)/opt/opencv/lib";
+				PROTOBUF_LIB_DIR = "$(HOMEBREW_PREFIX)/opt/protobuf/lib";
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-framework",
@@ -239,6 +240,7 @@
 					"$(OPENCV_LIB_DIR)/libopencv_imgproc.dylib",
 					"$(OPENCV_LIB_DIR)/libopencv_core.dylib",
 					"$(SMARTSPECTRA_LIB_DIR)/libsmartspectra.dylib",
+					"$(PROTOBUF_LIB_DIR)/libprotobuf.dylib",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "$(SMARTSPECTRA_BUNDLE_IDENTIFIER)";
 				SDKROOT = macosx;
@@ -289,6 +291,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				OPENCV_INCLUDE_DIR = "$(HOMEBREW_PREFIX)/opt/opencv/include/opencv4";
 				OPENCV_LIB_DIR = "$(HOMEBREW_PREFIX)/opt/opencv/lib";
+				PROTOBUF_LIB_DIR = "$(HOMEBREW_PREFIX)/opt/protobuf/lib";
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-framework",
@@ -299,6 +302,7 @@
 					"$(OPENCV_LIB_DIR)/libopencv_imgproc.dylib",
 					"$(OPENCV_LIB_DIR)/libopencv_core.dylib",
 					"$(SMARTSPECTRA_LIB_DIR)/libsmartspectra.dylib",
+					"$(PROTOBUF_LIB_DIR)/libprotobuf.dylib",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "$(SMARTSPECTRA_BUNDLE_IDENTIFIER)";
 				SDKROOT = macosx;

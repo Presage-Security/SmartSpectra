@@ -22,7 +22,7 @@ specific need.
 
 - **Xcode** with Command Line Tools (provides a C++17 toolchain and the Swift compiler)
 - **Homebrew**
-- **API key** from [physiology.presagetech.com](https://physiology.presagetech.com)
+- **API key** from [physiology.presagetech.com](https://physiology.presagetech.com/auth/login)
 - **Apple Development signing identity** — required for SDK startup on macOS
 
 Install Xcode Command Line Tools if you do not have them:
@@ -85,6 +85,18 @@ breathing/cardio metrics, and trend traces end to end.
 
 Source: [Presage-Security/SmartSpectra — `cpp/samples/macos_swiftui_example`](https://github.com/Presage-Security/SmartSpectra/tree/main/cpp/samples/macos_swiftui_example)
 
+### Result you should get
+
+At the end, the sample app should show:
+
+- live camera preview
+- validation and processing status
+- breathing and cardio metric cards
+- waveform or trend traces for supported metrics
+- a start/stop control for processing
+
+![SmartSpectra C++ macOS quickstart demo](images/macos-quickstart.gif)
+
 ### Clone and verify the environment
 
 Match the branch to the Homebrew formula you installed: `main` for the
@@ -137,6 +149,33 @@ identity is your Team ID.
 
 Press **Run**. Enter your `SMARTSPECTRA_API_KEY` in the app and press **Start**.
 On first launch, allow camera access when macOS prompts.
+
+## What success looks like
+
+When your program is running, you should see all of these:
+
+- the sample launches from Xcode without missing SDK or model-file errors
+- macOS prompts for camera access on first launch
+- the camera preview appears after you allow camera access
+- processing starts after you enter a valid API key and press **Start**
+- metric cards and traces update while you remain centered and well-lit
+
+## Expected API key check
+
+The first measurement should start after camera permission is granted and the
+API key is submitted. If startup fails with an authentication error, verify that
+the API key is valid and authorized for this app.
+
+## Common manual mistakes
+
+If the screen does not match the target state, check these first:
+
+- the Homebrew formula channel does not match the sample branch
+- `HOMEBREW_PREFIX` or `SMARTSPECTRA_SDK_ROOT` points at the wrong SDK install
+- the app target is not signed with an Apple Development identity
+- camera permission was denied in macOS System Settings
+- the API key was mistyped or copied with extra whitespace
+- the app is still running an older build from Xcode
 
 ### Configuration
 

@@ -138,6 +138,10 @@ Configuration for ``SmartSpectraSDK``.  Access configuration through ``SmartSpec
   public nonisolated static let faceMetrics : [MetricType]
   ```
 
+- ```swift
+  public nonisolated static let edaMetrics : [MetricType]
+  ```
+
 ## ProcessingStatus
 
 Indicates the current state of the preprocessing pipeline.

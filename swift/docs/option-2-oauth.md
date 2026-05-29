@@ -18,6 +18,22 @@ You will touch exactly these things:
 
 You do not need to create any new Swift files.
 
+## Result you should get
+
+At the end, the app should show:
+
+- `Status` and `Validation` at the top
+- live camera preview
+- pulse rate, breathing rate, HRV RMSSD, and expression cards
+- white labels for those four cards
+- confidence-colored pulse and breath-rate values
+- one large arterial pressure waveform
+- chest and abdomen breathing waveforms
+- guidance text below the breathing waveforms
+- one portrait screen with no scrolling
+
+![SmartSpectra iOS quickstart demo](ios-quickstart.gif)
+
 ## Step 1 — Create the project
 
 In Xcode, create a new iOS app project:
@@ -62,6 +78,8 @@ In Xcode:
 **NOTE** `Ctrl + Click` on the `Custom iOS Target Properties` and click `Add Row`
 4. Set the value to `This app needs camera access to measure vitals.`
 
+![FindInfo](FindInfo.png)
+
 ## Step 4 — Get `PresageService-Info.plist`
 
 This file does **not** come from Xcode.
@@ -72,7 +90,7 @@ This file is **not** already inside your app project unless you or your team alr
 
 You need to get it from Presage first:
 
-1. Sign in to the Presage developer portal: `https://physiology.presagetech.com/`
+1. Sign in to the Presage developer portal: `https://physiology.presagetech.com/auth/login`
 2. Register for OAuth in the [Presage developer portal](https://physiology.presagetech.com/portal/apps)
     - Your Bundle Identifier found in: `Signing & Capabilities` is what goes in the Application ID field
     - Your Team ID found in your [Apple Developer Account](https://developer.apple.com) in the `Membership Details` is what goes in the Organization ID field
@@ -665,7 +683,7 @@ Do not use the simulator.
 
 ## What success looks like
 
-If the install is correct, you should see all of these:
+When your program is running, you should see all of these:
 
 - `Status` and `Validation` chips are visible at the top
 - the preview is below the chips
