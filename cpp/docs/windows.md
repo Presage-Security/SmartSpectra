@@ -126,12 +126,17 @@ add_custom_command(TARGET hello_vitals POST_BUILD
 #include <smartspectra/smartspectra.h>
 #include <smartspectra/smartspectra_config.h>
 #include <smartspectra/messages/metrics.h>
+#include <atomic>
 #include <chrono>
+#include <csignal>
 #include <iostream>
 #include <string>
 #include <thread>
 
 namespace spectra = presage::smartspectra;
+
+static std::atomic<bool> g_running{true};
+static void on_signal(int) { g_running = false; }
 
 int main(int argc, char** argv) {
     std::string api_key = "YOUR_API_KEY";
@@ -167,8 +172,15 @@ int main(int argc, char** argv) {
         return 1;
     }
 
+    std::signal(SIGINT, on_signal);
+    std::signal(SIGTERM, on_signal);
+
     std::cout << "Processing... Press Ctrl+C to stop.\n";
-    std::this_thread::sleep_for(std::chrono::seconds(5));
+    while (g_running) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+
+    std::cout << "\nStopping...\n";
     if (const auto err = spectra.Stop(); !err.ok()) {
         std::cerr << "Stop failed: " << err.message << "\n";
     }

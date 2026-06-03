@@ -30,8 +30,11 @@ The `.deb` produced by this example:
 
 ```bash
 # 1. Extract a SmartSpectra Linux SDK release tarball
+#    Use the codename-qualified asset name:
+#    - Ubuntu 22.04 / Mint 21 / Debian 11+: linux-jammy-amd64
+#    - Ubuntu 24.04 / Mint 22: linux-noble-amd64
 mkdir -p /tmp/sdk
-tar -xzf smartspectra-sdk-<version>-linux-amd64.tar.gz -C /tmp/sdk
+tar -xzf smartspectra-sdk-<version>-linux-<codename>-amd64.tar.gz -C /tmp/sdk
 
 # 2. Build the example against it (out-of-tree)
 cmake -S . -B /tmp/build \
@@ -91,12 +94,12 @@ install resolves that.
 
 ## Distro coverage
 
-The SDK ships per-codename tarballs (`jammy1`, `noble1`). This example
-reuses the same per-codename suffix mechanism, so a `.deb` built against a
-`jammy1`-suffixed SDK installs on Ubuntu 22.04 / Mint 21 / Debian 11+, and a
-`.deb` built against a `noble1`-suffixed SDK installs on Ubuntu 24.04 /
-Mint 22. Cross-codename install (jammy `.deb` on noble host or vice versa)
-is not supported — the bundled `libsmartspectra.so` is per-codename and the
+The SDK ships per-codename tarballs (`linux-jammy-*`, `linux-noble-*`). This
+example emits per-codename `.deb` revision suffixes (`jammy1`, `noble1`), so
+a `.deb` built against a jammy SDK installs on Ubuntu 22.04 / Mint 21 /
+Debian 11+, and a `.deb` built against a noble SDK installs on Ubuntu 24.04 /
+Mint 22. Cross-codename install (jammy `.deb` on noble host or vice versa) is
+not supported — the bundled `libsmartspectra.so` is per-codename and the
 Depends versions differ.
 
 ## License

@@ -52,12 +52,17 @@ bundles, which is enough to see live values on the console. See the
 [C++ API reference](https://smartspectra.presagetech.com/docs/cpp/api-reference) for
 the full `requested_metrics` catalog and custom-input pipeline.
 
+If you need to redistribute a Linux desktop app without requiring end users to
+configure the Presage apt source, see
+[Redistribute SmartSpectra on Linux](../docs/redistribute_smartspectra_on_linux.md).
+
 ## Going further
 
 Once your first build runs:
 
 - [Configure which metrics to compute](docs/metrics.md)
 - [Headless mode](docs/headless-mode.md) — C++ is headless by default; see the guide for video output callbacks
+- [Redistribute SmartSpectra on Linux](../docs/redistribute_smartspectra_on_linux.md) — bundle the published Linux SDK tarball into your own `.deb`
 - [Migration guide](docs/migration-guide.md) — upgrading from v1.x or v2.x
 - [API reference](https://smartspectra.presagetech.com/docs/cpp/api-reference)
 

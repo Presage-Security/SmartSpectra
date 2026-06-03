@@ -159,9 +159,9 @@ own all UI.
   for instrumented tests; the SDK class no longer mirrors them.
 - Config flags removed from `SmartSpectraConfig` (all were `internal`):
   `showFps`, `showOutputFps`, `showControlsInScreeningView`
-- Derived helpers `cardioMeasurementsEnabled` and
-  `facialExpressionEnabled` (replicate app-side from
-  `requestedMetrics` if needed)
+- Derived helpers `cardioMeasurementsEnabled`,
+  `facialExpressionEnabled`, `edaMeasurementsEnabled` (replicate
+  app-side from `requestedMetrics` if needed)
 
 ### Migration paths
 
@@ -256,11 +256,11 @@ changes bring the two SDKs closer to a shared contract.
 Older Android releases did not expose public requested-metric selection. Apps
 attached `setMetricsBufferObserver` for pulse and breathing output, and
 `setEdgeMetricsObserver` for edge metrics such as dense face landmarks. The
-current SDK uses `requestedMetrics` directly. Three companion `@JvmField`
-lists on `SmartSpectraConfig` provide the standard bundles:
-`breathingMetrics`, `cardioMetrics`, `faceMetrics`. The `Metrics` suffix
-matches the C++ SDK's `SmartSpectraConfig::CardioMetrics()` etc.; the
-`SmartSpectraConfig` namespace matches the iOS Swift surface.
+current SDK uses `requestedMetrics` directly. Public `@JvmField` bundles on
+`SmartSpectraConfig` include `breathingMetrics`, `cardioMetrics`,
+`faceMetrics`, and `edaMetrics`. The `Metrics` suffix matches the C++ SDK's
+`SmartSpectraConfig::CardioMetrics()` etc.; the `SmartSpectraConfig`
+namespace matches the iOS Swift surface.
 
 ```kotlin
 // Before

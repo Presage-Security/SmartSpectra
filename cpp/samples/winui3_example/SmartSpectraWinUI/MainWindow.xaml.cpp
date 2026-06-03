@@ -28,12 +28,15 @@ using namespace ::winrt::Microsoft::UI::Xaml::Shapes;
 using namespace ::winrt::Windows::Foundation;
 using namespace ::winrt::Windows::UI;
 
-// Read the API key from the SMARTSPECTRA_API_KEY environment variable.
-// Do NOT hard-code a real key here — set the environment variable instead:
-//   setx SMARTSPECTRA_API_KEY "your-key-here"
+// Returns the Presage API key.
+// Replace the placeholder below with your key from https://physiology.presagetech.com/auth/register
+// or set SMARTSPECTRA_API_KEY in the process environment before launch.
 static std::string ApiKey() {
-    const char* env = std::getenv("SMARTSPECTRA_API_KEY");
-    return (env && *env) ? env : std::string{};
+    constexpr char kPlaceholder[] = "YOUR_API_KEY_HERE";
+    char buf[512];
+    DWORD len = ::GetEnvironmentVariableA("SMARTSPECTRA_API_KEY", buf, static_cast<DWORD>(sizeof(buf)));
+    if (len > 0 && len < sizeof(buf)) return std::string(buf, len);
+    return kPlaceholder;
 }
 
 namespace winrt::SmartSpectraWinUI::implementation

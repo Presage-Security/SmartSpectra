@@ -26,7 +26,7 @@ channel, pinning, uninstall) for that suite.
 | Ubuntu 22.04 / Mint 21 (amd64) | Experimental | Debian package available |
 | Ubuntu 22.04 / Mint 21 (arm64) | Experimental | Debian package available |
 | Ubuntu 24.04 / Mint 22 (amd64) | Experimental | Debian package available |
-| Ubuntu 24.04 / Mint 22 (arm64) | Coming soon | — |
+| Ubuntu 24.04 / Mint 22 (arm64) | Experimental | Debian package available |
 | Debian 12 | Not supported | — |
 | RHEL 9 / Fedora 41 | Not supported | — |
 

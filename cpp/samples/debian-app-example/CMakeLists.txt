@@ -5,11 +5,11 @@
 # debian-app-example: standalone SmartSpectra C++ SDK redistribution example.
 #
 # This CMakeLists is built OUT-OF-TREE against an extracted SmartSpectra Linux
-# SDK release tarball (`smartspectra-sdk-<version>-linux-<arch>.tar.gz`). It
-# consumes the SDK strictly through find_package(SmartSpectra) and is NOT
-# added to smartspectra/cpp/samples/CMakeLists.txt's add_subdirectory(...)
-# aggregate. CI exercises it via the verify_redistribution_example_linux_*
-# job pair in smartspectra/cpp/.gitlab-ci.yml.
+# SDK release tarball
+# (`smartspectra-sdk-<version>-linux-<codename>-<arch>.tar.gz`, for example
+# `smartspectra-sdk-<version>-linux-jammy-amd64.tar.gz`). It consumes the SDK
+# strictly through find_package(SmartSpectra) and is NOT added to
+# smartspectra/cpp/samples/CMakeLists.txt's add_subdirectory(...) aggregate.
 #
 # Build (after extracting the SDK tarball to /tmp/sdk):
 #   cmake -S . -B /tmp/build -DCMAKE_PREFIX_PATH=/tmp/sdk -DCMAKE_BUILD_TYPE=Release
@@ -150,7 +150,24 @@ set(CPACK_GENERATOR "DEB")
 set(CPACK_PACKAGE_NAME "debian-app-example")
 set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}")
 set(CPACK_DEBIAN_PACKAGE_RELEASE "${DAE_DISTRO_CODENAME}1")
-set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "amd64")
+# Resolve the Debian arch from the host (amd64, arm64, ...) so the produced
+# .deb is tagged for the build machine, not hardcoded to amd64.
+find_program(DAE_DPKG_EXECUTABLE dpkg)
+if(NOT DAE_DPKG_EXECUTABLE)
+    message(FATAL_ERROR
+        "debian-app-example: dpkg not found — CPack DEB packaging requires "
+        "a Debian-family host.")
+endif()
+execute_process(
+    COMMAND "${DAE_DPKG_EXECUTABLE}" --print-architecture
+    OUTPUT_VARIABLE CPACK_DEBIAN_PACKAGE_ARCHITECTURE
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    RESULT_VARIABLE _dae_dpkg_arch_rc)
+if(NOT _dae_dpkg_arch_rc EQUAL 0 OR CPACK_DEBIAN_PACKAGE_ARCHITECTURE STREQUAL "")
+    message(FATAL_ERROR
+        "debian-app-example: \`dpkg --print-architecture\` failed (rc="
+        "${_dae_dpkg_arch_rc}); cannot resolve CPACK_DEBIAN_PACKAGE_ARCHITECTURE.")
+endif()
 set(CPACK_DEBIAN_FILE_NAME "DEB-DEFAULT")
 set(CPACK_PACKAGING_INSTALL_PREFIX "/")
 set(CPACK_SET_DESTDIR ON)

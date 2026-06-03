@@ -98,6 +98,7 @@ sdk.config.requestedMetrics =
         MetricType.PULSE_RATE,
         MetricType.ARTERIAL_PRESSURE_TRACE,
         MetricType.HRV,
+        MetricType.EDA_TRACE,
         MetricType.FACE_LANDMARKS,
         MetricType.BLINKING,
         MetricType.TALKING,
@@ -111,6 +112,8 @@ Read the advanced fields from the same metrics stream:
 sdk.metrics.observe(viewLifecycleOwner) { metrics ->
     val pressureTrace = metrics?.cardio?.arterialPressureTraceList?.lastOrNull()?.value
     val hrvRmssd = metrics?.cardio?.hrvList?.lastOrNull()?.rmssd
+
+    val edaTrace = metrics?.eda?.traceList?.lastOrNull()?.value
 
     val faceLandmarks = metrics?.face?.landmarksList?.lastOrNull()?.valueList
     val blinking = metrics?.face?.blinkingList?.lastOrNull()?.detected
@@ -126,6 +129,7 @@ Android uses the generated protobuf classes. Requested advanced metrics populate
 ```kotlin
 Metrics {
     breathing: Breathing
+    eda: Eda
     face: Face
     cardio: Cardio
 }
@@ -145,6 +149,10 @@ Hrv {
     confidence: Float
 }
 
+Eda {
+    traceList: List<Measurement>
+}
+
 Face {
     landmarksList: List<Landmarks>
     blinkingList: List<DetectionStatus>
@@ -153,4 +161,4 @@ Face {
 }
 ```
 
-See [Data Types](https://smartspectra.presagetech.com/docs/data-types) for the complete protobuf schema.
+EDA may take longer to produce its first sample than breathing or cardio outputs. See [Data Types](https://smartspectra.presagetech.com/docs/data-types) for the complete protobuf schema.

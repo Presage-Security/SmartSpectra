@@ -1,6 +1,6 @@
 ---
-title: Linux
-description: Bundle the SmartSpectra Linux C++ SDK into your own .deb so end users install your app on stock Ubuntu without a Presage apt source.
+title: Redistribute on Linux
+description: Bundle the SmartSpectra Linux C++ SDK tarball into your own .deb so end users install your app on stock Ubuntu without a Presage apt source.
 ---
 
 # Redistribute SmartSpectra on Linux
@@ -39,8 +39,11 @@ Build it standalone against an extracted SDK release tarball:
 
 ```bash
 # 1. Extract the published SDK release tarball
+#    Use the codename-qualified asset name:
+#    - Ubuntu 22.04 / Mint 21 / Debian 11+: linux-jammy-amd64
+#    - Ubuntu 24.04 / Mint 22: linux-noble-amd64
 mkdir -p /tmp/sdk
-tar -xzf smartspectra-sdk-<version>-linux-amd64.tar.gz -C /tmp/sdk
+tar -xzf smartspectra-sdk-<version>-linux-<codename>-amd64.tar.gz -C /tmp/sdk
 
 # 2. Configure + build the example out-of-tree
 cmake -S cpp/samples/debian-app-example -B /tmp/dae-build \

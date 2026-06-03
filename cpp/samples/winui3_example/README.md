@@ -23,7 +23,7 @@ The sample shows how to:
 
 ## Prerequisites
 
-1. **The SmartSpectra Windows binary distribution.** Download `SmartSpectra-<version>-windows-x64.zip` from <https://github.com/Presage-Security/SmartSpectra/releases> and unzip it anywhere on disk. The unzipped folder is the *SDK root* and must contain `bin/`, `include/`, `lib/`, and `share/` subdirectories.
+1. **The SmartSpectra Windows binary distribution.** Download `smartspectra-sdk-<version>-windows-x64.zip` from <https://github.com/Presage-Security/SmartSpectra/releases> and unzip it anywhere on disk. The unzipped folder is the *SDK root* and must contain `bin/`, `include/`, `lib/`, and `share/` subdirectories.
 2. **Visual Studio 2022 (17.4+) or later**, with these workloads installed via Visual Studio Installer:
    - **Desktop development with C++**
    - **Windows application development** — this is the workload that ships the WinUI 3 C++ project templates and `Microsoft.Windows.UI.Xaml.Cpp.Targets`, which wires the XAML markup compiler into the native build chain. Without it the project will not build.
@@ -95,15 +95,23 @@ The post-build step copies `smartspectra.dll`, `opencv_world4100.dll`, and a gen
 
 ## Configuration
 
-Before running, set the `SMARTSPECTRA_API_KEY` environment variable to your Presage API key:
+### API key — two options
 
-```bat
-setx SMARTSPECTRA_API_KEY "YOUR_API_KEY_HERE"
+**Option A (simplest): edit the source directly.**
+Open `SmartSpectraWinUI/MainWindow.xaml.cpp` and replace the placeholder in `ApiKey()`:
+
+```cpp
+constexpr char kPlaceholder[] = "YOUR_API_KEY_HERE";   // ← replace this string
 ```
 
-Restart Visual Studio (or the command prompt) after `setx` so it inherits the new value.
-The sample reads the key from `std::getenv("SMARTSPECTRA_API_KEY")` at startup — do **not**
-hard-code a real key in `MainWindow.xaml.cpp` or commit it to source control.
+**Option B: environment variable (no source edit needed).**
+Set `SMARTSPECTRA_API_KEY` before launching the executable and the app will pick it up automatically:
+
+```bat
+setx SMARTSPECTRA_API_KEY "your-key-here"
+```
+
+> **Note:** Do not commit a real key to source control. If you use Option A, make sure your key stays local (e.g., add `MainWindow.xaml.cpp` to `.gitignore`, or keep a separate local patch).
 
 Other knobs you may want to change:
 

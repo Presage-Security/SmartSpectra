@@ -91,6 +91,7 @@ sdk.config.requestedMetrics = SmartSpectraConfig.breathingMetrics + [
     .pulseRate,
     .arterialPressureTrace,
     .hrv,
+    .edaTrace,
     .faceLandmarks,
     .blinking,
     .talking,
@@ -104,6 +105,8 @@ Read the advanced fields from the same metrics object:
 if let metrics = sdk.metrics {
     let pressureTrace = metrics.cardio.arterialPressureTrace.last?.value
     let hrvRmssd = metrics.cardio.hrv.last?.rmssd
+
+    let edaTrace = metrics.eda.trace.last?.value
 
     let faceLandmarks = metrics.face.landmarks.last?.value
     let blinking = metrics.face.blinking.last?.detected
@@ -119,6 +122,7 @@ The Swift SDK uses the generated Swift protobuf types. Requested advanced metric
 ```swift
 Metrics {
     breathing: Breathing
+    eda: Eda
     face: Face
     cardio: Cardio
 }
@@ -138,6 +142,10 @@ Hrv {
     confidence: Float
 }
 
+Eda {
+    trace: [Measurement]
+}
+
 Face {
     landmarks: [Landmarks]
     blinking: [DetectionStatus]
@@ -146,4 +154,4 @@ Face {
 }
 ```
 
-See [Data Types](https://smartspectra.presagetech.com/docs/data-types) for the complete protobuf schema.
+EDA may take longer to produce its first sample than breathing or cardio outputs. See [Data Types](https://smartspectra.presagetech.com/docs/data-types) for the complete protobuf schema.

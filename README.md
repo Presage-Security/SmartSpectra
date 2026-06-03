@@ -89,6 +89,8 @@ For C++ integration on Windows, macOS, and Linux, refer to the [C++ README](cpp/
 - Supported systems and architectures.
 - Installation via the prebuilt ZIP (Windows), Homebrew (macOS), or apt (Linux).
 - Build instructions and example applications.
+- A Linux redistribution path for bundling the published SDK tarball into your
+  own `.deb`: [Redistribute SmartSpectra on Linux](docs/redistribute_smartspectra_on_linux.md).
 
 ## Bugs & Troubleshooting
 

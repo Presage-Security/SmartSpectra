@@ -52,6 +52,7 @@ FeatureType defines high-level physiological measurement categories. Each featur
 ```proto
 enum FeatureType {
   BREATHING = 0;
+  EDA = 2;
   FACE = 3;
   CARDIO = 4;
 }
@@ -60,6 +61,7 @@ enum FeatureType {
 > Some wire values are intentionally omitted from this view; the gaps in the numeric sequence preserve compatibility with the underlying proto. Use the listed names — do not renumber.
 
 - `BREATHING` -- Breathing measurements (chest and abdomen)
+- `EDA` -- Electrodermal activity (EDA) measurement
 - `FACE` -- Facial tracking and analysis
 - `CARDIO` -- Cardiovascular metrics (pulse, HRV, blood pressure)
 
@@ -77,6 +79,7 @@ enum MetricType {
   RESPIRATORY_LINE_LENGTH = 5;
   BASELINE = 6;
   INHALE_EXHALE_RATIO = 7;
+  EDA_TRACE = 10;
   FACE_LANDMARKS = 11;
   BLINKING = 12;
   TALKING = 13;
@@ -92,6 +95,7 @@ enum MetricType {
 - `CHEST_BREATHING` -- Breathing upper (chest) metrics
 - `ABDOMEN_BREATHING` -- Breathing lower (abdomen) metrics
 - `BREATHING_RATE` -- Breathing aggregate metrics
+- `EDA_TRACE` -- EDA metrics
 - `FACE_LANDMARKS` -- Face metrics
 - `PULSE_RATE` -- Cardio metrics
 
@@ -353,6 +357,20 @@ message Face {
 - `repeated` [`Landmarks`](#landmarks) `landmarks` -- Facial landmark coordinates over time
 - `repeated` [`Expression`](#expression) `expression` -- Detected expressions over time
 
+## Eda
+
+Electrodermal Activity (EDA) measurements. Tracks skin conductance changes related to autonomic nervous system activity.
+
+### Properties
+
+```proto
+message Eda {
+  repeated Measurement trace = 1;
+}
+```
+
+- `repeated` [`Measurement`](#measurement) `trace` -- EDA trace measurements over time
+
 ## Cardio
 
 ### Properties
@@ -373,35 +391,19 @@ message Cardio {
 
 Comprehensive physiological metrics container. Contains all available physiological measurements and analysis results.
 
-During active capture, SDK metrics payloads are incremental. A payload contains
-the samples that became available since the previous SDK metrics update, not a
-fully populated snapshot of every requested metric. Requested fields can
-therefore be absent, empty, or `null` in a given payload even though processing
-is still running and the metric remains enabled.
-
-Metric update cadence depends on how the metric is produced:
-
-| Metric category | Examples | Expected cadence | Empty/null behavior |
-| --- | --- | --- | --- |
-| Peak/event-driven rate metrics | `breathing.rate`, `cardio.pulse_rate`, `cardio.hrv` | Updated when a new physiological event, cycle, or analysis window produces a value | May be empty between valid updates during active capture |
-| Frame-driven metrics | `face.expression`, `face.landmarks`, `face.blinking`, `face.talking`, breathing traces | Updated near device frame cadence, with SDK callbacks rate-limited to about 30 Hz | Usually present more continuously when enabled and the input signal is valid |
-
-For UI integrations, retain the last valid pulse rate or breathing rate in app
-state, show a placeholder until the first valid sample arrives, and clear the
-retained value when the capture session or requested metric set changes. Do not
-treat a single empty rate field as a capture failure.
-
 ### Properties
 
 ```proto
 message Metrics {
   Breathing breathing = 1;
+  Eda eda = 3;
   Face face = 4;
   Cardio cardio = 5;
 }
 ```
 
 - [`Breathing`](#breathing) `breathing` -- Breathing and respiratory analysis results
+- [`Eda`](#eda) `eda` -- Electrodermal activity measurements. Note: processing needs to run for over 35 seconds to generate the first EDA result.
 - [`Face`](#face) `face` -- Facial analysis results
 - [`Cardio`](#cardio) `cardio` -- Cardiovascular measurements (pulse rate, arterial pressure, HRV)
 

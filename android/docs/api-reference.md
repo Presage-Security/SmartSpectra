@@ -123,6 +123,10 @@ Configuration for [SmartSpectraSdk]. Most apps access configuration through [Sma
 
   Face metric bundle (landmarks, blinking, talking, expressions). Requires the face-metrics-enabled bundle.
 
+- ```kotlin
+  public val edaMetrics: List<MetricType> = listOf( MetricType.EDA_TRACE, )
+  ```
+
 ## CameraPosition
 
 - `public fun fromLensFacing(@CameraSelector.LensFacing lensFacing: Int): CameraPosition = when (lensFacing)`

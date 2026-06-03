@@ -1,6 +1,6 @@
 ---
 title: Ubuntu 24.04 / Mint 22
-description: Install the SmartSpectra C++ SDK on Ubuntu 24.04 or Linux Mint 22 (noble) for amd64.
+description: Install the SmartSpectra C++ SDK on Ubuntu 24.04 or Linux Mint 22 (noble) for amd64 and arm64.
 ---
 
 # SmartSpectra C++ Quickstart — Ubuntu 24.04 / Mint 22
@@ -9,9 +9,8 @@ description: Install the SmartSpectra C++ SDK on Ubuntu 24.04 or Linux Mint 22 (
 > SDK is experimental. If you have any issues running SmartSpectra,
 > [contact Presage support](mailto:support@presagetech.com) for assistance.
 
-This guide covers the `noble` apt suite, which currently supports `amd64`
-only. An `arm64` build for Ubuntu 24.04 / Mint 22 will follow in a later
-release. If you are on Ubuntu 22.04 / Mint 21, follow the
+This guide covers the `noble` apt suite, which supports both `amd64` and
+`arm64`. If you are on Ubuntu 22.04 / Mint 21, follow the
 [Ubuntu 22.04 / Mint 21 guide](ubuntu-22-04.md) instead.
 
 ## Installation
@@ -35,11 +34,10 @@ curl -fsSL https://packages.presagetech.com/KEY.gpg \
 sudo chmod 644 /etc/apt/keyrings/presage-archive-keyring.gpg
 ```
 
-Add the `noble` apt source. The `[arch=amd64]` restriction skips the suite on
-`arm64` hosts, which is not yet supported on `noble`:
+Add the `noble` apt source:
 
 ```bash
-echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/presage-archive-keyring.gpg] https://packages.presagetech.com/apt/ubuntu noble main" \
+echo "deb [signed-by=/etc/apt/keyrings/presage-archive-keyring.gpg] https://packages.presagetech.com/apt/ubuntu noble main" \
   | sudo tee /etc/apt/sources.list.d/presage-technologies.list
 ```
 
@@ -47,7 +45,7 @@ echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/presage-archive-keyring.gpg] h
 > `noble-rc` apt source instead of `noble`:
 >
 > ```bash
-> echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/presage-archive-keyring.gpg] https://packages.presagetech.com/apt/ubuntu noble-rc main" \
+> echo "deb [signed-by=/etc/apt/keyrings/presage-archive-keyring.gpg] https://packages.presagetech.com/apt/ubuntu noble-rc main" \
 >   | sudo tee /etc/apt/sources.list.d/presage-technologies.list
 > ```
 >
@@ -62,7 +60,8 @@ sudo apt install libsmartspectra-dev
 ```
 
 The `signed-by=` source entry scopes the Presage signing key to the Presage
-apt repository.
+apt repository. APT selects the package matching your system's
+`dpkg --print-architecture` (`amd64` or `arm64`) automatically.
 
 The SmartSpectra SDK package is self-contained. You do not need to install
 protobuf, curl, OpenSSL, or other SDK runtime libraries separately. On
@@ -79,7 +78,7 @@ pkg-config --modversion SmartSpectra
 The command prints the installed SDK version (for example, `1.7.0`). If it
 prints nothing or reports that the package is missing, reinstall
 `libsmartspectra-dev` and confirm you are on a supported Ubuntu 24.04 /
-Mint 22 `amd64` host.
+Mint 22 (`amd64` or `arm64`) host.
 
 ## Example
 
@@ -339,7 +338,7 @@ Release-candidate builds are published to the parallel `noble-rc` apt suite
 signed by the same Presage key:
 
 ```bash
-echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/presage-archive-keyring.gpg] https://packages.presagetech.com/apt/ubuntu noble-rc main" \
+echo "deb [signed-by=/etc/apt/keyrings/presage-archive-keyring.gpg] https://packages.presagetech.com/apt/ubuntu noble-rc main" \
   | sudo tee /etc/apt/sources.list.d/presage-technologies-rc.list
 
 sudo apt update && sudo apt -t noble-rc install libsmartspectra-dev

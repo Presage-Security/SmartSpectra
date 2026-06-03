@@ -118,6 +118,7 @@ config.AddMetrics({
     MetricType::PULSE_RATE,
     MetricType::ARTERIAL_PRESSURE_TRACE,
     MetricType::HRV,
+    MetricType::EDA_TRACE,
     MetricType::FACE_LANDMARKS,
     MetricType::BLINKING,
     MetricType::TALKING,
@@ -138,6 +139,11 @@ spectra.SetOnMetrics([](const presage::smartspectra::Metrics& metrics, int64_t) 
     if (metrics.has_cardio() && metrics.cardio().hrv_size() > 0) {
         const auto& hrv = metrics.cardio().hrv(metrics.cardio().hrv_size() - 1);
         LOG(INFO) << "HRV RMSSD: " << hrv.rmssd();
+    }
+
+    if (metrics.has_eda() && metrics.eda().trace_size() > 0) {
+        const auto& eda = metrics.eda().trace(metrics.eda().trace_size() - 1);
+        LOG(INFO) << "EDA trace: " << eda.value();
     }
 
     if (metrics.has_face() && metrics.face().landmarks_size() > 0) {
@@ -167,6 +173,7 @@ C++ uses the generated protobuf classes. Requested advanced metrics populate the
 ```cpp
 presage::smartspectra::Metrics {
     Breathing breathing;
+    Eda eda;
     Face face;
     Cardio cardio;
 }
@@ -186,6 +193,10 @@ Hrv {
     float confidence;
 }
 
+Eda {
+    repeated Measurement trace;
+}
+
 Face {
     repeated Landmarks landmarks;
     repeated DetectionStatus blinking;
@@ -194,12 +205,13 @@ Face {
 }
 ```
 
-See [Data Types](https://smartspectra.presagetech.com/docs/data-types) for the complete protobuf schema.
+EDA may take longer to produce its first sample than breathing or cardio outputs. See [Data Types](https://smartspectra.presagetech.com/docs/data-types) for the complete protobuf schema.
 
 ## Timing and Stability
 
 All measurement samples use `timestamp` values in microseconds. Trace metrics
-are produced at frame cadence when the underlying signal is available.
+are produced at frame cadence when the underlying signal is available; lower
+rate outputs such as EDA may arrive less frequently.
 
 Measurement types expose a `stable()` flag. Check it before using a sample for
 critical decisions or user-facing summaries:
