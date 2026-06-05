@@ -95,10 +95,10 @@ You will create exactly these files:
 At the end, the app should show console output with:
 
 - a successful CMake configure and build
-- `Processing for 20 seconds...`
+- `Processing... Press Ctrl+C to stop.`
 - `Cardio metrics:` log lines when cardio metrics are available
 - `Breathing metrics:` log lines when breathing metrics are available
-- a clean exit after the 20-second sample run
+- a clean exit after you stop the sample
 
 ![SmartSpectra C++ quickstart demo](../images/cpp-quickstart.gif)
 
@@ -120,11 +120,16 @@ cd hello_vitals
 Open a new file named `hello_vitals.cpp` in your editor of choice and paste this
 entire file:
 
+This example also lives in `smartspectra/cpp/samples/hello_vitals/`.
+
+<!-- BEGIN hello_vitals_cpp -->
 ```cpp
+#include <smartspectra/messages/metrics.h>
 #include <smartspectra/smartspectra.h>
 #include <smartspectra/smartspectra_config.h>
-#include <smartspectra/messages/metrics.h>
+
 #include <chrono>
+#include <csignal>
 #include <cstdlib>
 #include <iostream>
 #include <string>
@@ -132,14 +137,37 @@ entire file:
 
 namespace spectra = presage::smartspectra;
 
+namespace {
+
+volatile std::sig_atomic_t g_stop_requested = 0;
+
+void HandleSignal(int) {
+    g_stop_requested = 1;
+}
+
+std::string ResolveApiKey(int argc, char** argv) {
+    if (argc > 1) {
+        return argv[1];
+    }
+    if (const char* key = std::getenv("SMARTSPECTRA_API_KEY")) {
+        return key;
+    }
+    return {};
+}
+
+}  // namespace
+
 int main(int argc, char** argv) {
-    std::string api_key;
-    if (argc > 1) api_key = argv[1];
-    else if (auto* k = std::getenv("SMARTSPECTRA_API_KEY")) api_key = k;
-    else if (auto* k = std::getenv("PHYSIOLOGY_API_KEY")) api_key = k;
-    else {
+    std::signal(SIGINT, HandleSignal);
+    const std::string api_key = ResolveApiKey(argc, argv);
+    if (api_key.empty()) {
+#if defined(_WIN32)
+        std::cerr << "Usage: .\\hello_vitals.exe YOUR_API_KEY\n"
+                  << "or set SMARTSPECTRA_API_KEY=YOUR_API_KEY\n";
+#else
         std::cerr << "Usage: ./hello_vitals YOUR_API_KEY\n"
                   << "or export SMARTSPECTRA_API_KEY=YOUR_API_KEY\n";
+#endif
         return 1;
     }
 
@@ -151,12 +179,29 @@ int main(int argc, char** argv) {
     spectra::SmartSpectra sdk(config);
     sdk.SetOnMetrics([](const spectra::Metrics& metrics, int64_t) {
         if (metrics.has_cardio()) {
-            std::cerr << "Cardio metrics: " << metrics.cardio().ShortDebugString() << "\n";
+            std::cerr << "Cardio metrics: "
+                      << metrics.cardio().ShortDebugString() << "\n";
         }
         if (metrics.has_breathing()) {
-            std::cerr << "Breathing metrics: " << metrics.breathing().ShortDebugString() << "\n";
+            std::cerr << "Breathing metrics: "
+                      << metrics.breathing().ShortDebugString() << "\n";
         }
     });
+    sdk.SetOnValidationStatusChanged(
+        [have_last_status = false,
+         last_code = spectra::ValidationCode::kOk,
+         last_hint = std::string{}](const spectra::ValidationStatus& status, int64_t) mutable {
+            if (have_last_status &&
+                status.code == last_code &&
+                status.hint == last_hint) {
+                return;
+            }
+            have_last_status = true;
+            last_code = status.code;
+            last_hint = status.hint;
+            std::cerr << "Validation [" << status.code
+                      << "]: " << status.hint << "\n";
+        });
     sdk.SetOnError([](const spectra::SmartSpectraError& error) {
         std::cerr << "Error [" << static_cast<int>(error.code)
                   << "]: " << error.message << "\n";
@@ -165,7 +210,8 @@ int main(int argc, char** argv) {
     const auto source_error =
         sdk.UseCamera().SetResolution(1280, 720).SetFps(30).Build();
     if (!source_error.ok()) {
-        std::cerr << "Failed to create camera source: " << source_error.message << "\n";
+        std::cerr << "Failed to create camera source: "
+                  << source_error.message << "\n";
         return 1;
     }
 
@@ -174,14 +220,17 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    std::cout << "Processing for 20 seconds...\n";
-    std::this_thread::sleep_for(std::chrono::seconds(20));
+    std::cout << "Processing... Press Ctrl+C to stop.\n";
+    while (!g_stop_requested) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    }
     if (const auto err = sdk.Stop(); !err.ok()) {
         std::cerr << "Stop failed: " << err.message << "\n";
     }
     return 0;
 }
 ```
+<!-- END hello_vitals_cpp -->
 
 The example requests breathing and cardio metrics. Add `FaceMetrics()` or other
 metric groups with `config.AddMetrics(...)` when your app expects those outputs.
@@ -230,19 +279,19 @@ export SMARTSPECTRA_API_KEY="YOUR_API_KEY"
 ```
 
 Sit centered in front of the webcam, well-lit, and stay reasonably still. The
-app logs breathing and cardio metrics for 20 seconds, then exits. If no face is
-detected the app still runs and exits cleanly, but no metrics callbacks fire.
-An internet connection is required for subscription validation when using the
-standard SDK.
+app logs breathing and cardio metrics until you stop it with `Ctrl+C`. If no
+face is detected the app still runs and exits cleanly, but no metrics callbacks
+fire. An internet connection is required for subscription validation when using
+the standard SDK.
 
 ## What success looks like
 
 When your program is running, you should see all of these:
 
-- `Processing for 20 seconds...` prints after launch
+- `Processing... Press Ctrl+C to stop.` prints after launch
 - the camera starts without a source creation error
 - `Cardio metrics:` or `Breathing metrics:` logs print while you sit centered and well-lit
-- the process exits after the 20-second run without a `Stop failed` message
+- the process exits after `Ctrl+C` without a `Stop failed` message
 
 ## Expected API key check
 

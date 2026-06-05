@@ -67,7 +67,7 @@ When registering your OAuth app, you need your **Apple Org ID** (Team ID, e.g. `
 
 Your app repo should look roughly like this:
 
-<img src={`${process.env.NEXT_PUBLIC_BASE_PATH || ""}/docs/swift/plist_location_in_repo.png`} alt="Example plist location" />
+![Example plist location](plist_location_in_repo.png)
 
 > **Note:** Each bundle identifier can only be registered once. You cannot create multiple OAuth configs for the same bundle ID.
 

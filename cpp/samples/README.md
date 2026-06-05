@@ -25,6 +25,7 @@ Portable CLI samples built by the aggregate `CMakeLists.txt`:
 - [Dense Facemesh Example](dense_facemesh_example): Overlays the dense face landmark mesh on the live camera feed. Useful for verifying landmark stability and debugging face tracking. Executable name: `dense_facemesh`.
 - [Full Example](full_example): Continuously reads from a video stream (camera or file), generates vitals output at fixed intervals, and overlays a HUD with live plots on the video feed. Executable name: `full_example`.
 - [GStreamer Example](gstreamer_example): Pulls frames from a GStreamer pipeline (via OpenCV's GStreamer backend) and pushes them into the SDK through `UseCustomInput()`. Starting point for non-V4L2 capture stacks. Executable name: `gstreamer_example`.
+- [Hello Vitals](hello_vitals): Cross-platform quickstart sample also referenced by the platform install guides. Executable name: `hello_vitals`.
 - [Insights Example](insights_example): Streams the higher-level "insights" metric output from a camera or video file. Executable name: `insights_example`.
 - [Minimal Example](minimal_example): The smallest possible runnable SmartSpectra C++ application - minimum code to demonstrate the SDK lifecycle. Executable name: `minimal_example`.
 - [SmartSpectra Example](smart_spectra_example): Streams metrics and validation status to the terminal while displaying the camera (or input video) feed. Demonstrates the standard SmartSpectra setup pipeline. Executable name: `smart_spectra_example`.
@@ -221,10 +222,10 @@ reports keychain entitlement errors such as `errSecMissingEntitlement (-34018)`.
 
 ## Command Line Interface
 
-All six portable CLI samples (`dense_facemesh`, `full_example`,
-`gstreamer_example`, `insights_example`, `minimal_example`,
-`smart_spectra_example`) parse flags via Abseil and support the standard Abseil
-help surface. To list the flags declared by a sample, pass `--help=main`:
+The portable CLI samples that use Abseil flags (`dense_facemesh`,
+`full_example`, `gstreamer_example`, `insights_example`, `minimal_example`,
+`smart_spectra_example`) support the standard Abseil help surface. To list the
+flags declared by a sample, pass `--help=main`:
 
 ```bash
 ./build/full_example/full_example --help=main
@@ -235,6 +236,9 @@ To read about a specific command line option, pass `--help=<OPTION_NAME>`:
 ```bash
 ./build/full_example/full_example --help=verbosity
 ```
+
+`hello_vitals` takes a positional API key argument instead of Abseil flags so
+the docs can keep the quickstart focused on the smallest runnable project.
 
 The app-style samples (`macos_swiftui_example`, `winui3_example`) do not use
 Abseil flags and have their own platform-native settings UIs; the `--help=main`

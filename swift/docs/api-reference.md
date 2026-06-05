@@ -185,6 +185,7 @@ Measurement-readiness codes.
 - `case tooBright = 6`
 - `case chestNotVisible = 7`
 - `case cameraTuning = 10`
+- `case frameRateTooLow = 11`
 
 ## SmartSpectraError
 

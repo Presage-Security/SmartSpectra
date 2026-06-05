@@ -272,6 +272,7 @@ description: API Reference for the SmartSpectra SDK.
 - `kTooBright = 6`
 - `kChestNotVisible = 7`
 - `kCameraTuning = 10`
+- `kFrameRateTooLow = 11`
 
 ## SmartSpectraError
 

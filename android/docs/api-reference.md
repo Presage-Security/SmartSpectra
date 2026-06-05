@@ -164,6 +164,7 @@ Configuration for [SmartSpectraSdk]. Most apps access configuration through [Sma
 - `TOO_BRIGHT(6)`
 - `CHEST_NOT_VISIBLE(7)`
 - `CAMERA_TUNING(10)`
+- `FRAME_RATE_TOO_LOW(11)`
 
 ## SmartSpectraError
 

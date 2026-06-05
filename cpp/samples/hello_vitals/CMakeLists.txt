@@ -1,25 +1,15 @@
-# Copyright (C) 2024-2026 Presage Technologies, Inc.
-#
-# SPDX-License-Identifier: LicenseRef-Proprietary
-
-# SmartSpectra C++ samples aggregate.
-#
-# Each `add_subdirectory(...)` line below is a portable CLI sample binary
-# built and shipped with the public C++ SDK. App-style samples
-# (`macos_swiftui_example`, `winui3_example`, `debian-app-example`) live
-# alongside this tree but are built outside this aggregate by their own
-# platform tooling. `debian-app-example` in particular is built standalone
-# against an extracted SmartSpectra Linux SDK release tarball — see
-# `smartspectra/cpp/samples/debian-app-example/README.md`.
 cmake_minimum_required(VERSION 3.22.1)
-project(SmartSpectraExamples CXX)
 
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
+if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+    project(SmartSpectraHelloVitals CXX)
+endif ()
+
+if (DEFINED ENV{SMARTSPECTRA_SDK_PATH} AND NOT "$ENV{SMARTSPECTRA_SDK_PATH}" STREQUAL "")
+    list(PREPEND CMAKE_PREFIX_PATH "$ENV{SMARTSPECTRA_SDK_PATH}")
+endif ()
 
 if (NOT TARGET SmartSpectra::SDK)
-    find_package(SmartSpectra REQUIRED)
+    find_package(SmartSpectra CONFIG REQUIRED)
 endif ()
 
 function(smartspectra_stage_windows_runtime target_name)
@@ -36,7 +26,8 @@ function(smartspectra_stage_windows_runtime target_name)
     else ()
         message(FATAL_ERROR
             "Cannot resolve the SmartSpectra SDK directory for ${target_name}. "
-            "Configure samples with find_package(SmartSpectra) through CMAKE_PREFIX_PATH.")
+            "Configure hello_vitals with find_package(SmartSpectra) through CMAKE_PREFIX_PATH "
+            "or set SMARTSPECTRA_SDK_PATH before running CMake.")
     endif ()
 
     file(GLOB _smartspectra_runtime_files
@@ -60,14 +51,19 @@ function(smartspectra_stage_windows_runtime target_name)
         VERBATIM)
 endfunction ()
 
-add_subdirectory(dense_facemesh_example)
-add_subdirectory(minimal_example)
-add_subdirectory(hello_vitals)
-add_subdirectory(gstreamer_example)
-add_subdirectory(full_example)
-add_subdirectory(insights_example)
-add_subdirectory(smart_spectra_example)
+add_executable(hello_vitals hello_vitals.cpp)
+set_target_properties(hello_vitals PROPERTIES
+    CXX_STANDARD 20
+    CXX_STANDARD_REQUIRED ON
+    CXX_EXTENSIONS OFF)
 
 if (MSVC)
     set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT hello_vitals)
+    set_target_properties(hello_vitals PROPERTIES
+        VS_DEBUGGER_COMMAND "$<TARGET_FILE:hello_vitals>"
+        VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:hello_vitals>")
 endif ()
+
+target_link_libraries(hello_vitals PRIVATE SmartSpectra::SDK)
+
+smartspectra_stage_windows_runtime(hello_vitals)
