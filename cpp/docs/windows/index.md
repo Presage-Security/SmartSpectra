@@ -61,7 +61,7 @@ At the end, the app should show console output with:
 - `Breathing metrics:` log lines when breathing metrics are available
 - a clean exit after you stop the sample
 
-![SmartSpectra C++ Windows quickstart demo](images/win-quickstart.gif)
+![SmartSpectra C++ Windows quickstart demo](../images/win-quickstart.gif)
 
 ### 1. Open the developer command prompt
 
@@ -101,6 +101,15 @@ find_package(SmartSpectra CONFIG REQUIRED)
 add_executable(hello_vitals hello_vitals.cpp)
 target_link_libraries(hello_vitals SmartSpectra::SDK)
 
+# Stage the Windows runtime DLLs next to the executable. The SDK ZIP owns this
+# runtime set; copy every DLL from bin/ so required dependencies such as
+# vulkan-1.dll and the versioned OpenCV runtime stay in sync with the package.
+file(GLOB SMARTSPECTRA_RUNTIME_DLLS
+    "${SMARTSPECTRA_SDK_DIR}/bin/*.dll")
+if (NOT SMARTSPECTRA_RUNTIME_DLLS)
+    message(FATAL_ERROR "No SmartSpectra runtime DLLs found in ${SMARTSPECTRA_SDK_DIR}/bin.")
+endif ()
+
 # Write smartspectra_manifest.json next to the executable. The SDK dir
 # typically contains backslashes on Windows, so escape them (and any
 # embedded quotes) before interpolating into the JSON literal.
@@ -110,12 +119,9 @@ file(GENERATE
     OUTPUT "$<TARGET_FILE_DIR:hello_vitals>/smartspectra_manifest.json"
     CONTENT "{\n  \"resource_root_dir\": \"${_smartspectra_manifest_root}\"\n}\n")
 
-# Stage the Windows runtime DLLs next to the executable.
 add_custom_command(TARGET hello_vitals POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${SMARTSPECTRA_SDK_DIR}/bin/smartspectra.dll"
-            "${SMARTSPECTRA_SDK_DIR}/bin/smartspectra_capi.dll"
-            "${SMARTSPECTRA_SDK_DIR}/bin/opencv_world4100.dll"
+            ${SMARTSPECTRA_RUNTIME_DLLS}
             "$<TARGET_FILE_DIR:hello_vitals>"
     VERBATIM)
 ```
@@ -326,20 +332,21 @@ lib/
 bin/
   smartspectra.dll            # C++ SDK runtime DLL — must ship with your app
   smartspectra_capi.dll       # C ABI shim runtime DLL — required for FFI consumers
+  vulkan-1.dll                # Vulkan loader used by the default inference backend
   smartspectra_manifest.json
-  opencv_world4100.dll        # OpenCV runtime dependency — must ship with your app
+  opencv_world*.dll           # OpenCV runtime dependency — must ship with your app
 share/smartspectra/           # Bundled graph and model resources
 ```
 
-When you ship your app to other machines, copy `smartspectra.dll`,
-`opencv_world4100.dll`, and the contents of `share/smartspectra/` next to
-the executable (or onto the PATH).
+When you ship your app to other machines, copy every DLL from the SDK `bin/`
+directory and the contents of `share/smartspectra/` next to the executable
+(or onto the PATH).
 
 ## Next Steps
 
-- [Configure which metrics to compute](metrics.md)
-- [Run headless without video output](headless-mode.md)
-- [Migration Guide](migration-guide.md) for upgrading from older SDK versions
+- [Configure which metrics to compute](../metrics.md)
+- [Run headless without video output](../headless-mode.md)
+- [Migration Guide](../migration-guide.md) for upgrading from older SDK versions
 
 ## Troubleshooting
 
@@ -347,6 +354,6 @@ If the app starts but can't find DLLs, verify that `smartspectra.dll`,
 `opencv_world*.dll`, and other SDK DLLs from the extracted ZIP are present
 next to the executable or on the Windows DLL search path.
 
-If you are upgrading an older C++ integration, see the [C++ Migration Guide](migration-guide.md).
+If you are upgrading an older C++ integration, see the [C++ Migration Guide](../migration-guide.md).
 
 For support: contact [support@presagetech.com](mailto:support@presagetech.com) or [submit a GitHub issue](https://github.com/Presage-Security/SmartSpectra/issues).

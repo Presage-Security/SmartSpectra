@@ -6,7 +6,24 @@ The app shows a live camera preview, validation status, breathing metrics, cardi
 
 ## Quick Start
 
-Install SmartSpectra and the required runtime packages through Homebrew, then open `smartspectra_swift_ui.xcodeproj` in Xcode, select the `smartspectra_swift_ui` scheme, and press Run.
+### 1. Install the SDK
+
+Stable:
+
+```sh
+brew tap presage/smartspectra https://github.com/Presage-Security/homebrew-smartspectra
+brew install presage/smartspectra/smartspectra
+```
+
+Release candidate:
+
+```sh
+brew tap presage/smartspectra https://github.com/Presage-Security/homebrew-smartspectra
+brew unlink smartspectra
+brew install presage/smartspectra/smartspectra-rc
+```
+
+### 2. Verify the local runtime setup
 
 Before first run, check the SDK and runtime setup:
 
@@ -20,12 +37,34 @@ To apply safe runtime fixes, run:
 ./scripts/check-requirements.sh --fix
 ```
 
+### 3. Open the sample in Xcode
+
+From this directory, run:
+
+```sh
+open smartspectra_swift_ui.xcodeproj
+```
+
+Stable sample source:
+
+- [main branch sample](https://github.com/Presage-Security/SmartSpectra/tree/main/cpp/samples/macos_swiftui_example)
+
+RC sample source:
+
+- [rc branch sample](https://github.com/Presage-Security/SmartSpectra/tree/rc/cpp/samples/macos_swiftui_example)
+
 Then select the app target and set Signing & Capabilities:
 
 ```text
 Team = your Apple Development team
 Bundle Identifier = your unique bundle identifier
 ```
+
+After selecting the app target, use this `Signing & Capabilities` view:
+
+![Signing & Capabilities view showing where Xcode exposes the Bundle Identifier for the Application ID and the signing identity used to look up the Organization ID](../../docs/images/macos-xcode-signing-source.png)
+
+### 4. Run the app
 
 Enter `SMARTSPECTRA_API_KEY` in the app and press Start. On first launch, allow camera access when macOS prompts.
 
@@ -180,6 +219,15 @@ or run:
 
 ```sh
 ./scripts/check-requirements.sh --fix
+```
+
+### `brew install presage/smartspectra/smartspectra-rc` fails because `smartspectra` is already linked
+
+Unlink the stable formula, then retry the RC install:
+
+```sh
+brew unlink smartspectra
+brew install presage/smartspectra/smartspectra-rc
 ```
 
 ### `Vulkan is not available: vkCreateInstance failed with ErrorIncompatibleDriver`

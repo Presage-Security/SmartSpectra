@@ -44,7 +44,7 @@ class MinimalAppInstrumentedTest {
 
     @Test
     fun tappingStartWithSuppliedApiKeyRunsThenStops() {
-        assumeApiKeyAvailable()
+        requireApiKeyAvailable()
         grantCameraPermission()
 
         ActivityScenario.launch(MainActivity::class.java).use { scenario ->
@@ -85,7 +85,7 @@ class MinimalAppInstrumentedTest {
      */
     @Test
     fun rapidStartStopCyclesStayClean() {
-        assumeApiKeyAvailable()
+        requireApiKeyAvailable()
         grantCameraPermission()
 
         ActivityScenario.launch(MainActivity::class.java).use { scenario ->
@@ -126,7 +126,7 @@ class MinimalAppInstrumentedTest {
      */
     @Test
     fun realOrientationChangeMidMeasurementSettlesCleanly() {
-        assumeApiKeyAvailable()
+        requireApiKeyAvailable()
         grantCameraPermission()
 
         ActivityScenario.launch(MainActivity::class.java).use { scenario ->
@@ -218,7 +218,7 @@ class MinimalAppInstrumentedTest {
      */
     @Test
     fun stopDuringStartingSettlesToIdle() {
-        assumeApiKeyAvailable()
+        requireApiKeyAvailable()
         grantCameraPermission()
 
         ActivityScenario.launch(MainActivity::class.java).use { scenario ->
@@ -250,10 +250,27 @@ class MinimalAppInstrumentedTest {
         }
     }
 
-    private fun assumeApiKeyAvailable() {
-        assumeTrue(
-            "Skipping test that requires a real start/stop cycle without SMARTSPECTRA_API_KEY",
+    /** Opt-in escape for local runs without secrets: set allowTestSkip=true via
+     *  `-e allowTestSkip true`. Default is to FAIL. */
+    private fun allowTestSkip(): Boolean =
+        InstrumentationRegistry.getArguments().getString("allowTestSkip")
+            ?.trim()?.equals("true", ignoreCase = true) == true
+
+    /** Fail-closed prerequisite gate. A missing prerequisite FAILS the test by
+     *  default so CI can never silently drop this coverage — a skip reads as
+     *  green. Opt into skipping with allowTestSkip=true. */
+    private fun requireForTest(satisfied: Boolean, what: String) {
+        if (satisfied) return
+        if (allowTestSkip()) {
+            assumeTrue("$what [skipped: allowTestSkip=true]", false)
+        }
+        org.junit.Assert.fail("$what — set allowTestSkip=true (-e allowTestSkip true) to skip locally.")
+    }
+
+    private fun requireApiKeyAvailable() {
+        requireForTest(
             BuildConfig.SMARTSPECTRA_API_KEY.isNotBlank(),
+            "SMARTSPECTRA_API_KEY (BuildConfig) not set",
         )
     }
 

@@ -424,7 +424,7 @@ sudo apt update
 
 ## Documentation
 
-API reference available at [C++ API Reference](https://smartspectra.presagetech.com/docs/cpp/api-reference).
+API reference available at [C++ API Reference](../api-reference.md).
 
 ## Troubleshooting
 

@@ -1,0 +1,327 @@
+:root {
+    color-scheme: dark;
+    --bg:        #101218;
+    --panel:     #1a1d27;
+    --border:    #2a2f3d;
+    --text:      #e8e9ee;
+    --muted:     #7a8095;
+    --accent:    #4c8df6;
+    --ok:        #3ec78a;
+    --warn:      #f1b443;
+    --err:       #e3635f;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+}
+
+header h1 {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: 0.2px;
+}
+
+.status {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 999px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.status-uninitialized { background: #2a2f3d; color: var(--muted); }
+.status-idle          { background: #2a2f3d; color: var(--muted); }
+.status-starting      { background: #3a3322; color: var(--warn); }
+.status-running       { background: #1f4530; color: var(--ok); }
+.status-stopping      { background: #3a3322; color: var(--warn); }
+.status-error         { background: #4a2222; color: var(--err); }
+
+/* --- Top error banner (replaces the old prominent error card) ----------- */
+/* The `display: flex` below would otherwise override the HTML `hidden`
+   attribute's default `display: none`, leaving a thin red strip visible
+   even when no error is set. Force `[hidden]` to win. */
+.error-banner[hidden] { display: none !important; }
+.error-banner {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 24px;
+    background: #2a1818;
+    border-bottom: 1px solid var(--err);
+    font-size: 13px;
+    color: var(--err);
+}
+.error-banner-code {
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+.error-banner-message { color: var(--text); }
+
+/* --- Main two-column layout -------------------------------------------- */
+main {
+    flex: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);  /* ~40% / ~60% */
+    gap: 16px;
+    padding: 16px 24px;
+    overflow: hidden;
+    min-height: 0;
+}
+
+.left-col {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow-y: auto;
+    min-height: 0;
+}
+
+.right-col {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow-y: auto;
+    min-height: 0;
+    padding-right: 4px;  /* breathing room for the scrollbar */
+}
+
+/* --- Preview ------------------------------------------------------------ */
+.preview {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 16 / 9;
+    flex-shrink: 0;
+}
+
+.preview video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.hint {
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+    right: 12px;
+    padding: 8px 12px;
+    background: rgba(16, 18, 24, 0.85);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 12px;
+    color: var(--muted);
+    backdrop-filter: blur(8px);
+}
+.hint.hint-ok    { color: var(--ok); }
+.hint.hint-warn  { color: var(--warn); }
+.hint.hint-err   { color: var(--err); }
+
+/* --- Live numeric readouts --------------------------------------------- */
+.readouts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+.readout {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+}
+.readout-label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+.readout-value {
+    font-size: 22px;
+    font-weight: 600;
+    margin-top: 4px;
+    font-variant-numeric: tabular-nums;
+}
+.readout-unit {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+    margin-left: 2px;
+}
+
+/* --- Toggle panel ------------------------------------------------------- */
+.metrics-toggles {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.panel-label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 4px;
+}
+
+.toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    cursor: pointer;
+}
+.toggle input[type="checkbox"] {
+    width: 14px;
+    height: 14px;
+    accent-color: var(--accent);
+    cursor: pointer;
+}
+.toggle input[type="checkbox"]:disabled,
+.toggle:has(input:disabled) {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+.toggle em {
+    color: var(--muted);
+    font-style: normal;
+    font-size: 11px;
+    margin-left: 2px;
+}
+/* Static (non-interactive) toggle for the always-on Breathing bundle. */
+.toggle-static { cursor: default; }
+.toggle-static .check {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    background: var(--accent);
+    flex-shrink: 0;
+    position: relative;
+}
+.toggle-static .check::after {
+    content: '';
+    position: absolute;
+    left: 3px;
+    top: 0px;
+    width: 5px;
+    height: 9px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+/* --- Controls ----------------------------------------------------------- */
+.controls {
+    display: flex;
+    gap: 8px;
+}
+button {
+    flex: 1;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 16px;
+    cursor: pointer;
+    transition: background 120ms ease;
+}
+button:hover:not(:disabled)   { background: #232735; }
+button:active:not(:disabled)  { background: #2b3043; }
+button:disabled               { opacity: 0.45; cursor: not-allowed; }
+#btn-start:not(:disabled)     { border-color: var(--accent); color: var(--accent); }
+
+/* --- Chart panels ------------------------------------------------------- */
+.chart-panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.chart-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+}
+.chart-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+}
+.chart-unit {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+
+.chart-canvas-wrap {
+    position: relative;
+    height: 180px;
+}
+.chart-canvas-wrap canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.chart-placeholder {
+    position: absolute;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 0 16px;
+    font-size: 12px;
+    color: var(--muted);
+    background: rgba(26, 29, 39, 0.85);
+    border-radius: 6px;
+}
+.chart-panel.disabled .chart-canvas-wrap canvas { opacity: 0.15; }
+.chart-panel.disabled .chart-placeholder { display: flex; }
+
+/* --- Footer ------------------------------------------------------------- */
+footer {
+    padding: 10px 24px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--muted);
+    flex-shrink: 0;
+}
+footer code {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 11px;
+}

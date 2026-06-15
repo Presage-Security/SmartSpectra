@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/sample_background_dark">
@@ -128,12 +129,12 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:paddingHorizontal="4dp"
-                        android:text="@string/blood_pressure_title"
+                        android:text="@string/arterial_pressure_title"
                         android:textColor="@color/sample_text_muted"
                         android:textSize="12sp" />
 
                     <com.presagetech.smartspectra_minimal.SignalGraphView
-                        android:id="@+id/blood_pressure_graph_view"
+                        android:id="@+id/arterial_pressure_graph_view"
                         android:layout_width="match_parent"
                         android:layout_height="72dp"
                         android:layout_marginTop="4dp"
@@ -229,6 +230,19 @@
                         android:textSize="13sp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
+
+            <TextView
+                android:id="@+id/validation_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="6dp"
+                android:gravity="center"
+                android:textColor="@color/sample_coral"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:visibility="gone"
+                tools:visibility="visible"
+                tools:text="Center your face in the frame" />
 
             <TextView
                 android:id="@+id/status_label"

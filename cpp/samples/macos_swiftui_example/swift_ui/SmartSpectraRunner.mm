@@ -292,6 +292,10 @@ void DispatchDiagnostics(__weak SmartSpectraRunner *weakRunner, NSString *diagno
     std::atomic<long long> frame_blocked_count_;
 }
 
++ (NSString *)sdkVersion {
+    return [NSString stringWithUTF8String:SMART_SPECTRA_VERSION_STRING];
+}
+
 - (nullable NSString *)startWithAPIKey:(NSString *)apiKey {
     if (self.running) {
         return nil;

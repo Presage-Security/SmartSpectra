@@ -13,7 +13,7 @@ The Presage apt repository ships two suites. Pick the guide that matches your
 host:
 
 - [**Ubuntu 22.04 / Mint 21**](ubuntu-22-04.md) — `jammy` suite, `amd64` and `arm64`.
-- [**Ubuntu 24.04 / Mint 22**](ubuntu-24-04.md) — `noble` suite, `amd64` only (arm64 coming in a later release).
+- [**Ubuntu 24.04 / Mint 22**](ubuntu-24-04.md) — `noble` suite, `amd64` and `arm64`.
 
 Each guide is end-to-end: prerequisites, repository setup, a minimal CMake
 project, the headless-host bootstrap, and the advanced apt workflows (RC

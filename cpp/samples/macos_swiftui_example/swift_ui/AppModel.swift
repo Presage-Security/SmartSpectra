@@ -21,6 +21,7 @@ final class AppModel: NSObject, ObservableObject, SmartSpectraRunnerDelegate {
     @Published var lastMetricTime = "never"
     @Published var apiKey: String
     @Published var isRunning = false
+    let sdkVersion = SmartSpectraRunner.sdkVersion()
 
     private let runner = SmartSpectraRunner()
 
@@ -186,7 +187,7 @@ final class AppModel: NSObject, ObservableObject, SmartSpectraRunnerDelegate {
 
         if let open = line.lastIndex(of: "("), let close = line.lastIndex(of: ")"), open < close {
             let confidence = line[line.index(after: open)..<close]
-            self[keyPath: confidenceKeyPath] = String(confidence)
+            self[keyPath: confidenceKeyPath] = String(confidence).trimmingCharacters(in: .whitespaces)
         }
     }
 

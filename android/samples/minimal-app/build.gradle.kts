@@ -19,7 +19,7 @@ extensions.configure<com.android.build.api.dsl.ApplicationExtension>("android") 
     defaultConfig {
         applicationId = "com.presagetech.smartspectra_minimal"
         minSdk = 28
-        targetSdk = 34
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

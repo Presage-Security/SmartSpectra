@@ -145,6 +145,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import com.presagetech.smartspectra.CameraPosition
 import com.presagetech.smartspectra.ProcessingStatus
@@ -180,7 +183,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var hrvLabel: TextView
     private lateinit var chestGraphView: SignalGraphView
     private lateinit var abdomenGraphView: SignalGraphView
-    private lateinit var bloodPressureGraphView: SignalGraphView
+    private lateinit var arterialPressureGraphView: SignalGraphView
     private lateinit var statusLabel: TextView
     private lateinit var validationLabel: TextView
     private lateinit var toggleButton: Button
@@ -201,6 +204,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
 
         sdk.config.apiKey = API_KEY
         sdk.config.imageOutputEnabled = false
@@ -254,7 +258,7 @@ class MainActivity : ComponentActivity() {
                 metrics.cardio.arterialPressureTraceList.forEach { sample ->
                     if (sample.timestamp > latestPressureTimestamp) {
                         latestPressureTimestamp = sample.timestamp
-                        bloodPressureGraphView.appendValue(sample.value)
+                        arterialPressureGraphView.appendValue(sample.value)
                     }
                 }
 
@@ -299,6 +303,9 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun buildUi() {
+        val horizontalInset = dp(14)
+        val topInsetSpacing = dp(8)
+        val bottomInsetSpacing = dp(12)
         val root = FrameLayout(this).apply {
             background = GradientDrawable(
                 GradientDrawable.Orientation.TOP_BOTTOM,
@@ -317,25 +324,27 @@ class MainActivity : ComponentActivity() {
             ViewGroup.LayoutParams.MATCH_PARENT,
             dp(465),
             Gravity.TOP,
-        ).apply { topMargin = dp(33) }
+        )
         root.addView(previewView, previewParams)
+        val previewOverlay = View(this).apply {
+            background = GradientDrawable(
+                GradientDrawable.Orientation.TOP_BOTTOM,
+                intArrayOf(0x33000000, 0x00000000, 0xCC05070C.toInt()),
+            )
+        }
+        val previewOverlayParams = FrameLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            dp(465),
+            Gravity.TOP,
+        )
         root.addView(
-            View(this).apply {
-                background = GradientDrawable(
-                    GradientDrawable.Orientation.TOP_BOTTOM,
-                    intArrayOf(0x33000000, 0x00000000, 0xCC05070C.toInt()),
-                )
-            },
-            FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                dp(465),
-                Gravity.TOP,
-            ).apply { topMargin = dp(33) },
+            previewOverlay,
+            previewOverlayParams,
         )
 
         val topPanel = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(dp(14), dp(33), dp(14), 0)
+            setPadding(horizontalInset, topInsetSpacing, horizontalInset, 0)
         }
         root.addView(
             topPanel,
@@ -363,15 +372,16 @@ class MainActivity : ComponentActivity() {
 
         val panel = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(dp(14), 0, dp(14), 0)
+            setPadding(horizontalInset, 0, horizontalInset, 0)
         }
+        val panelParams = FrameLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+            Gravity.BOTTOM,
+        )
         root.addView(
             panel,
-            FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                Gravity.BOTTOM,
-            ).apply { bottomMargin = dp(60) },
+            panelParams,
         )
 
         heartRateLabel = textView(sizeSp = 23f, color = CORAL, bold = true)
@@ -391,8 +401,8 @@ class MainActivity : ComponentActivity() {
         summaryRow.addView(metricCard("Expression", expressionLabel, AMBER), weightedParams())
         panel.addView(summaryRow, matchWrapBottomMargin(dp(10)))
 
-        bloodPressureGraphView = SignalGraphView(this, VIOLET)
-        panel.addView(waveformCard("Arterial Pressure", bloodPressureGraphView), matchWrapBottomMargin(dp(10)))
+        arterialPressureGraphView = SignalGraphView(this, VIOLET)
+        panel.addView(waveformCard("Arterial Pressure", arterialPressureGraphView), matchWrapBottomMargin(dp(10)))
 
         chestGraphView = SignalGraphView(this, TEAL)
         abdomenGraphView = SignalGraphView(this, BLUE)
@@ -401,7 +411,35 @@ class MainActivity : ComponentActivity() {
         breathingRow.addView(waveformCard("Abdomen Waveform", abdomenGraphView), weightedParams())
         panel.addView(breathingRow, matchHeight(dp(126)))
 
+        ViewCompat.setOnApplyWindowInsetsListener(root) { _, windowInsets ->
+            val systemBars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val previewTopMargin = systemBars.top + topInsetSpacing
+
+            previewParams.topMargin = previewTopMargin
+            previewView.layoutParams = previewParams
+
+            previewOverlayParams.topMargin = previewTopMargin
+            previewOverlay.layoutParams = previewOverlayParams
+
+            topPanel.setPadding(
+                horizontalInset + systemBars.left,
+                previewTopMargin,
+                horizontalInset + systemBars.right,
+                0,
+            )
+            panel.setPadding(
+                horizontalInset + systemBars.left,
+                0,
+                horizontalInset + systemBars.right,
+                0,
+            )
+            panelParams.bottomMargin = systemBars.bottom + bottomInsetSpacing
+            panel.layoutParams = panelParams
+
+            windowInsets
+        }
         setContentView(root)
+        ViewCompat.requestApplyInsets(root)
     }
 
     private fun toggleProcessing() {
@@ -464,7 +502,7 @@ class MainActivity : ComponentActivity() {
         latestPressureTimestamp = Long.MIN_VALUE
         chestGraphView.reset()
         abdomenGraphView.reset()
-        bloodPressureGraphView.reset()
+        arterialPressureGraphView.reset()
         heartRateLabel.text = "-- bpm"
         expressionLabel.text = "--"
         breathingRateLabel.text = "-- bpm"

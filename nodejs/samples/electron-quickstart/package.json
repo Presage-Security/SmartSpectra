@@ -1,0 +1,65 @@
+{
+  "name": "smartspectra-electron-quickstart",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Cross-platform Electron quickstart for @smartspectra/node-sdk.",
+  "main": "main.js",
+  "scripts": {
+    "build": "esbuild renderer.js --bundle --outfile=dist/renderer.bundle.js --platform=browser --format=iife --log-level=warning",
+    "start": "npm run build && electron .",
+    "dist:mac": "npm run build && electron-builder --mac --arm64",
+    "dist:win": "npm run build && electron-builder --win --x64",
+    "dist:linux": "npm run build && electron-builder --linux --x64",
+    "dist:all": "npm run dist:mac && npm run dist:win && npm run dist:linux"
+  },
+  "dependencies": {
+    "@smartspectra/node-sdk": "latest",
+    "chart.js": "^4.5.0"
+  },
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.13.0",
+    "esbuild": "^0.21.0"
+  },
+  "build": {
+    "appId": "com.presagetech.smartspectra-electron-quickstart",
+    "productName": "SmartSpectra Quickstart",
+    "files": [
+      "main.js",
+      "index.html",
+      "styles.css",
+      "dist/**",
+      "node_modules/**",
+      "!node_modules/@smartspectra/node-sdk-*/**",
+      "!node_modules/@smartspectra/node-sdk/scripts/**",
+      "!node_modules/@smartspectra/node-sdk/test/**",
+      "!node_modules/@smartspectra/node-sdk/samples/**",
+      "!node_modules/@smartspectra/node-sdk/prebuilds/**"
+    ],
+    "mac": {
+      "category": "public.app-category.developer-tools",
+      "hardenedRuntime": true,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist",
+      "extendInfo": {
+        "NSCameraUsageDescription": "SmartSpectra needs camera access for video-based vitals measurement."
+      },
+      "extraResources": [
+        { "from": "node_modules/@smartspectra/node-sdk-darwin-${arch}/", "to": "smartspectra" }
+      ]
+    },
+    "win": {
+      "target": "nsis",
+      "extraResources": [
+        { "from": "node_modules/@smartspectra/node-sdk-win32-${arch}/", "to": "smartspectra" }
+      ]
+    },
+    "linux": {
+      "target": "AppImage",
+      "extraResources": [
+        { "from": "node_modules/@smartspectra/node-sdk-linux-${arch}/", "to": "smartspectra" }
+      ]
+    },
+    "asar": true
+  }
+}

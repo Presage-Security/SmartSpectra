@@ -69,11 +69,15 @@ class CheckupFragment : Fragment() {
     // Face metrics toggle
     private var faceMetricsEnabled: Boolean = false
 
+    // EDA measurements toggle
+    private var edaMeasurementsEnabled: Boolean = false
+
     // Metrics buffers for real-time display
     private val edgeArterialPressureBuffer = mutableListOf<MetricsProto.MeasurementWithConfidence>()
     private val edgePulseRateBuffer = mutableListOf<MetricsProto.MeasurementWithConfidence>()
     private val edgeBreathingRateBuffer = mutableListOf<MetricsProto.MeasurementWithConfidence>()
     private val edgeBreathingTraceBuffer = mutableListOf<MetricsProto.Measurement>()
+    private val edgeEdaBuffer = mutableListOf<MetricsProto.Measurement>()
 
     private val smartSpectraSdk: SmartSpectraSdk = SmartSpectraSdk.shared.apply {
         // Optional configurations
@@ -118,10 +122,12 @@ class CheckupFragment : Fragment() {
     private fun addControlViews() {
         cardioMeasurementsEnabled = viewModel.cardioMeasurementsEnabled.value
         faceMetricsEnabled = viewModel.faceMetricsEnabled.value
+        edaMeasurementsEnabled = viewModel.edaMeasurementsEnabled.value
         refreshRequestedMetrics()
         addCameraToggle()
         addCardioToggle()
         addFaceMetricsToggle()
+        addEdaToggle()
     }
 
     private fun refreshRequestedMetrics() {
@@ -129,6 +135,7 @@ class CheckupFragment : Fragment() {
             addAll(SmartSpectraConfig.breathingMetrics)
             if (cardioMeasurementsEnabled) addAll(SmartSpectraConfig.cardioMetrics)
             if (faceMetricsEnabled) addAll(SmartSpectraConfig.faceMetrics)
+            if (edaMeasurementsEnabled) addAll(SmartSpectraConfig.edaMetrics)
         }
     }
 
@@ -203,6 +210,42 @@ class CheckupFragment : Fragment() {
         buttonContainer.addView(faceContainer)
     }
 
+    private fun addEdaToggle() {
+        val edaContainer = LinearLayout(requireContext()).apply {
+            orientation = LinearLayout.VERTICAL
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                setMargins(16, 8, 16, 8)
+            }
+        }
+
+        val edaSwitch = SwitchMaterial(requireContext()).apply {
+            text = getString(R.string.demo_eda_measurements)
+            isChecked = edaMeasurementsEnabled
+        }
+
+        val edaSubtitle = TextView(requireContext()).apply {
+            text = getString(R.string.demo_eda_subtitle)
+            textSize = 12f
+            setTextColor(resources.getColor(android.R.color.darker_gray, null))
+            setPadding(0, 0, 0, 8)
+        }
+
+        edaSwitch.setOnCheckedChangeListener { _, isChecked ->
+            edaMeasurementsEnabled = isChecked
+            viewModel.setEdaMeasurementsEnabled(isChecked)
+            refreshRequestedMetrics()
+            // Clear buffer when toggling
+            edgeEdaBuffer.clear()
+        }
+
+        edaContainer.addView(edaSwitch)
+        edaContainer.addView(edaSubtitle)
+        buttonContainer.addView(edaContainer)
+    }
+
     private fun addCameraToggle() {
         val cameraPositionButton = MaterialButton(
             requireContext(), null, com.google.android.material.R.attr.materialIconButtonStyle
@@ -273,6 +316,15 @@ class CheckupFragment : Fragment() {
             }
         }
 
+        // Buffer EDA metrics
+        if (edaMeasurementsEnabled && metrics.hasEda()) {
+            if (metrics.eda.traceCount > 0) {
+                val newSamples = metrics.eda.traceList.filter { it.timestamp > 0 }
+                edgeEdaBuffer.addAll(newSamples)
+                edgeEdaBuffer.trimBuffer(400)
+            }
+        }
+
         // Render aggregate charts from buffers
         renderCharts()
     }
@@ -291,8 +343,11 @@ class CheckupFragment : Fragment() {
                 addChart(edgePulseRateBuffer.toChartEntries(), getString(R.string.demo_pulse_rate), true)
             }
             if (edgeArterialPressureBuffer.isNotEmpty()) {
-                addChart(edgeArterialPressureBuffer.toChartEntries(), getString(R.string.demo_blood_pressure_phasic), false)
+                addChart(edgeArterialPressureBuffer.toChartEntries(), getString(R.string.demo_edge_arterial_pressure), false)
             }
+        }
+        if (edaMeasurementsEnabled && edgeEdaBuffer.isNotEmpty()) {
+            addChart(edgeEdaBuffer.toChartEntries(), getString(R.string.demo_eda), false)
         }
     }
 

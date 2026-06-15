@@ -171,4 +171,4 @@ For older-to-current mappings, see the [iOS Migration Guide](migration-guide.md)
 
 - Email: [support@presagetech.com](mailto:support@presagetech.com)
 - [Submit a GitHub issue](https://github.com/Presage-Security/SmartSpectra-Swift/issues)
-- API reference: [Swift API reference](https://smartspectra.presagetech.com/docs/swift/api-reference)
+- API reference: [Swift API reference](api-reference.md)

@@ -18,6 +18,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface SmartSpectraRunner : NSObject
 @property(nonatomic, weak, nullable) id<SmartSpectraRunnerDelegate> delegate;
 
++ (NSString *)sdkVersion;
 - (nullable NSString *)startWithAPIKey:(NSString *)apiKey;
 - (void)stop;
 @end

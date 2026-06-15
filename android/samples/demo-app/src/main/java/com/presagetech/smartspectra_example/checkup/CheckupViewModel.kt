@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.update
 private const val KEY_CAMERA_POSITION = "cameraPosition"
 private const val KEY_CARDIO_MEASUREMENTS_ENABLED = "cardioMeasurementsEnabled"
 private const val KEY_FACE_METRICS_ENABLED = "faceMetricsEnabled"
+private const val KEY_EDA_MEASUREMENTS_ENABLED = "edaMeasurementsEnabled"
 
 class CheckupViewModel(
     private val savedStateHandle: SavedStateHandle
@@ -37,6 +38,10 @@ class CheckupViewModel(
         MutableStateFlow(savedStateHandle[KEY_FACE_METRICS_ENABLED] ?: false)
     val faceMetricsEnabled: StateFlow<Boolean> = _faceMetricsEnabled
 
+    private val _edaMeasurementsEnabled =
+        MutableStateFlow(savedStateHandle[KEY_EDA_MEASUREMENTS_ENABLED] ?: false)
+    val edaMeasurementsEnabled: StateFlow<Boolean> = _edaMeasurementsEnabled
+
     fun setCameraPosition(value: Int) {
         smartSpectraSdk.config.cameraPosition = CameraPosition.fromLensFacing(value)
         _cameraPosition.update { value }
@@ -51,5 +56,10 @@ class CheckupViewModel(
     fun setFaceMetricsEnabled(value: Boolean) {
         _faceMetricsEnabled.update { value }
         savedStateHandle[KEY_FACE_METRICS_ENABLED] = value
+    }
+
+    fun setEdaMeasurementsEnabled(value: Boolean) {
+        _edaMeasurementsEnabled.update { value }
+        savedStateHandle[KEY_EDA_MEASUREMENTS_ENABLED] = value
     }
 }

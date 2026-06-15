@@ -155,7 +155,12 @@
   </Target>
 
   <Target Name="StageSmartSpectraRuntime" AfterTargets="Build">
-    <Copy SourceFiles="$(SmartSpectraSdkDir)bin\smartspectra.dll;$(SmartSpectraSdkDir)bin\opencv_world4100.dll" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+    <ItemGroup>
+      <SmartSpectraRuntimeDll Include="$(SmartSpectraSdkDir)bin\*.dll" />
+    </ItemGroup>
+    <Error Condition="'@(SmartSpectraRuntimeDll)' == ''"
+           Text="SmartSpectra runtime DLLs were not found under '$(SmartSpectraSdkDir)bin\'. Reinstall or re-extract the SmartSpectra Windows distribution." />
+    <Copy SourceFiles="@(SmartSpectraRuntimeDll)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
     <WriteLinesToFile File="$(OutDir)smartspectra_manifest.json" Lines="{ &quot;resource_root_dir&quot;: &quot;$(CanonicalSdkDir)share/smartspectra&quot; }" Overwrite="true" />
   </Target>
 </Project>

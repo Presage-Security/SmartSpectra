@@ -120,8 +120,18 @@ struct ContinuousVitalsPlotView: View {
             }
 
             if sdk.edaInferenceEnabled {
-                edaLevel = metrics.eda.trace.last?.value ?? 0
-                edaTrace = metrics.eda.trace.suffix(TraceWindow.eda)
+                // Accumulate the EDA trace like breathing/cardio above. Each metrics
+                // update carries a delta that is empty on many frames; replacing the
+                // trace wholesale cleared the chart on every empty delta (the live
+                // "blink"). `appendProtoArray` no-ops on an empty delta and merges by
+                // timestamp, so the trace stays put between updates.
+                if let latestEda = metrics.eda.trace.last {
+                    edaLevel = latestEda.value
+                }
+                if !metrics.eda.trace.isEmpty {
+                    edaTrace.appendProtoArray(contentsOf: metrics.eda.trace)
+                    edaTrace = edaTrace.suffix(TraceWindow.eda)
+                }
             } else {
                 edaLevel = 0
                 edaTrace.removeAll(keepingCapacity: true)

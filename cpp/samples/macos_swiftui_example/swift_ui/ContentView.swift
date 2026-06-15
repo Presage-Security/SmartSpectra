@@ -151,6 +151,9 @@ struct ContentView: View {
                     Text("Native macOS example")
                         .font(.callout)
                         .foregroundStyle(.secondary)
+                    LabeledContent("SDK Version", value: model.sdkVersion)
+                        .font(.caption.monospacedDigit())
+                        .foregroundStyle(.secondary)
                 }
 
                 VStack(alignment: .leading, spacing: 8) {
@@ -232,6 +235,7 @@ private struct VitalTile: View {
                     .font(.system(size: 34, weight: .bold, design: .rounded))
                     .foregroundStyle(color)
                     .monospacedDigit()
+                    .contentTransition(.numericText())
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
                 Text(unit)
@@ -239,9 +243,10 @@ private struct VitalTile: View {
                     .foregroundStyle(.white.opacity(0.58))
                 Spacer()
                 if !confidence.isEmpty {
-                    Text(confidence)
+                    Text("Confidence \(confidence)")
                         .font(.caption.monospacedDigit())
                         .foregroundStyle(.white.opacity(0.54))
+                        .contentTransition(.numericText())
                 }
             }
 

@@ -18,7 +18,7 @@ clone, build, and run example applications against an installed SDK.
 
 Install the SDK for your platform from the C++ SDK documentation:
 
-<https://smartspectra.presagetech.com/docs/cpp>
+[C++ SDK documentation](../README.md)
 
 Portable CLI samples built by the aggregate `CMakeLists.txt`:
 
@@ -38,7 +38,7 @@ App-style samples built by platform-specific tooling:
 ## Prerequisites
 
 1. Install the SmartSpectra C++ SDK for your platform:
-   <https://smartspectra.presagetech.com/docs/cpp>
+   [C++ SDK documentation](../README.md)
 2. Register and obtain a Presage Technologies Physiology API key from
    <https://physiology.presagetech.com/auth/register>.
 3. Install the build tools required by your platform. The SDK installation guide
@@ -219,6 +219,17 @@ The same pattern applies to other C++ samples. Use a unique bundle identifier
 per sample wrapper, and keep the bundle identifier, entitlement values, and
 provisioning profile aligned. If any of those values drift, macOS typically
 reports keychain entitlement errors such as `errSecMissingEntitlement (-34018)`.
+
+### Distributing your own app (notarization)
+
+The steps above sign an app so it can **run the SDK locally** during
+development. **Redistributing** an app that bundles `libsmartspectra.dylib` to
+other Macs is a separate concern: the Homebrew-installed library is ad-hoc
+signed, so you must re-sign the embedded copy with your Developer ID (hardened
+runtime + secure timestamp) and make the bundle self-contained before Apple
+notarization will accept it. See
+[Distributing an app that embeds the SDK](../docs/macos.md#distributing-an-app-that-embeds-the-sdk-signing--notarization)
+in the macOS guide.
 
 ## Command Line Interface
 

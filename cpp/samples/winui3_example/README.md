@@ -35,16 +35,16 @@ The build needs to know where you unzipped the SmartSpectra distribution. The va
 
 1. `-p:SmartSpectraSdkDir=...` on the MSBuild command line — highest priority
 2. `SMARTSPECTRA_SDK_DIR` environment variable
-3. The default value in `Directory.Build.props` next to the solution: **`C:\SmartSpectra-<version>-windows-x64\`** (replace `<version>` with the release you downloaded, e.g. `3.1.0`)
+3. The default value in `Directory.Build.props` next to the solution: **`C:\SmartSpectra\`**
 
 If none of these resolve to a folder containing the SDK, the build fails before doing any work with a message naming the path it tried.
 
 ### Easiest setup
 
-Unzip the distribution at the default location (substitute the actual version number you downloaded):
+Unzip the distribution at the default location:
 
 ```text
-C:\SmartSpectra-<version>-windows-x64\
+C:\SmartSpectra\
 ├─ bin\
 ├─ include\
 ├─ lib\
@@ -61,7 +61,7 @@ Pick whichever of these fits:
 - **Set the `SMARTSPECTRA_SDK_DIR` environment variable** so Visual Studio picks it up automatically:
 
   ```bat
-  setx SMARTSPECTRA_SDK_DIR "D:\sdks\SmartSpectra-<version>-windows-x64\"
+  setx SMARTSPECTRA_SDK_DIR "D:\sdks\SmartSpectra\"
   ```
 
   Restart Visual Studio after running `setx` so it inherits the new environment.
@@ -69,7 +69,7 @@ Pick whichever of these fits:
 
   ```bat
   msbuild SmartSpectraWinUI.sln -t:Restore -p:Configuration=Release -p:Platform=x64 ^
-    -p:SmartSpectraSdkDir="D:\sdks\SmartSpectra-<version>-windows-x64\"
+    -p:SmartSpectraSdkDir="D:\sdks\SmartSpectra\"
   ```
 
 ## Building
@@ -91,7 +91,7 @@ msbuild SmartSpectraWinUI.sln -t:Restore -p:Configuration=Release -p:Platform=x6
 msbuild SmartSpectraWinUI.sln               -p:Configuration=Release -p:Platform=x64
 ```
 
-The post-build step copies `smartspectra.dll`, `opencv_world4100.dll`, and a generated `smartspectra_manifest.json` (with the absolute path to `<sdk>/share/smartspectra` baked in) next to the executable, so you can launch the app directly without setting up a runtime search path.
+The post-build step copies every DLL from the SDK `bin\` directory and writes a generated `smartspectra_manifest.json` (with the absolute path to `<sdk>\share\smartspectra` baked in) next to the executable, so you can launch the app directly without setting up a runtime search path.
 
 ## Configuration
 

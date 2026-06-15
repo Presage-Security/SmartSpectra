@@ -29,11 +29,13 @@ you're in territory we don't currently validate.
 
 ## The example app
 
-[`cpp/samples/debian-app-example/`](https://github.com/Presage-Security/SmartSpectra/tree/main/cpp/samples/debian-app-example)
-on the public mirror is a working reference implementation. It demonstrates
-every choice this page documents and is a suitable starting point to copy
-into your own repository when integrating the SDK into a redistributable
-`.deb`.
+The public GitHub mirror ships the example as
+[`cpp/samples/debian-app-example/README.md`](https://github.com/Presage-Security/SmartSpectra/blob/main/cpp/samples/debian-app-example/README.md)
+with its packaging logic in
+[`cpp/samples/debian-app-example/CMakeLists.txt`](https://github.com/Presage-Security/SmartSpectra/blob/main/cpp/samples/debian-app-example/CMakeLists.txt).
+It demonstrates every choice this page documents and is a suitable starting
+point to copy into your own repository when integrating the SDK into a
+redistributable `.deb`.
 
 Build it standalone against an extracted SDK release tarball:
 
@@ -45,8 +47,9 @@ Build it standalone against an extracted SDK release tarball:
 mkdir -p /tmp/sdk
 tar -xzf smartspectra-sdk-<version>-linux-<codename>-amd64.tar.gz -C /tmp/sdk
 
-# 2. Configure + build the example out-of-tree
-cmake -S cpp/samples/debian-app-example -B /tmp/dae-build \
+# 2. Choose the example source path for your checkout:
+#    - Public GitHub mirror: cpp/samples/debian-app-example
+cmake -S <example-source-dir> -B /tmp/dae-build \
       -DCMAKE_PREFIX_PATH=/tmp/sdk \
       -DCMAKE_BUILD_TYPE=Release
 cmake --build /tmp/dae-build -j$(nproc)
@@ -63,7 +66,9 @@ cpack -G DEB
 sudo apt install -y ./debian-app-example_*.deb
 ```
 
-Read [`cpp/samples/debian-app-example/CMakeLists.txt`](https://github.com/Presage-Security/SmartSpectra/blob/main/cpp/samples/debian-app-example/CMakeLists.txt) end-to-end —
+Read the example
+[`CMakeLists.txt`](https://github.com/Presage-Security/SmartSpectra/blob/main/cpp/samples/debian-app-example/CMakeLists.txt)
+end-to-end —
 it's the canonical source for the install layout, CPack DEB config, Depends
 manifest reading, and maintainer-script wiring.
 
@@ -176,4 +181,5 @@ remains a follow-up.
 
 ## See also
 
-- Example source: [`cpp/samples/debian-app-example/`](https://github.com/Presage-Security/SmartSpectra/tree/main/cpp/samples/debian-app-example)
+- Example README: [`cpp/samples/debian-app-example/README.md`](https://github.com/Presage-Security/SmartSpectra/blob/main/cpp/samples/debian-app-example/README.md)
+- Example packaging logic: [`cpp/samples/debian-app-example/CMakeLists.txt`](https://github.com/Presage-Security/SmartSpectra/blob/main/cpp/samples/debian-app-example/CMakeLists.txt)

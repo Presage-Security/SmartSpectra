@@ -24,11 +24,13 @@
     <string name="demo_breathing_baseline">Breathing Baseline</string>
     <string name="demo_breathing_line_length">Respiratory Line Length</string>
     <string name="demo_breathing_ratio">Inhale-Exhale Ratio</string>
-    <string name="demo_blood_pressure_phasic">Phasic</string>
     <string name="demo_cardio_measurements">Cardio Measurements</string>
-    <string name="demo_cardio_subtitle">Requires custom bundle. Not generally available yet.</string>
+    <string name="demo_cardio_subtitle">Pulse rate, arterial pressure trace, and HRV.</string>
     <string name="demo_face_metrics">Face Metrics</string>
     <string name="demo_face_metrics_subtitle">Enables facial expression detection.</string>
+    <string name="demo_eda_measurements">EDA Measurements</string>
+    <string name="demo_eda_subtitle">Electrodermal activity (EDA) trace.</string>
+    <string name="demo_eda">EDA</string>
     <string name="demo_edge_arterial_pressure">Arterial Pressure Trace</string>
     <string name="demo_edge_pulse_rate">Edge Pulse Rate</string>
     <string name="demo_edge_pulse_rate_confidence">Edge Pulse Rate Confidence</string>
@@ -55,7 +57,7 @@
     <string name="smart_spectra_headless_metrics_placeholder">Awaiting metrics...</string>
     <string name="smart_spectra_headless_metrics_pulse_format">Pulse: %1$.0f bpm</string>
     <string name="smart_spectra_headless_metrics_breathing_format">Breathing: %1$.0f rpm</string>
-    <string name="smart_spectra_headless_metrics_bp_format">Blood Pressure (Phasic): %1$.0f mmHg</string>
+    <string name="smart_spectra_headless_metrics_arterial_pressure_format">Arterial Pressure (Phasic): %1$.0f</string>
     <string name="smart_spectra_headless_fps_placeholder">FPS: --</string>
 
     <!-- Insights chat -->
@@ -93,7 +95,8 @@
     <string name="info_button_description">Show screening tips</string>
     <string name="navigation_hint_start">Tap to advance</string>
     <string name="navigation_hint_end">Tap to dismiss</string>
-    <string name="screening_blood_pressure">Pulse Rate</string>
+    <string name="screening_pulse_rate">Pulse Rate</string>
+    <string name="screening_eda">EDA</string>
 
     <!-- Expression detection -->
     <string name="expression_label">Facial Expression</string>

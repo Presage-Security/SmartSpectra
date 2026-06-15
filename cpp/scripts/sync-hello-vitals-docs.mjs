@@ -19,7 +19,7 @@ const targetDocs = [
   resolve(cppRoot, "docs", "linux", "ubuntu-22-04.md"),
   resolve(cppRoot, "docs", "linux", "ubuntu-24-04.md"),
   resolve(cppRoot, "docs", "macos.md"),
-  resolve(cppRoot, "docs", "windows.md"),
+  resolve(cppRoot, "docs", "windows", "index.md"),
 ];
 
 const args = new Set(process.argv.slice(2));

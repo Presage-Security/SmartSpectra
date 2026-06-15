@@ -8,6 +8,7 @@ package com.presagetech.smartspectra_minimal
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.view.View
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -19,6 +20,7 @@ import com.presagetech.smartspectra.CameraPosition
 import com.presagetech.smartspectra.SmartSpectraConfig
 import com.presagetech.smartspectra.ProcessingStatus
 import com.presagetech.smartspectra.SmartSpectraSdk
+import com.presagetech.smartspectra.ValidationStatus
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 
@@ -32,14 +34,17 @@ class MainActivity : AppCompatActivity() {
     private lateinit var heartRateLabel: TextView
     private lateinit var breathingRateLabel: TextView
     private lateinit var breathingGraphView: SignalGraphView
-    private lateinit var bloodPressureGraphView: SignalGraphView
+    private lateinit var arterialPressureGraphView: SignalGraphView
     private lateinit var edaLabel: TextView
     private lateinit var edaGraphView: SignalGraphView
+    private lateinit var validationLabel: TextView
     private lateinit var statusLabel: TextView
     private lateinit var toggleButton: MaterialButton
     private lateinit var insightLabel: TextView
     private lateinit var insightButton: MaterialButton
 
+    private var latestProcessingStatus: ProcessingStatus? = null
+    private var latestValidationStatus: ValidationStatus? = null
     private var pendingInsightRequestId: Int? = null
     private var latestBreathingTimestamp: Long = Long.MIN_VALUE
     private var latestPressureTimestamp: Long = Long.MIN_VALUE
@@ -71,9 +76,10 @@ class MainActivity : AppCompatActivity() {
         heartRateLabel = findViewById(R.id.heart_rate_label)
         breathingRateLabel = findViewById(R.id.breathing_rate_label)
         breathingGraphView = findViewById(R.id.breathing_graph_view)
-        bloodPressureGraphView = findViewById(R.id.blood_pressure_graph_view)
+        arterialPressureGraphView = findViewById(R.id.arterial_pressure_graph_view)
         edaLabel = findViewById(R.id.eda_label)
         edaGraphView = findViewById(R.id.eda_graph_view)
+        validationLabel = findViewById(R.id.validation_label)
         statusLabel = findViewById(R.id.status_label)
         toggleButton = findViewById(R.id.toggle_button)
         insightLabel = findViewById(R.id.insight_label)
@@ -101,6 +107,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun bindSdk() {
         sdk.processingStatus.observe(this) { updateProcessingStatus(it) }
+        sdk.validationStatus.observe(this) { status ->
+            latestValidationStatus = status
+            updateValidationHint()
+        }
         sdk.error.observe(this) { error ->
             if (error != null) {
                 statusLabel.text = getString(R.string.status_error, error.message)
@@ -141,7 +151,7 @@ class MainActivity : AppCompatActivity() {
                     .filter { it.timestamp > latestPressureTimestamp }
                 if (newPressureSamples.isNotEmpty()) {
                     latestPressureTimestamp = newPressureSamples.last().timestamp
-                    bloodPressureGraphView.appendValues(newPressureSamples.map { it.value })
+                    arterialPressureGraphView.appendValues(newPressureSamples.map { it.value })
                 }
             }
 
@@ -219,6 +229,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateProcessingStatus(status: ProcessingStatus?) {
+        latestProcessingStatus = status
+        updateValidationHint()
         when (status) {
             ProcessingStatus.IDLE -> {
                 statusLabel.text = getString(R.string.status_idle)
@@ -248,17 +260,33 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // Show the SDK's positioning/lighting guidance (e.g. "No face found", "Too dark")
+    // while a measurement is starting or running; hide it otherwise.
+    private fun updateValidationHint() {
+        val hint = latestValidationStatus?.hint.orEmpty()
+        val showHint = hint.isNotBlank() &&
+            latestProcessingStatus in setOf(ProcessingStatus.STARTING, ProcessingStatus.RUNNING)
+        if (showHint) {
+            validationLabel.text = hint
+            validationLabel.visibility = View.VISIBLE
+        } else {
+            validationLabel.visibility = View.GONE
+        }
+    }
+
     private fun resetGraphs() {
         latestBreathingTimestamp = Long.MIN_VALUE
         latestPressureTimestamp = Long.MIN_VALUE
         latestEdaTimestamp = Long.MIN_VALUE
         breathingGraphView.reset()
-        bloodPressureGraphView.reset()
+        arterialPressureGraphView.reset()
         edaGraphView.reset()
     }
 
     private fun resetMeasurementUi() {
         resetGraphs()
+        latestValidationStatus = null
+        updateValidationHint()
         heartRateLabel.text = getString(R.string.heart_rate_placeholder)
         breathingRateLabel.text = getString(R.string.breathing_rate_placeholder)
         edaLabel.text = getString(R.string.eda_placeholder)
