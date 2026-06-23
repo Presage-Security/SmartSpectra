@@ -107,6 +107,16 @@ Vitals measurement entry point. Owns one processing pipeline and surfaces lifecy
   on(event: 'videoOutput',        callback: (buf: Buffer, width: number, height: number, stride: number, pixelFormat: PixelFormatValue, timestampUs: number) => void): this
   ```
 
+### Properties
+
+- ```typescript
+  static readonly version: string
+  ```
+
+- ```typescript
+  readonly processingStatus: ProcessingStatusValue
+  ```
+
 ## SmartSpectraOptions
 
 ```typescript

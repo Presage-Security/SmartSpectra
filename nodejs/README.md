@@ -149,16 +149,6 @@ generated from the SDK's bundled TypeScript declarations so it tracks the
 published package. For which metrics to request and how to read the decoded
 payloads, see the [metrics guide](docs/metrics.md).
 
-<!-- The two members below are not yet emitted by docs-site/scripts/generate-api.ts
-     (it doesn't capture fields on the ambient `declare class`); documented here
-     until that generator gap is fixed, then they move to the API reference. -->
-Two instance members aren't yet in the generated reference:
-
-| Member | Type | Notes |
-| --- | --- | --- |
-| `sdk.processingStatus` | `ProcessingStatusValue` | Current processing status (read-only). |
-| `SmartSpectraSDK.version` | `string` | Static; the SDK package version. |
-
 ## Electron integration
 
 Runnable sample at [electron-quickstart](https://github.com/Presage-Security/SmartSpectra/tree/main/nodejs/samples/electron-quickstart).
