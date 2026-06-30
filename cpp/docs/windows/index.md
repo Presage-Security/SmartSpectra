@@ -100,30 +100,6 @@ find_package(SmartSpectra CONFIG REQUIRED)
 
 add_executable(hello_vitals hello_vitals.cpp)
 target_link_libraries(hello_vitals SmartSpectra::SDK)
-
-# Stage the Windows runtime DLLs next to the executable. The SDK ZIP owns this
-# runtime set; copy every DLL from bin/ so required dependencies such as
-# vulkan-1.dll and the versioned OpenCV runtime stay in sync with the package.
-file(GLOB SMARTSPECTRA_RUNTIME_DLLS
-    "${SMARTSPECTRA_SDK_DIR}/bin/*.dll")
-if (NOT SMARTSPECTRA_RUNTIME_DLLS)
-    message(FATAL_ERROR "No SmartSpectra runtime DLLs found in ${SMARTSPECTRA_SDK_DIR}/bin.")
-endif ()
-
-# Write smartspectra_manifest.json next to the executable. The SDK dir
-# typically contains backslashes on Windows, so escape them (and any
-# embedded quotes) before interpolating into the JSON literal.
-string(REPLACE "\\" "\\\\" _smartspectra_manifest_root "${SMARTSPECTRA_SDK_DIR}/share/smartspectra")
-string(REPLACE "\"" "\\\"" _smartspectra_manifest_root "${_smartspectra_manifest_root}")
-file(GENERATE
-    OUTPUT "$<TARGET_FILE_DIR:hello_vitals>/smartspectra_manifest.json"
-    CONTENT "{\n  \"resource_root_dir\": \"${_smartspectra_manifest_root}\"\n}\n")
-
-add_custom_command(TARGET hello_vitals POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            ${SMARTSPECTRA_RUNTIME_DLLS}
-            "$<TARGET_FILE_DIR:hello_vitals>"
-    VERBATIM)
 ```
 
 **`hello_vitals.cpp`**:
@@ -257,22 +233,22 @@ set "SMARTSPECTRA_SDK_PATH=C:\SmartSpectra" && cmake -S . -B build -G "NMake Mak
 
 ### 4. Run
 
-Pass the API key as an argument:
-
-Run the executable from the same developer command prompt:
+The executable needs the SDK runtime DLLs (`smartspectra.dll`, `opencv_world*.dll`,
+`vulkan-1.dll`, …) on its load path. The simplest way is to put the SmartSpectra SDK `bin/`
+directory on `PATH` for the session — Windows then loads the DLLs from there, and
+the SDK finds its bundled resources relative to `smartspectra.dll`. No copying and
+no resource configuration are required:
 
 ```bat
+set "PATH=%SMARTSPECTRA_SDK_PATH%\bin;%PATH%"
 .\build\hello_vitals.exe YOUR_API_KEY
 ```
 
-Or set it once in the shell:
+Or set the key once in the shell as well:
 
 ```bat
 set "SMARTSPECTRA_API_KEY=YOUR_API_KEY" && .\build\hello_vitals.exe
 ```
-
-The SDK DLLs are copied next to `hello_vitals.exe` by the post-build step in
-`CMakeLists.txt`, so no `PATH` setup is required.
 
 You should see breathing and cardio metrics printed to the console within a few
 seconds of the camera starting. Press `Ctrl+C` to stop the sample.
@@ -300,7 +276,9 @@ If the console output does not match the target state, check these first:
 - the ZIP was extracted into a different folder than `SMARTSPECTRA_SDK_PATH`
 - the project was built outside the x64 developer command prompt
 - the API key argument or `SMARTSPECTRA_API_KEY` environment variable is missing
-- the post-build step did not copy the SDK DLLs next to the executable
+- the SDK `bin/` directory is not on `PATH`, so the runtime DLLs can't be found
+- the runtime DLLs were copied away from the SDK `bin/`, separating them from the
+  sibling `share/smartspectra/` resource tree
 - another app is already using the camera
 - the executable is an older build from before the latest source change
 
@@ -333,14 +311,19 @@ bin/
   smartspectra.dll            # C++ SDK runtime DLL — must ship with your app
   smartspectra_capi.dll       # C ABI shim runtime DLL — required for FFI consumers
   vulkan-1.dll                # Vulkan loader used by the default inference backend
-  smartspectra_manifest.json
+  smartspectra_manifest.json  # lets smartspectra.dll locate ../share/smartspectra
   opencv_world*.dll           # OpenCV runtime dependency — must ship with your app
 share/smartspectra/           # Bundled graph and model resources
 ```
 
-When you ship your app to other machines, copy every DLL from the SDK `bin/`
-directory and the contents of `share/smartspectra/` next to the executable
-(or onto the PATH).
+When you ship your app to other machines, keep the `bin/` and `share/` directories
+together as a unit — the SDK locates its resources at `bin/../share/smartspectra`
+relative to `smartspectra.dll`, so the relationship between the two must be
+preserved. The recommended layout is to place your executable in `bin/` (or copy
+the whole `bin/ + share/` tree into your install directory); the DLLs then load
+without any `PATH` setup and resources resolve automatically. Do **not** copy the
+DLLs out on their own — separating `smartspectra.dll` from its sibling `share/`
+tree is what breaks resource resolution.
 
 ## Next Steps
 
@@ -350,9 +333,14 @@ directory and the contents of `share/smartspectra/` next to the executable
 
 ## Troubleshooting
 
-If the app starts but can't find DLLs, verify that `smartspectra.dll`,
-`opencv_world*.dll`, and other SDK DLLs from the extracted ZIP are present
-next to the executable or on the Windows DLL search path.
+If the app starts but can't find DLLs, verify that the SDK `bin/` directory is on
+`PATH` (or that your executable sits in `bin/` alongside `smartspectra.dll`,
+`opencv_world*.dll`, and the other SDK DLLs).
+
+If the app loads but fails to find its models/graph resources, the runtime DLLs
+were likely separated from the SDK's `share/smartspectra/` tree. Keep `bin/` and
+`share/` together — the SDK resolves resources at `bin/../share/smartspectra`
+relative to `smartspectra.dll`.
 
 If you are upgrading an older C++ integration, see the [C++ Migration Guide](../migration-guide.md).
 

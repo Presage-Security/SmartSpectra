@@ -157,7 +157,7 @@ Run:
 keytool -list -v -keystore <path-to-keystore> -alias <key-alias> -storepass <store-password> | grep SHA256
 ```
 
-Register that fingerprint under **Account → Registered App for OAuth** alongside your package name, then re-download and replace `presage_services.xml`.
+Register that fingerprint under **Account → OAuth Registration** alongside your package name, then re-download and replace `presage_services.xml`.
 
 > **Note:** Each package name can only be registered once. You cannot create multiple OAuth configs for the same package name.
 

@@ -45,6 +45,14 @@ Entry point for the SmartSpectra SDK. Most apps use the shared singleton initial
   public val metrics: LiveData<Metrics?> = _metrics
   ```
 
+  Latest metrics snapshot (keep-latest). Suitable for scalar state such as pulse rate or status. For the per-sample traces, prefer [metricsFlow]: LiveData can drop intermediate emits under main-thread congestion, losing trace samples.
+
+- ```kotlin
+  public val metricsFlow: SharedFlow<Metrics> = _metricsFlow.asSharedFlow()
+  ```
+
+  Every metrics emission, in order — lossless streaming. Prefer this over [metrics] for the per-sample traces; deliveries are buffered, so nothing is dropped under consumer main-thread congestion.
+
 - ```kotlin
   public val insight: LiveData<Insight?> = _insight
   ```

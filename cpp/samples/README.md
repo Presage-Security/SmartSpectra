@@ -27,7 +27,7 @@ Portable CLI samples built by the aggregate `CMakeLists.txt`:
 - [GStreamer Example](gstreamer_example): Pulls frames from a GStreamer pipeline (via OpenCV's GStreamer backend) and pushes them into the SDK through `UseCustomInput()`. Starting point for non-V4L2 capture stacks. Executable name: `gstreamer_example`.
 - [Hello Vitals](hello_vitals): Cross-platform quickstart sample also referenced by the platform install guides. Executable name: `hello_vitals`.
 - [Insights Example](insights_example): Streams the higher-level "insights" metric output from a camera or video file. Executable name: `insights_example`.
-- [Minimal Example](minimal_example): The smallest possible runnable SmartSpectra C++ application - minimum code to demonstrate the SDK lifecycle. Executable name: `minimal_example`.
+- [Minimal Example](minimal_example): The smallest possible runnable SmartSpectra C++ application - minimum code to demonstrate the SDK lifecycle, with optional file input via `--input_video_path`. Executable name: `minimal_example`.
 - [SmartSpectra Example](smart_spectra_example): Streams metrics and validation status to the terminal while displaying the camera (or input video) feed. Demonstrates the standard SmartSpectra setup pipeline. Executable name: `smart_spectra_example`.
 
 App-style samples built by platform-specific tooling:

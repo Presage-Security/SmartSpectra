@@ -10,8 +10,6 @@ target_link_libraries(${EXECUTABLE_NAME}
         SmartSpectra::SDK
 )
 
-smartspectra_stage_windows_runtime(${EXECUTABLE_NAME})
-
 if (INSTALL_SAMPLES)
     install(TARGETS ${EXECUTABLE_NAME}
             EXPORT ${PROJECT_NAME}Targets

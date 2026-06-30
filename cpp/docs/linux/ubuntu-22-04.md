@@ -357,6 +357,9 @@ Run a sample with your API key:
 ./build/minimal_example/minimal_example --api_key=YOUR_API_KEY
 ```
 
+To run headlessly against a recording instead of the default camera, add
+`--input_video_path=/path/to/video.mp4`.
+
 ## Advanced apt workflows
 
 Most users only need the stable `jammy` repository above. Use these when you

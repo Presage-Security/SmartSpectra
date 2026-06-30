@@ -72,13 +72,6 @@ class CheckupFragment : Fragment() {
     // EDA measurements toggle
     private var edaMeasurementsEnabled: Boolean = false
 
-    // Metrics buffers for real-time display
-    private val edgeArterialPressureBuffer = mutableListOf<MetricsProto.MeasurementWithConfidence>()
-    private val edgePulseRateBuffer = mutableListOf<MetricsProto.MeasurementWithConfidence>()
-    private val edgeBreathingRateBuffer = mutableListOf<MetricsProto.MeasurementWithConfidence>()
-    private val edgeBreathingTraceBuffer = mutableListOf<MetricsProto.Measurement>()
-    private val edgeEdaBuffer = mutableListOf<MetricsProto.Measurement>()
-
     private val smartSpectraSdk: SmartSpectraSdk = SmartSpectraSdk.shared.apply {
         // Optional configurations
         // select camera (front or back, defaults to front when not set)
@@ -96,6 +89,15 @@ class CheckupFragment : Fragment() {
                 viewModel.cameraPosition.collect { lensFacing ->
                     cameraPosition = lensFacing
                 }
+            }
+        }
+        // Render the finished traces accumulated by the ViewModel. Capture runs
+        // in a separate Activity, so accumulation lives in the ViewModel (which
+        // survives this fragment being stopped); here we just render its snapshot
+        // when the screen is visible.
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.traces.collect { traces -> renderCharts(traces) }
             }
         }
 
@@ -166,9 +168,6 @@ class CheckupFragment : Fragment() {
             cardioMeasurementsEnabled = isChecked
             viewModel.setCardioMeasurementsEnabled(isChecked)
             refreshRequestedMetrics()
-            // Clear buffers when toggling
-            edgeArterialPressureBuffer.clear()
-            edgePulseRateBuffer.clear()
         }
 
         cardioContainer.addView(cardioSwitch)
@@ -237,8 +236,6 @@ class CheckupFragment : Fragment() {
             edaMeasurementsEnabled = isChecked
             viewModel.setEdaMeasurementsEnabled(isChecked)
             refreshRequestedMetrics()
-            // Clear buffer when toggling
-            edgeEdaBuffer.clear()
         }
 
         edaContainer.addView(edaSwitch)
@@ -273,7 +270,8 @@ class CheckupFragment : Fragment() {
     }
 
     private fun handleMetrics(metrics: MetricsProto.Metrics) {
-        // Handle face mesh
+        // Handle face mesh. Trace accumulation/rendering is driven separately by
+        // the ViewModel's [CheckupTraces] snapshot (see onViewCreated).
         if (isFaceMeshEnabled && metrics.hasFace() && metrics.face.landmarksCount > 0) {
             val latestLandmarks = metrics.face.landmarksList.lastOrNull()?.valueList
             if (latestLandmarks != null) {
@@ -285,69 +283,27 @@ class CheckupFragment : Fragment() {
         } else {
             faceMeshContainer.isVisible = false
         }
-
-        // Buffer breathing metrics
-        if (metrics.hasBreathing()) {
-            val breathing = metrics.breathing
-            if (breathing.rateCount > 0) {
-                val newSamples = breathing.rateList.filter { it.timestamp > 0 }
-                edgeBreathingRateBuffer.addAll(newSamples)
-                edgeBreathingRateBuffer.trimBuffer(200)
-            }
-            if (breathing.upperTraceCount > 0) {
-                val newSamples = breathing.upperTraceList.filter { it.timestamp > 0 }
-                edgeBreathingTraceBuffer.addAll(newSamples)
-                edgeBreathingTraceBuffer.trimBuffer(400)
-            }
-        }
-
-        // Buffer cardio metrics
-        if (cardioMeasurementsEnabled && metrics.hasCardio()) {
-            val cardio = metrics.cardio
-            if (cardio.arterialPressureTraceCount > 0) {
-                val newSamples = cardio.arterialPressureTraceList.filter { it.timestamp > 0 }
-                edgeArterialPressureBuffer.addAll(newSamples)
-                edgeArterialPressureBuffer.trimBuffer(400)
-            }
-            if (cardio.pulseRateCount > 0) {
-                val newSamples = cardio.pulseRateList.filter { it.timestamp > 0 }
-                edgePulseRateBuffer.addAll(newSamples)
-                edgePulseRateBuffer.trimBuffer(200)
-            }
-        }
-
-        // Buffer EDA metrics
-        if (edaMeasurementsEnabled && metrics.hasEda()) {
-            if (metrics.eda.traceCount > 0) {
-                val newSamples = metrics.eda.traceList.filter { it.timestamp > 0 }
-                edgeEdaBuffer.addAll(newSamples)
-                edgeEdaBuffer.trimBuffer(400)
-            }
-        }
-
-        // Render aggregate charts from buffers
-        renderCharts()
     }
 
-    private fun renderCharts() {
+    private fun renderCharts(traces: CheckupTraces) {
         chartContainer.removeAllViews()
 
-        if (edgeBreathingTraceBuffer.isNotEmpty()) {
-            addChart(edgeBreathingTraceBuffer.toChartEntries(), getString(R.string.demo_breathing_pleth), false)
+        if (traces.breathingTrace.isNotEmpty()) {
+            addChart(traces.breathingTrace.toChartEntries(), getString(R.string.demo_breathing_pleth), false)
         }
-        if (edgeBreathingRateBuffer.isNotEmpty()) {
-            addChart(edgeBreathingRateBuffer.toChartEntries(), getString(R.string.demo_breathing_rate), true)
+        if (traces.breathingRate.isNotEmpty()) {
+            addChart(traces.breathingRate.toChartEntries(), getString(R.string.demo_breathing_rate), true)
         }
         if (cardioMeasurementsEnabled) {
-            if (edgePulseRateBuffer.isNotEmpty()) {
-                addChart(edgePulseRateBuffer.toChartEntries(), getString(R.string.demo_pulse_rate), true)
+            if (traces.pulseRate.isNotEmpty()) {
+                addChart(traces.pulseRate.toChartEntries(), getString(R.string.demo_pulse_rate), true)
             }
-            if (edgeArterialPressureBuffer.isNotEmpty()) {
-                addChart(edgeArterialPressureBuffer.toChartEntries(), getString(R.string.demo_edge_arterial_pressure), false)
+            if (traces.arterialPressureTrace.isNotEmpty()) {
+                addChart(traces.arterialPressureTrace.toChartEntries(), getString(R.string.demo_edge_arterial_pressure), false)
             }
         }
-        if (edaMeasurementsEnabled && edgeEdaBuffer.isNotEmpty()) {
-            addChart(edgeEdaBuffer.toChartEntries(), getString(R.string.demo_eda), false)
+        if (edaMeasurementsEnabled && traces.edaTrace.isNotEmpty()) {
+            addChart(traces.edaTrace.toChartEntries(), getString(R.string.demo_eda), false)
         }
     }
 
@@ -436,13 +392,6 @@ class CheckupFragment : Fragment() {
             setVisibleYRange(0f, 1f, YAxis.AxisDependency.LEFT)
             moveViewTo(0f, 0f, YAxis.AxisDependency.LEFT)
             invalidate()
-        }
-    }
-
-    private fun <T> MutableList<T>.trimBuffer(maxSize: Int) {
-        if (size > maxSize) {
-            val excess = size - maxSize
-            subList(0, excess).clear()
         }
     }
 }

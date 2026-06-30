@@ -122,9 +122,9 @@ cd SmartSpectra/cpp/samples/macos_swiftui_example
 ./scripts/check-requirements.sh
 ```
 
-The script checks the Homebrew SDK, required model files, Vulkan/MoltenVK
-setup, the SDK graph asset path, and code-signing visibility. To apply safe
-runtime fixes (install missing Homebrew packages), run:
+The script checks the Homebrew SDK, required model files, the SDK graph asset
+path, and code-signing visibility. To apply safe runtime fixes (install missing
+Homebrew packages), run:
 
 ```bash
 ./scripts/check-requirements.sh --fix
@@ -432,12 +432,12 @@ for the full `notarytool`/`stapler` flow.
 ### Make the bundle self-contained first
 
 The Homebrew library records **absolute** load paths
-(`/opt/homebrew/opt/smartspectra/lib/...`) and links its OpenCV, Vulkan loader,
-and MoltenVK dependencies by absolute `/opt/homebrew/opt/...` paths — those
-won't exist on a customer's Mac. Before signing, copy `libsmartspectra.dylib`
-**and its Homebrew dependency tree** into `Contents/Frameworks`, rewrite the
-install names to `@rpath`, and add an `@executable_path/../Frameworks` rpath to
-your executable. A tool such as
+(`/opt/homebrew/opt/smartspectra/lib/...`) and links its OpenCV dependencies by
+absolute `/opt/homebrew/opt/...` paths — those won't exist on a customer's Mac.
+Before signing, copy `libsmartspectra.dylib` **and its Homebrew
+dependency tree** into `Contents/Frameworks`, rewrite the install names to
+`@rpath`, and add an `@executable_path/../Frameworks` rpath to your executable.
+A tool such as
 [`dylibbundler`](https://github.com/auriamg/macdylibbundler) automates the copy
 and relocation; re-sign every relocated Mach-O afterward as shown above.
 
@@ -467,8 +467,8 @@ API reference available at [C++ API Reference](api-reference.md).
 
 ### Runtime libraries or model files missing
 
-If you see errors about a missing Vulkan loader, MoltenVK driver, or
-`.tflite` model files, run the sample's diagnostic script:
+If you see errors about missing runtime libraries or `.tflite` model files,
+run the sample's diagnostic script:
 
 ```bash
 ./scripts/check-requirements.sh --fix

@@ -74,8 +74,6 @@ Enter `SMARTSPECTRA_API_KEY` in the app and press Start. On first launch, allow 
 - SmartSpectra SDK installed through Homebrew.
 - Homebrew dependencies used by this SDK build:
   - OpenCV
-  - `vulkan-loader`
-  - `molten-vk`
 - Apple Development signing in Xcode.
 - A SmartSpectra API key.
 
@@ -163,7 +161,7 @@ task cpp:macos-swiftui-example
 
 ## Requirements Script
 
-The helper script checks the Homebrew SDK, required model files, Vulkan/MoltenVK setup, SDK graph asset path, and code-signing visibility:
+The helper script checks the Homebrew SDK, required model files, SDK graph asset path, and code-signing visibility:
 
 ```sh
 ./scripts/check-requirements.sh
@@ -171,7 +169,7 @@ The helper script checks the Homebrew SDK, required model files, Vulkan/MoltenVK
 
 `--fix` can:
 
-- install missing `opencv`, `vulkan-loader`, and `molten-vk`
+- install missing `opencv`
 - create `$(HOMEBREW_PREFIX)/share/smartspectra/graph` as a symlink to the SDK graph assets
 
 The graph symlink is needed because `libsmartspectra.dylib` looks for model files under:
@@ -207,20 +205,6 @@ Select the app target, open Signing & Capabilities, and choose your Apple Develo
 SMARTSPECTRA_DEVELOPMENT_TEAM=<team-id> task cpp:macos-swiftui-example
 ```
 
-### `Library not loaded: @rpath/libvulkan.1.dylib`
-
-Install the Vulkan loader:
-
-```sh
-brew install vulkan-loader
-```
-
-or run:
-
-```sh
-./scripts/check-requirements.sh --fix
-```
-
 ### `brew install presage/smartspectra/smartspectra-rc` fails because `smartspectra` is already linked
 
 Unlink the stable formula, then retry the RC install:
@@ -229,16 +213,6 @@ Unlink the stable formula, then retry the RC install:
 brew unlink smartspectra
 brew install presage/smartspectra/smartspectra-rc
 ```
-
-### `Vulkan is not available: vkCreateInstance failed with ErrorIncompatibleDriver`
-
-Install MoltenVK:
-
-```sh
-brew install molten-vk
-```
-
-Then restart the app.
 
 ### Missing `.tflite` model files under `$(HOMEBREW_PREFIX)/share/smartspectra`
 
