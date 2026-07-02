@@ -58,15 +58,15 @@
         app:layout_constraintTop_toBottomOf="@+id/faceMetricsStatus"
         app:layout_constraintStart_toEndOf="@+id/breathingRateTitle"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/bloodPressureTitle" />
+        app:layout_constraintBottom_toTopOf="@+id/pulseRateTitle" />
 
-    <!-- Blood Pressure Section (conditionally visible) -->
+    <!-- Cardio section: pulse rate + arterial pressure trace (conditionally visible) -->
     <TextView
-        android:id="@+id/bloodPressureTitle"
+        android:id="@+id/pulseRateTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:minWidth="125dp"
-        android:text="@string/screening_blood_pressure"
+        android:text="@string/screening_pulse_rate"
         android:textColor="@color/purple"
         android:textSize="18sp"
         android:textStyle="bold"
@@ -74,9 +74,9 @@
         android:shadowColor="@color/white"
         android:shadowRadius="8"
         android:visibility="gone"
-        app:layout_constraintTop_toTopOf="@+id/bloodPressurePlot"
+        app:layout_constraintTop_toTopOf="@+id/arterialPressurePlot"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/bloodPressurePlot"
+        app:layout_constraintEnd_toStartOf="@+id/arterialPressurePlot"
         app:layout_constraintBottom_toTopOf="@+id/pulseRateValue" />
 
     <TextView
@@ -91,13 +91,13 @@
         android:shadowColor="@color/white"
         android:shadowRadius="8"
         android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@+id/bloodPressureTitle"
+        app:layout_constraintTop_toBottomOf="@+id/pulseRateTitle"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/bloodPressurePlot"
-        app:layout_constraintBottom_toBottomOf="@+id/bloodPressurePlot" />
+        app:layout_constraintEnd_toStartOf="@+id/arterialPressurePlot"
+        app:layout_constraintBottom_toBottomOf="@+id/arterialPressurePlot" />
 
     <com.github.mikephil.charting.charts.LineChart
-        android:id="@+id/bloodPressurePlot"
+        android:id="@+id/arterialPressurePlot"
         android:layout_width="0dp"
         android:layout_height="125dp"
         android:layout_marginStart="10dp"
@@ -105,7 +105,56 @@
         android:shadowRadius="8"
         android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@+id/breathingPlot"
-        app:layout_constraintStart_toEndOf="@+id/bloodPressureTitle"
+        app:layout_constraintStart_toEndOf="@+id/pulseRateTitle"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/edaPlot" />
+
+    <!-- EDA section: electrodermal activity trace (conditionally visible) -->
+    <TextView
+        android:id="@+id/edaTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:minWidth="125dp"
+        android:text="@string/screening_eda"
+        android:textColor="@color/green"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textAlignment="viewStart"
+        android:shadowColor="@color/white"
+        android:shadowRadius="8"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="@+id/edaPlot"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/edaPlot"
+        app:layout_constraintBottom_toTopOf="@+id/edaValue" />
+
+    <TextView
+        android:id="@+id/edaValue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="--"
+        android:textColor="@color/green"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textAlignment="viewStart"
+        android:shadowColor="@color/white"
+        android:shadowRadius="8"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@+id/edaTitle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/edaPlot"
+        app:layout_constraintBottom_toBottomOf="@+id/edaPlot" />
+
+    <com.github.mikephil.charting.charts.LineChart
+        android:id="@+id/edaPlot"
+        android:layout_width="0dp"
+        android:layout_height="125dp"
+        android:layout_marginStart="10dp"
+        android:shadowColor="@color/white"
+        android:shadowRadius="8"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@+id/arterialPressurePlot"
+        app:layout_constraintStart_toEndOf="@+id/edaTitle"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toTopOf="@+id/expressionStatus" />
 
@@ -116,7 +165,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@+id/bloodPressurePlot"
+        app:layout_constraintTop_toBottomOf="@+id/edaPlot"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent" />

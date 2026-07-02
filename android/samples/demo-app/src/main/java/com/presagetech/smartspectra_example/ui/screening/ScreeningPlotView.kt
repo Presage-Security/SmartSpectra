@@ -25,6 +25,7 @@ import com.presagetech.smartspectra.proto.MetricsProto.Metrics
 import com.presagetech.smartspectra_example.R
 import com.presagetech.smartspectra.SmartSpectraSdk
 import com.presagetech.smartspectra_example.cardioMeasurementsEnabled
+import com.presagetech.smartspectra_example.edaMeasurementsEnabled
 import com.presagetech.smartspectra_example.facialExpressionEnabled
 import com.presagetech.smartspectra_example.util.displayName
 import com.presagetech.smartspectra_example.util.toChartEntries
@@ -32,7 +33,7 @@ import java.util.Locale
 import kotlin.math.roundToInt
 
 /**
- * View that renders pulse, breathing, and blood pressure plots during continuous measurements.
+ * View that renders pulse, breathing, arterial pressure, and EDA plots during continuous measurements.
  * Use [bindLifecycleOwner] to start observing metrics.
  */
 class ScreeningPlotView @JvmOverloads constructor(
@@ -41,15 +42,19 @@ class ScreeningPlotView @JvmOverloads constructor(
 
     private val breathingRateTitle: TextView
     private val breathingRateValue: TextView
-    private val bloodPressureTitle: TextView
+    private val pulseRateTitle: TextView
     private val pulseRateValue: TextView
+    private val edaTitle: TextView
+    private val edaValue: TextView
     private val breathingPlot: LineChart
-    private val bloodPressurePlot: LineChart
+    private val arterialPressurePlot: LineChart
+    private val edaPlot: LineChart
     private val faceMetricsStatusView: FaceMetricsStatusView
     private val expressionStatusView: ExpressionStatusView
 
     private val breathingTraces = mutableListOf<Measurement>()
     private val arterialPressureTrace = mutableListOf<MeasurementWithConfidence>()
+    private val edaTrace = mutableListOf<Measurement>()
 
     // Coalesce chart redraws to one per animation frame. Metrics arrive at ~30 Hz
     // and each MPAndroidChart invalidate is expensive; without coalescing the UI
@@ -61,11 +66,13 @@ class ScreeningPlotView @JvmOverloads constructor(
     }
 
     private lateinit var breathingDataSet: LineDataSet
-    private lateinit var bloodPressureDataSet: LineDataSet
+    private lateinit var arterialPressureDataSet: LineDataSet
+    private lateinit var edaDataSet: LineDataSet
 
     private var breathingRate: Int = 0
     private var cardioMeasurementsEnabledOverride: Boolean? = null
     private var facialExpressionEnabledOverride: Boolean? = null
+    private var edaMeasurementsEnabledOverride: Boolean? = null
 
     private val sdk: SmartSpectraSdk by lazy {
         SmartSpectraSdk.shared
@@ -77,28 +84,42 @@ class ScreeningPlotView @JvmOverloads constructor(
 
         breathingRateTitle = findViewById(R.id.breathingRateTitle)
         breathingRateValue = findViewById(R.id.breathingRateValue)
-        bloodPressureTitle = findViewById(R.id.bloodPressureTitle)
+        pulseRateTitle = findViewById(R.id.pulseRateTitle)
         pulseRateValue = findViewById(R.id.pulseRateValue)
+        edaTitle = findViewById(R.id.edaTitle)
+        edaValue = findViewById(R.id.edaValue)
         breathingPlot = findViewById(R.id.breathingPlot)
-        bloodPressurePlot = findViewById(R.id.bloodPressurePlot)
+        arterialPressurePlot = findViewById(R.id.arterialPressurePlot)
+        edaPlot = findViewById(R.id.edaPlot)
         faceMetricsStatusView = findViewById(R.id.faceMetricsStatus)
         expressionStatusView = findViewById(R.id.expressionStatus)
 
         breathingDataSet = createDataSet(Color.BLUE)
-        bloodPressureDataSet = createDataSet(ContextCompat.getColor(context, R.color.purple))
+        arterialPressureDataSet = createDataSet(ContextCompat.getColor(context, R.color.purple))
+        edaDataSet = createDataSet(ContextCompat.getColor(context, R.color.green))
 
         setupChart(breathingPlot)
-        setupChart(bloodPressurePlot)
+        setupChart(arterialPressurePlot)
+        setupChart(edaPlot)
 
         breathingPlot.data = LineData(breathingDataSet)
-        bloodPressurePlot.data = LineData(bloodPressureDataSet)
+        arterialPressurePlot.data = LineData(arterialPressureDataSet)
+        edaPlot.data = LineData(edaDataSet)
     }
 
     fun setCardioMeasurementsEnabled(enabled: Boolean) {
         cardioMeasurementsEnabledOverride = enabled
         updateCardioVisibility()
         if (!enabled) {
-            updateChart(bloodPressurePlot, bloodPressureDataSet, emptyList())
+            updateChart(arterialPressurePlot, arterialPressureDataSet, emptyList())
+        }
+    }
+
+    fun setEdaMeasurementsEnabled(enabled: Boolean) {
+        edaMeasurementsEnabledOverride = enabled
+        updateEdaVisibility()
+        if (!enabled) {
+            updateChart(edaPlot, edaDataSet, emptyList())
         }
     }
 
@@ -121,6 +142,7 @@ class ScreeningPlotView @JvmOverloads constructor(
         // Observe metrics LiveData for breathing, cardio, expression, and face metrics data
         sdk.metrics.observe(lifecycleOwner) { metrics ->
             updateCardioVisibility()
+            updateEdaVisibility()
             updateExpressionVisibility()
             updateFaceMetricsVisibility()
 
@@ -147,6 +169,11 @@ class ScreeningPlotView @JvmOverloads constructor(
             // Update cardio traces and pulse rate when enabled
             if (cardioMeasurementsEnabled) {
                 updateCardioTraces(metrics)
+            }
+
+            // Update EDA trace when enabled
+            if (edaMeasurementsEnabled) {
+                updateEdaTrace(metrics)
             }
 
             // Update face metrics (blinking/talking) when enabled
@@ -176,13 +203,28 @@ class ScreeningPlotView @JvmOverloads constructor(
      */
     private fun updateCardioVisibility() {
         val visibility = if (cardioMeasurementsEnabled) View.VISIBLE else View.GONE
-        bloodPressureTitle.visibility = visibility
+        pulseRateTitle.visibility = visibility
         pulseRateValue.visibility = visibility
-        bloodPressurePlot.visibility = visibility
+        arterialPressurePlot.visibility = visibility
 
         if (!cardioMeasurementsEnabled) {
             arterialPressureTrace.clear()
             pulseRateValue.text = "-- bpm"
+        }
+    }
+
+    /**
+     * Updates the visibility of the EDA section based on EDA enabled state.
+     */
+    private fun updateEdaVisibility() {
+        val visibility = if (edaMeasurementsEnabled) View.VISIBLE else View.GONE
+        edaTitle.visibility = visibility
+        edaValue.visibility = visibility
+        edaPlot.visibility = visibility
+
+        if (!edaMeasurementsEnabled) {
+            edaTrace.clear()
+            edaValue.text = "--"
         }
     }
 
@@ -246,16 +288,38 @@ class ScreeningPlotView @JvmOverloads constructor(
         }
     }
 
+    /**
+     * Updates the EDA trace from the latest metrics.
+     */
+    private fun updateEdaTrace(metrics: Metrics) {
+        if (!metrics.hasEda()) return
+
+        val eda = metrics.eda
+        if (eda.traceCount > 0) {
+            val newSamples = eda.traceList.filter { it.timestamp > 0 }
+            mergeData(edaTrace, newSamples, maxSize = 400) { it.timestamp }
+            scheduleChartRedraw()
+
+            val latestEda = newSamples.lastOrNull()?.value
+            if (latestEda != null) {
+                edaValue.text = String.format(Locale.ROOT, "%.2f", latestEda)
+            }
+        }
+    }
+
     private fun clearDisplayedVitals() {
         removeCallbacks(chartRedrawRunnable)
         chartsDirty = false
         breathingTraces.clear()
         arterialPressureTrace.clear()
+        edaTrace.clear()
         breathingRate = 0
         updateBreathingRateDisplay()
         pulseRateValue.text = "-- bpm"
+        edaValue.text = "--"
         updateChart(breathingPlot, breathingDataSet, emptyList())
-        updateChart(bloodPressurePlot, bloodPressureDataSet, emptyList())
+        updateChart(arterialPressurePlot, arterialPressureDataSet, emptyList())
+        updateChart(edaPlot, edaDataSet, emptyList())
         faceMetricsStatusView.reset()
         expressionStatusView.reset()
     }
@@ -275,10 +339,13 @@ class ScreeningPlotView @JvmOverloads constructor(
         updateChart(breathingPlot, breathingDataSet, breathingTraces.toChartEntries())
         if (cardioMeasurementsEnabled) {
             updateChart(
-                bloodPressurePlot,
-                bloodPressureDataSet,
+                arterialPressurePlot,
+                arterialPressureDataSet,
                 arterialPressureTrace.toChartEntries(),
             )
+        }
+        if (edaMeasurementsEnabled) {
+            updateChart(edaPlot, edaDataSet, edaTrace.toChartEntries())
         }
     }
 
@@ -375,6 +442,9 @@ class ScreeningPlotView @JvmOverloads constructor(
 
     private val cardioMeasurementsEnabled: Boolean
         get() = cardioMeasurementsEnabledOverride ?: sdk.cardioMeasurementsEnabled
+
+    private val edaMeasurementsEnabled: Boolean
+        get() = edaMeasurementsEnabledOverride ?: sdk.edaMeasurementsEnabled
 
     private val facialExpressionEnabled: Boolean
         get() = facialExpressionEnabledOverride ?: sdk.facialExpressionEnabled

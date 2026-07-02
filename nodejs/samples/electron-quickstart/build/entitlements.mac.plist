@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Required by getUserMedia under the macOS hardened runtime. The
+         NSCameraUsageDescription string lives in Info.plist; this entitlement
+         tells the OS the app intends to use the camera. -->
+    <key>com.apple.security.device.camera</key>
+    <true/>
+
+    <!-- SmartSpectra ships unsigned helper dylibs inside the bundle. With
+         the hardened runtime, Electron refuses to load unsigned libraries
+         unless this entitlement is granted, OR you re-sign every dylib
+         yourself before packaging. The latter is preferable for
+         notarization-strict production builds. -->
+    <key>com.apple.security.cs.disable-library-validation</key>
+    <true/>
+
+    <!-- Required when loading Electron's helper apps and the embedded
+         Chromium V8 runtime under the hardened runtime. Standard for
+         Electron apps. -->
+    <key>com.apple.security.cs.allow-jit</key>
+    <true/>
+    <key>com.apple.security.cs.allow-unsigned-executable-memory</key>
+    <true/>
+</dict>
+</plist>

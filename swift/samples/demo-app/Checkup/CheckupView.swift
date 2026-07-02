@@ -10,15 +10,20 @@ import SmartSpectra
 struct CheckupView: View {
     private let sdk = SmartSpectraSDK.shared
     @State private var edgePulseRateBuffer: [MeasurementWithConfidence] = []
-    @State private var edgeBloodPressureBuffer: [MeasurementWithConfidence] = []
+    @State private var edgeArterialPressureBuffer: [MeasurementWithConfidence] = []
     @State private var edgeBreathingRateBuffer: [MeasurementWithConfidence] = []
+    // EDA trace is a plain Measurement (value + timestamp, no confidence). `SmartSpectra.` qualifies it
+    // to avoid clashing with Foundation's `Measurement`.
+    @State private var edgeEdaBuffer: [SmartSpectra.Measurement] = []
 
     // Set the initial camera position. Can be set to .front or .back. Defaults to .front
     @State private var cameraPosition: AVCaptureDevice.Position = .front
-    // Cardio measurements (e.g., arterial pressure trace). Contact support for compatible custom bundles.
+    // Cardio measurements (pulse rate, arterial pressure trace, HRV).
     @State private var cardioMeasurementsEnabled: Bool = false
     // Face metrics (landmarks, blinking, talking, expressions). Contact support for compatible custom bundles.
     @State private var faceMetricsEnabled: Bool = false
+    // EDA (electrodermal activity) trace.
+    @State private var edaMeasurementsEnabled: Bool = false
 
     // App display configurations
     let isCustomizationEnabled: Bool = true
@@ -53,7 +58,7 @@ struct CheckupView: View {
                 Toggle(isOn: $cardioMeasurementsEnabled) {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Cardio Measurements")
-                        Text("Requires a custom bundle and isn't generally available yet.")
+                        Text("Pulse rate, arterial pressure trace, and HRV.")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -91,6 +96,27 @@ struct CheckupView: View {
                     }
                     sdk.config.requestedMetrics = current
                 }
+
+                Toggle(isOn: $edaMeasurementsEnabled) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("EDA Measurements")
+                        Text("Electrodermal activity (EDA) trace.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .onChange(of: edaMeasurementsEnabled) { _, enabled in
+                    var current = sdk.config.requestedMetrics ?? SmartSpectraConfig.breathingMetrics
+                    let edaMetrics = SmartSpectraConfig.edaMetrics
+                    if enabled {
+                        let currentSet = Set(current)
+                        for m in edaMetrics where !currentSet.contains(m) { current.append(m) }
+                    } else {
+                        let removeSet = Set(edaMetrics)
+                        current.removeAll { removeSet.contains($0) }
+                    }
+                    sdk.config.requestedMetrics = current
+                }
             }
 
 
@@ -103,15 +129,15 @@ struct CheckupView: View {
                         Section("Metrics") {
                             VStack(spacing: 8) {
                                 // Arterial pressure trace sourced from metrics.
-                                if !edgeBloodPressureBuffer.isEmpty {
+                                if !edgeArterialPressureBuffer.isEmpty {
                                     LineChartView(
-                                        orderedPairs: edgeBloodPressureBuffer.map { ($0.date, $0.value) },
-                                        title: "Blood Pressure",
+                                        orderedPairs: edgeArterialPressureBuffer.map { ($0.date, $0.value) },
+                                        title: "Arterial Pressure Trace",
                                         yLabel: "Value",
                                         showYTicks: true
                                     )
                                 } else {
-                                    Text("No blood pressure data available")
+                                    Text("No arterial pressure data available")
                                         .foregroundStyle(.secondary)
                                 }
 
@@ -155,6 +181,21 @@ struct CheckupView: View {
                                 } else {
                                     Text("No breathing rate data available")
                                         .foregroundStyle(.secondary)
+                                }
+
+                                // EDA trace (only shown when EDA measurements are enabled).
+                                if sdk.edaInferenceEnabled {
+                                    if !edgeEdaBuffer.isEmpty {
+                                        LineChartView(
+                                            orderedPairs: edgeEdaBuffer.map { ($0.date, $0.value) },
+                                            title: "EDA",
+                                            yLabel: "Value",
+                                            showYTicks: true
+                                        )
+                                    } else {
+                                        Text("No EDA data available")
+                                            .foregroundStyle(.secondary)
+                                    }
                                 }
                             }
                         }
@@ -203,15 +244,19 @@ struct CheckupView: View {
                     edgePulseRateBuffer.appendProtoArray(contentsOf: cardio.pulseRate)
                 }
                 if !cardio.arterialPressureTrace.isEmpty {
-                    edgeBloodPressureBuffer.appendProtoArray(contentsOf: cardio.arterialPressureTrace)
+                    edgeArterialPressureBuffer.appendProtoArray(contentsOf: cardio.arterialPressureTrace)
                 }
+            }
+            if sdk.edaInferenceEnabled && !metrics.eda.trace.isEmpty {
+                edgeEdaBuffer.appendProtoArray(contentsOf: metrics.eda.trace)
             }
         }
         .onChange(of: sdk.processingStatus) { _, status in
             if status == .running {
                 edgePulseRateBuffer.removeAll(keepingCapacity: true)
-                edgeBloodPressureBuffer.removeAll(keepingCapacity: true)
+                edgeArterialPressureBuffer.removeAll(keepingCapacity: true)
                 edgeBreathingRateBuffer.removeAll(keepingCapacity: true)
+                edgeEdaBuffer.removeAll(keepingCapacity: true)
             }
         }
     }

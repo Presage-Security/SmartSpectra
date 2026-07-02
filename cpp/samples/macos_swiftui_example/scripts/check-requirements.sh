@@ -51,7 +51,6 @@ fi
 HOMEBREW_PREFIX="${HOMEBREW_PREFIX:-/opt/homebrew}"
 EXPECTED_GRAPH="$HOMEBREW_PREFIX/share/smartspectra/graph"
 SDK_GRAPH="$SDK_ROOT/share/smartspectra/graph"
-ICD_JSON="$HOMEBREW_PREFIX/etc/vulkan/icd.d/MoltenVK_icd.json"
 
 info() { printf '[info] %s\n' "$*"; }
 warn() { printf '[warn] %s\n' "$*" >&2; }
@@ -143,16 +142,8 @@ fi
 
 if command -v brew >/dev/null 2>&1; then
   brew_install_if_missing opencv
-  brew_install_if_missing vulkan-loader
-  brew_install_if_missing molten-vk
 else
-  warn "Homebrew not found; install opencv, vulkan-loader, and molten-vk another way"
-fi
-
-if [[ -f "$ICD_JSON" ]]; then
-  info "MoltenVK ICD manifest: $ICD_JSON"
-else
-  warn "MoltenVK ICD manifest not found: $ICD_JSON"
+  warn "Homebrew not found; install opencv another way"
 fi
 
 IDENTITIES="$(security find-identity -v -p codesigning 2>/dev/null || true)"

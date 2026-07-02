@@ -14,7 +14,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(SMARTSPECTRA_SDK_ROOT "" CACHE PATH "SmartSpectra SDK install prefix.")
 set(SMARTSPECTRA_DEVELOPMENT_TEAM "" CACHE STRING "Apple Developer Team ID used by Xcode signing.")
 set(SMARTSPECTRA_BUNDLE_IDENTIFIER "com.example.smartspectra-swift-ui" CACHE STRING "macOS app bundle identifier.")
-set(SMARTSPECTRA_HOMEBREW_PREFIX "/opt/homebrew" CACHE PATH "Homebrew prefix used for OpenCV, Vulkan, and MoltenVK runtime libraries.")
+set(SMARTSPECTRA_HOMEBREW_PREFIX "/opt/homebrew" CACHE PATH "Homebrew prefix used for OpenCV runtime libraries.")
 option(SMARTSPECTRA_REQUIRE_SIGNING "Require Apple Development signing at configure time." ON)
 
 if(NOT APPLE)

@@ -59,9 +59,9 @@ At the end, the app should show console output with:
 - `Processing... Press Ctrl+C to stop.`
 - `Cardio metrics:` log lines when cardio metrics are available
 - `Breathing metrics:` log lines when breathing metrics are available
-- a clean exit after the sample stops
+- a clean exit after you stop the sample
 
-![SmartSpectra C++ Windows quickstart demo](images/win-quickstart.gif)
+![SmartSpectra C++ Windows quickstart demo](../images/win-quickstart.gif)
 
 ### 1. Open the developer command prompt
 
@@ -100,81 +100,121 @@ find_package(SmartSpectra CONFIG REQUIRED)
 
 add_executable(hello_vitals hello_vitals.cpp)
 target_link_libraries(hello_vitals SmartSpectra::SDK)
-
-# Write smartspectra_manifest.json next to the executable. The SDK dir
-# typically contains backslashes on Windows, so escape them (and any
-# embedded quotes) before interpolating into the JSON literal.
-string(REPLACE "\\" "\\\\" _smartspectra_manifest_root "${SMARTSPECTRA_SDK_DIR}/share/smartspectra")
-string(REPLACE "\"" "\\\"" _smartspectra_manifest_root "${_smartspectra_manifest_root}")
-file(GENERATE
-    OUTPUT "$<TARGET_FILE_DIR:hello_vitals>/smartspectra_manifest.json"
-    CONTENT "{\n  \"resource_root_dir\": \"${_smartspectra_manifest_root}\"\n}\n")
-
-# Stage the Windows runtime DLLs next to the executable.
-add_custom_command(TARGET hello_vitals POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${SMARTSPECTRA_SDK_DIR}/bin/smartspectra.dll"
-            "${SMARTSPECTRA_SDK_DIR}/bin/smartspectra_capi.dll"
-            "${SMARTSPECTRA_SDK_DIR}/bin/opencv_world4100.dll"
-            "$<TARGET_FILE_DIR:hello_vitals>"
-    VERBATIM)
 ```
 
 **`hello_vitals.cpp`**:
 
+This example also lives in `smartspectra/cpp/samples/hello_vitals/`.
+
+<!-- BEGIN hello_vitals_cpp -->
 ```cpp
+#include <smartspectra/messages/metrics.h>
 #include <smartspectra/smartspectra.h>
 #include <smartspectra/smartspectra_config.h>
-#include <smartspectra/messages/metrics.h>
+
 #include <chrono>
+#include <csignal>
+#include <cstdlib>
 #include <iostream>
 #include <string>
 #include <thread>
 
 namespace spectra = presage::smartspectra;
 
+namespace {
+
+volatile std::sig_atomic_t g_stop_requested = 0;
+
+void HandleSignal(int) {
+    g_stop_requested = 1;
+}
+
+std::string ResolveApiKey(int argc, char** argv) {
+    if (argc > 1) {
+        return argv[1];
+    }
+    if (const char* key = std::getenv("SMARTSPECTRA_API_KEY")) {
+        return key;
+    }
+    return {};
+}
+
+}  // namespace
+
 int main(int argc, char** argv) {
-    std::string api_key = "YOUR_API_KEY";
+    std::signal(SIGINT, HandleSignal);
+    const std::string api_key = ResolveApiKey(argc, argv);
+    if (api_key.empty()) {
+#if defined(_WIN32)
+        std::cerr << "Usage: .\\hello_vitals.exe YOUR_API_KEY\n"
+                  << "or set SMARTSPECTRA_API_KEY=YOUR_API_KEY\n";
+#else
+        std::cerr << "Usage: ./hello_vitals YOUR_API_KEY\n"
+                  << "or export SMARTSPECTRA_API_KEY=YOUR_API_KEY\n";
+#endif
+        return 1;
+    }
 
     spectra::SmartSpectraConfig config;
     config.api_key = api_key;
     config.requested_metrics = spectra::SmartSpectraConfig::BreathingMetrics();
     config.AddMetrics(spectra::SmartSpectraConfig::CardioMetrics());
 
-    spectra::SmartSpectra spectra(config);
-    spectra.SetOnMetrics([](const presage::smartspectra::Metrics& metrics, int64_t) {
+    spectra::SmartSpectra sdk(config);
+    sdk.SetOnMetrics([](const spectra::Metrics& metrics, int64_t) {
         if (metrics.has_cardio()) {
-            std::cerr << "Cardio metrics: " << metrics.cardio().ShortDebugString() << "\n";
+            std::cerr << "Cardio metrics: "
+                      << metrics.cardio().ShortDebugString() << "\n";
         }
         if (metrics.has_breathing()) {
-            std::cerr << "Breathing metrics: " << metrics.breathing().ShortDebugString() << "\n";
+            std::cerr << "Breathing metrics: "
+                      << metrics.breathing().ShortDebugString() << "\n";
         }
     });
-    spectra.SetOnError([](const spectra::SmartSpectraError& error) {
+    sdk.SetOnValidationStatusChanged(
+        [have_last_status = false,
+         last_code = spectra::ValidationCode::kOk,
+         last_hint = std::string{}](const spectra::ValidationStatus& status, int64_t) mutable {
+            if (have_last_status &&
+                status.code == last_code &&
+                status.hint == last_hint) {
+                return;
+            }
+            have_last_status = true;
+            last_code = status.code;
+            last_hint = status.hint;
+            std::cerr << "Validation [" << status.code
+                      << "]: " << status.hint << "\n";
+        });
+    sdk.SetOnError([](const spectra::SmartSpectraError& error) {
         std::cerr << "Error [" << static_cast<int>(error.code)
                   << "]: " << error.message << "\n";
     });
 
     const auto source_error =
-        spectra.UseCamera().SetResolution(1280, 720).SetFps(30).Build();
+        sdk.UseCamera().SetResolution(1280, 720).SetFps(30).Build();
     if (!source_error.ok()) {
-        std::cerr << "Failed to create camera source: " << source_error.message << "\n";
+        std::cerr << "Failed to create camera source: "
+                  << source_error.message << "\n";
         return 1;
     }
 
-    if (const auto err = spectra.Start(); !err.ok()) {
+    if (const auto err = sdk.Start(); !err.ok()) {
         std::cerr << "Failed to start: " << err.message << "\n";
         return 1;
     }
 
     std::cout << "Processing... Press Ctrl+C to stop.\n";
-    std::this_thread::sleep_for(std::chrono::seconds(5));
-    if (const auto err = spectra.Stop(); !err.ok()) {
+    while (!g_stop_requested) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    }
+    if (const auto err = sdk.Stop(); !err.ok()) {
         std::cerr << "Stop failed: " << err.message << "\n";
     }
     return 0;
 }
 ```
+<!-- END hello_vitals_cpp -->
 
 ### 3. Build
 
@@ -193,20 +233,25 @@ set "SMARTSPECTRA_SDK_PATH=C:\SmartSpectra" && cmake -S . -B build -G "NMake Mak
 
 ### 4. Run
 
-Replace `"YOUR_API_KEY"` in `hello_vitals.cpp` with your key from
-[physiology.presagetech.com](https://physiology.presagetech.com/auth/login) and rebuild.
-
-Run the executable from the same developer command prompt:
+The executable needs the SDK runtime DLLs (`smartspectra.dll`, `opencv_world*.dll`,
+`vulkan-1.dll`, …) on its load path. The simplest way is to put the SmartSpectra SDK `bin/`
+directory on `PATH` for the session — Windows then loads the DLLs from there, and
+the SDK finds its bundled resources relative to `smartspectra.dll`. No copying and
+no resource configuration are required:
 
 ```bat
-.\build\hello_vitals.exe
+set "PATH=%SMARTSPECTRA_SDK_PATH%\bin;%PATH%"
+.\build\hello_vitals.exe YOUR_API_KEY
 ```
 
-The SDK DLLs are copied next to `hello_vitals.exe` by the post-build step in
-`CMakeLists.txt`, so no `PATH` setup is required.
+Or set the key once in the shell as well:
+
+```bat
+set "SMARTSPECTRA_API_KEY=YOUR_API_KEY" && .\build\hello_vitals.exe
+```
 
 You should see breathing and cardio metrics printed to the console within a few
-seconds of the camera starting.
+seconds of the camera starting. Press `Ctrl+C` to stop the sample.
 
 ## What success looks like
 
@@ -215,14 +260,14 @@ When your program is running, you should see all of these:
 - `Processing... Press Ctrl+C to stop.` prints after launch
 - the camera starts without a source creation error
 - `Cardio metrics:` or `Breathing metrics:` logs print while you sit centered and well-lit
-- the process exits without a `Stop failed` message
+- the process exits after `Ctrl+C` without a `Stop failed` message
 
 ## Expected API key check
 
 The first measurement should start after the executable launches with a valid
-API key. If startup fails with an authentication error, verify that
-`YOUR_API_KEY` was replaced in `hello_vitals.cpp` and that the key is authorized
-for this app.
+API key argument or `SMARTSPECTRA_API_KEY` environment variable. If startup
+fails with an authentication error, verify that the key is authorized for this
+app and that the shell value did not include extra quotes or whitespace.
 
 ## Common manual mistakes
 
@@ -230,8 +275,10 @@ If the console output does not match the target state, check these first:
 
 - the ZIP was extracted into a different folder than `SMARTSPECTRA_SDK_PATH`
 - the project was built outside the x64 developer command prompt
-- `YOUR_API_KEY` was not replaced before rebuilding
-- the post-build step did not copy the SDK DLLs next to the executable
+- the API key argument or `SMARTSPECTRA_API_KEY` environment variable is missing
+- the SDK `bin/` directory is not on `PATH`, so the runtime DLLs can't be found
+- the runtime DLLs were copied away from the SDK `bin/`, separating them from the
+  sibling `share/smartspectra/` resource tree
 - another app is already using the camera
 - the executable is an older build from before the latest source change
 
@@ -263,27 +310,38 @@ lib/
 bin/
   smartspectra.dll            # C++ SDK runtime DLL — must ship with your app
   smartspectra_capi.dll       # C ABI shim runtime DLL — required for FFI consumers
-  smartspectra_manifest.json
-  opencv_world4100.dll        # OpenCV runtime dependency — must ship with your app
+  vulkan-1.dll                # Vulkan loader used by the default inference backend
+  smartspectra_manifest.json  # lets smartspectra.dll locate ../share/smartspectra
+  opencv_world*.dll           # OpenCV runtime dependency — must ship with your app
 share/smartspectra/           # Bundled graph and model resources
 ```
 
-When you ship your app to other machines, copy `smartspectra.dll`,
-`opencv_world4100.dll`, and the contents of `share/smartspectra/` next to
-the executable (or onto the PATH).
+When you ship your app to other machines, keep the `bin/` and `share/` directories
+together as a unit — the SDK locates its resources at `bin/../share/smartspectra`
+relative to `smartspectra.dll`, so the relationship between the two must be
+preserved. The recommended layout is to place your executable in `bin/` (or copy
+the whole `bin/ + share/` tree into your install directory); the DLLs then load
+without any `PATH` setup and resources resolve automatically. Do **not** copy the
+DLLs out on their own — separating `smartspectra.dll` from its sibling `share/`
+tree is what breaks resource resolution.
 
 ## Next Steps
 
-- [Configure which metrics to compute](metrics.md)
-- [Run headless without video output](headless-mode.md)
-- [Migration Guide](migration-guide.md) for upgrading from older SDK versions
+- [Configure which metrics to compute](../metrics.md)
+- [Run headless without video output](../headless-mode.md)
+- [Migration Guide](../migration-guide.md) for upgrading from older SDK versions
 
 ## Troubleshooting
 
-If the app starts but can't find DLLs, verify that `smartspectra.dll`,
-`opencv_world*.dll`, and other SDK DLLs from the extracted ZIP are present
-next to the executable or on the Windows DLL search path.
+If the app starts but can't find DLLs, verify that the SDK `bin/` directory is on
+`PATH` (or that your executable sits in `bin/` alongside `smartspectra.dll`,
+`opencv_world*.dll`, and the other SDK DLLs).
 
-If you are upgrading an older C++ integration, see the [C++ Migration Guide](migration-guide.md).
+If the app loads but fails to find its models/graph resources, the runtime DLLs
+were likely separated from the SDK's `share/smartspectra/` tree. Keep `bin/` and
+`share/` together — the SDK resolves resources at `bin/../share/smartspectra`
+relative to `smartspectra.dll`.
+
+If you are upgrading an older C++ integration, see the [C++ Migration Guide](../migration-guide.md).
 
 For support: contact [support@presagetech.com](mailto:support@presagetech.com) or [submit a GitHub issue](https://github.com/Presage-Security/SmartSpectra/issues).

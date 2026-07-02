@@ -391,24 +391,6 @@ message Cardio {
 
 Comprehensive physiological metrics container. Contains all available physiological measurements and analysis results.
 
-During active capture, SDK metrics payloads are incremental. A payload contains
-the samples that became available since the previous SDK metrics update, not a
-fully populated snapshot of every requested metric. Requested fields can
-therefore be absent, empty, or `null` in a given payload even though processing
-is still running and the metric remains enabled.
-
-Metric update cadence depends on how the metric is produced:
-
-| Metric category | Examples | Expected cadence | Empty/null behavior |
-| --- | --- | --- | --- |
-| Peak/event-driven rate metrics | `breathing.rate`, `cardio.pulse_rate`, `cardio.hrv` | Updated when a new physiological event, cycle, or analysis window produces a value | May be empty between valid updates during active capture |
-| Frame-driven metrics | `face.expression`, `face.landmarks`, `face.blinking`, `face.talking`, breathing traces | Updated near device frame cadence, with SDK callbacks rate-limited to about 30 Hz | Usually present more continuously when enabled and the input signal is valid |
-
-For UI integrations, retain the last valid pulse rate or breathing rate in app
-state, show a placeholder until the first valid sample arrives, and clear the
-retained value when the capture session or requested metric set changes. Do not
-treat a single empty rate field as a capture failure.
-
 ### Properties
 
 ```proto

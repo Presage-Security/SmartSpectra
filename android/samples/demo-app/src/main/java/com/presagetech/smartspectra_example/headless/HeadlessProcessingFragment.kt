@@ -46,7 +46,7 @@ class HeadlessProcessingFragment : Fragment() {
     private lateinit var statusHintText: TextView
     private lateinit var errorText: TextView
     private lateinit var fabInsightsChat: FloatingActionButton
-    // ScreeningPlotView for rendering pulse, breathing, and blood pressure plots during continuous measurements.
+    // ScreeningPlotView for rendering pulse, breathing, and arterial pressure plots during continuous measurements.
     private lateinit var vitalsView: ScreeningPlotView
 
     // SmartSpectra SDK settings
@@ -161,11 +161,15 @@ class HeadlessProcessingFragment : Fragment() {
             if (viewModel.faceMetricsEnabled.value) {
                 addAll(SmartSpectraConfig.faceMetrics)
             }
+            if (viewModel.edaMeasurementsEnabled.value) {
+                addAll(SmartSpectraConfig.edaMetrics)
+            }
         }
     }
 
     private fun applySharedMetricSettingsToUi() {
         vitalsView.setCardioMeasurementsEnabled(viewModel.cardioMeasurementsEnabled.value)
+        vitalsView.setEdaMeasurementsEnabled(viewModel.edaMeasurementsEnabled.value)
         vitalsView.setFacialExpressionEnabled(viewModel.faceMetricsEnabled.value)
     }
 

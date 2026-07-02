@@ -150,7 +150,24 @@ set(CPACK_GENERATOR "DEB")
 set(CPACK_PACKAGE_NAME "debian-app-example")
 set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}")
 set(CPACK_DEBIAN_PACKAGE_RELEASE "${DAE_DISTRO_CODENAME}1")
-set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "amd64")
+# Resolve the Debian arch from the host (amd64, arm64, ...) so the produced
+# .deb is tagged for the build machine, not hardcoded to amd64.
+find_program(DAE_DPKG_EXECUTABLE dpkg)
+if(NOT DAE_DPKG_EXECUTABLE)
+    message(FATAL_ERROR
+        "debian-app-example: dpkg not found — CPack DEB packaging requires "
+        "a Debian-family host.")
+endif()
+execute_process(
+    COMMAND "${DAE_DPKG_EXECUTABLE}" --print-architecture
+    OUTPUT_VARIABLE CPACK_DEBIAN_PACKAGE_ARCHITECTURE
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    RESULT_VARIABLE _dae_dpkg_arch_rc)
+if(NOT _dae_dpkg_arch_rc EQUAL 0 OR CPACK_DEBIAN_PACKAGE_ARCHITECTURE STREQUAL "")
+    message(FATAL_ERROR
+        "debian-app-example: \`dpkg --print-architecture\` failed (rc="
+        "${_dae_dpkg_arch_rc}); cannot resolve CPACK_DEBIAN_PACKAGE_ARCHITECTURE.")
+endif()
 set(CPACK_DEBIAN_FILE_NAME "DEB-DEFAULT")
 set(CPACK_PACKAGING_INSTALL_PREFIX "/")
 set(CPACK_SET_DESTDIR ON)

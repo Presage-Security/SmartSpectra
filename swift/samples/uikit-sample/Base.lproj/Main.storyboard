@@ -142,11 +142,11 @@
                                                 </userDefinedRuntimeAttributes>
                                             </view>
 
-                                            <!-- Blood Pressure graph card -->
+                                            <!-- Arterial Pressure graph card -->
                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="card-04-bp">
                                                 <rect key="frame" x="0" y="186" width="361" height="110"/>
                                                 <subviews>
-                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Blood Pressure Trace" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="lbl-05-bp-title">
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Arterial Pressure Trace" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="lbl-05-bp-title">
                                                         <rect key="frame" x="12" y="8" width="337" height="16"/>
                                                         <fontDescription key="fontDescription" style="UICTFontTextStyleCaption1"/>
                                                         <color key="textColor" white="1" alpha="0.5" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>

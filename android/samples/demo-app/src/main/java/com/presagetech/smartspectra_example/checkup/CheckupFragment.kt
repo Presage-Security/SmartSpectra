@@ -69,11 +69,8 @@ class CheckupFragment : Fragment() {
     // Face metrics toggle
     private var faceMetricsEnabled: Boolean = false
 
-    // Metrics buffers for real-time display
-    private val edgeArterialPressureBuffer = mutableListOf<MetricsProto.MeasurementWithConfidence>()
-    private val edgePulseRateBuffer = mutableListOf<MetricsProto.MeasurementWithConfidence>()
-    private val edgeBreathingRateBuffer = mutableListOf<MetricsProto.MeasurementWithConfidence>()
-    private val edgeBreathingTraceBuffer = mutableListOf<MetricsProto.Measurement>()
+    // EDA measurements toggle
+    private var edaMeasurementsEnabled: Boolean = false
 
     private val smartSpectraSdk: SmartSpectraSdk = SmartSpectraSdk.shared.apply {
         // Optional configurations
@@ -92,6 +89,15 @@ class CheckupFragment : Fragment() {
                 viewModel.cameraPosition.collect { lensFacing ->
                     cameraPosition = lensFacing
                 }
+            }
+        }
+        // Render the finished traces accumulated by the ViewModel. Capture runs
+        // in a separate Activity, so accumulation lives in the ViewModel (which
+        // survives this fragment being stopped); here we just render its snapshot
+        // when the screen is visible.
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.traces.collect { traces -> renderCharts(traces) }
             }
         }
 
@@ -118,10 +124,12 @@ class CheckupFragment : Fragment() {
     private fun addControlViews() {
         cardioMeasurementsEnabled = viewModel.cardioMeasurementsEnabled.value
         faceMetricsEnabled = viewModel.faceMetricsEnabled.value
+        edaMeasurementsEnabled = viewModel.edaMeasurementsEnabled.value
         refreshRequestedMetrics()
         addCameraToggle()
         addCardioToggle()
         addFaceMetricsToggle()
+        addEdaToggle()
     }
 
     private fun refreshRequestedMetrics() {
@@ -129,6 +137,7 @@ class CheckupFragment : Fragment() {
             addAll(SmartSpectraConfig.breathingMetrics)
             if (cardioMeasurementsEnabled) addAll(SmartSpectraConfig.cardioMetrics)
             if (faceMetricsEnabled) addAll(SmartSpectraConfig.faceMetrics)
+            if (edaMeasurementsEnabled) addAll(SmartSpectraConfig.edaMetrics)
         }
     }
 
@@ -159,9 +168,6 @@ class CheckupFragment : Fragment() {
             cardioMeasurementsEnabled = isChecked
             viewModel.setCardioMeasurementsEnabled(isChecked)
             refreshRequestedMetrics()
-            // Clear buffers when toggling
-            edgeArterialPressureBuffer.clear()
-            edgePulseRateBuffer.clear()
         }
 
         cardioContainer.addView(cardioSwitch)
@@ -203,6 +209,40 @@ class CheckupFragment : Fragment() {
         buttonContainer.addView(faceContainer)
     }
 
+    private fun addEdaToggle() {
+        val edaContainer = LinearLayout(requireContext()).apply {
+            orientation = LinearLayout.VERTICAL
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                setMargins(16, 8, 16, 8)
+            }
+        }
+
+        val edaSwitch = SwitchMaterial(requireContext()).apply {
+            text = getString(R.string.demo_eda_measurements)
+            isChecked = edaMeasurementsEnabled
+        }
+
+        val edaSubtitle = TextView(requireContext()).apply {
+            text = getString(R.string.demo_eda_subtitle)
+            textSize = 12f
+            setTextColor(resources.getColor(android.R.color.darker_gray, null))
+            setPadding(0, 0, 0, 8)
+        }
+
+        edaSwitch.setOnCheckedChangeListener { _, isChecked ->
+            edaMeasurementsEnabled = isChecked
+            viewModel.setEdaMeasurementsEnabled(isChecked)
+            refreshRequestedMetrics()
+        }
+
+        edaContainer.addView(edaSwitch)
+        edaContainer.addView(edaSubtitle)
+        buttonContainer.addView(edaContainer)
+    }
+
     private fun addCameraToggle() {
         val cameraPositionButton = MaterialButton(
             requireContext(), null, com.google.android.material.R.attr.materialIconButtonStyle
@@ -230,7 +270,8 @@ class CheckupFragment : Fragment() {
     }
 
     private fun handleMetrics(metrics: MetricsProto.Metrics) {
-        // Handle face mesh
+        // Handle face mesh. Trace accumulation/rendering is driven separately by
+        // the ViewModel's [CheckupTraces] snapshot (see onViewCreated).
         if (isFaceMeshEnabled && metrics.hasFace() && metrics.face.landmarksCount > 0) {
             val latestLandmarks = metrics.face.landmarksList.lastOrNull()?.valueList
             if (latestLandmarks != null) {
@@ -242,57 +283,27 @@ class CheckupFragment : Fragment() {
         } else {
             faceMeshContainer.isVisible = false
         }
-
-        // Buffer breathing metrics
-        if (metrics.hasBreathing()) {
-            val breathing = metrics.breathing
-            if (breathing.rateCount > 0) {
-                val newSamples = breathing.rateList.filter { it.timestamp > 0 }
-                edgeBreathingRateBuffer.addAll(newSamples)
-                edgeBreathingRateBuffer.trimBuffer(200)
-            }
-            if (breathing.upperTraceCount > 0) {
-                val newSamples = breathing.upperTraceList.filter { it.timestamp > 0 }
-                edgeBreathingTraceBuffer.addAll(newSamples)
-                edgeBreathingTraceBuffer.trimBuffer(400)
-            }
-        }
-
-        // Buffer cardio metrics
-        if (cardioMeasurementsEnabled && metrics.hasCardio()) {
-            val cardio = metrics.cardio
-            if (cardio.arterialPressureTraceCount > 0) {
-                val newSamples = cardio.arterialPressureTraceList.filter { it.timestamp > 0 }
-                edgeArterialPressureBuffer.addAll(newSamples)
-                edgeArterialPressureBuffer.trimBuffer(400)
-            }
-            if (cardio.pulseRateCount > 0) {
-                val newSamples = cardio.pulseRateList.filter { it.timestamp > 0 }
-                edgePulseRateBuffer.addAll(newSamples)
-                edgePulseRateBuffer.trimBuffer(200)
-            }
-        }
-
-        // Render aggregate charts from buffers
-        renderCharts()
     }
 
-    private fun renderCharts() {
+    private fun renderCharts(traces: CheckupTraces) {
         chartContainer.removeAllViews()
 
-        if (edgeBreathingTraceBuffer.isNotEmpty()) {
-            addChart(edgeBreathingTraceBuffer.toChartEntries(), getString(R.string.demo_breathing_pleth), false)
+        if (traces.breathingTrace.isNotEmpty()) {
+            addChart(traces.breathingTrace.toChartEntries(), getString(R.string.demo_breathing_pleth), false)
         }
-        if (edgeBreathingRateBuffer.isNotEmpty()) {
-            addChart(edgeBreathingRateBuffer.toChartEntries(), getString(R.string.demo_breathing_rate), true)
+        if (traces.breathingRate.isNotEmpty()) {
+            addChart(traces.breathingRate.toChartEntries(), getString(R.string.demo_breathing_rate), true)
         }
         if (cardioMeasurementsEnabled) {
-            if (edgePulseRateBuffer.isNotEmpty()) {
-                addChart(edgePulseRateBuffer.toChartEntries(), getString(R.string.demo_pulse_rate), true)
+            if (traces.pulseRate.isNotEmpty()) {
+                addChart(traces.pulseRate.toChartEntries(), getString(R.string.demo_pulse_rate), true)
             }
-            if (edgeArterialPressureBuffer.isNotEmpty()) {
-                addChart(edgeArterialPressureBuffer.toChartEntries(), getString(R.string.demo_blood_pressure_phasic), false)
+            if (traces.arterialPressureTrace.isNotEmpty()) {
+                addChart(traces.arterialPressureTrace.toChartEntries(), getString(R.string.demo_edge_arterial_pressure), false)
             }
+        }
+        if (edaMeasurementsEnabled && traces.edaTrace.isNotEmpty()) {
+            addChart(traces.edaTrace.toChartEntries(), getString(R.string.demo_eda), false)
         }
     }
 
@@ -381,13 +392,6 @@ class CheckupFragment : Fragment() {
             setVisibleYRange(0f, 1f, YAxis.AxisDependency.LEFT)
             moveViewTo(0f, 0f, YAxis.AxisDependency.LEFT)
             invalidate()
-        }
-    }
-
-    private fun <T> MutableList<T>.trimBuffer(maxSize: Int) {
-        if (size > maxSize) {
-            val excess = size - maxSize
-            subList(0, excess).clear()
         }
     }
 }

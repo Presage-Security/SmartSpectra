@@ -97,6 +97,10 @@ You need to get it from Presage first:
     - Enable sandbox in the portal if you want to test locally by pushing XCode builds to your phone. When sandbox is turned off it allows app store and test flight builds only.
 3. Download the iOS OAuth config file named `PresageService-Info.plist`
 
+Use this `Signing & Capabilities` view in Xcode to find the Application ID and Organization ID inputs mentioned above:
+
+![Signing & Capabilities view showing where Xcode exposes the Bundle Identifier for the Application ID and the signing identity used to look up the Organization ID](../../cpp/docs/images/macos-xcode-signing-source.png)
+
 If you cannot find a download for `PresageService-Info.plist`, stop here.
 
 That means you do not have the OAuth config file yet. Ask [Presage support](mailto:support@presagetech.com) or your Presage contact for the iOS OAuth plist for this app.

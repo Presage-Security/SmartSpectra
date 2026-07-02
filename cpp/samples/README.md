@@ -18,15 +18,16 @@ clone, build, and run example applications against an installed SDK.
 
 Install the SDK for your platform from the C++ SDK documentation:
 
-<https://smartspectra.presagetech.com/docs/cpp>
+[C++ SDK documentation](../README.md)
 
 Portable CLI samples built by the aggregate `CMakeLists.txt`:
 
 - [Dense Facemesh Example](dense_facemesh_example): Overlays the dense face landmark mesh on the live camera feed. Useful for verifying landmark stability and debugging face tracking. Executable name: `dense_facemesh`.
 - [Full Example](full_example): Continuously reads from a video stream (camera or file), generates vitals output at fixed intervals, and overlays a HUD with live plots on the video feed. Executable name: `full_example`.
 - [GStreamer Example](gstreamer_example): Pulls frames from a GStreamer pipeline (via OpenCV's GStreamer backend) and pushes them into the SDK through `UseCustomInput()`. Starting point for non-V4L2 capture stacks. Executable name: `gstreamer_example`.
+- [Hello Vitals](hello_vitals): Cross-platform quickstart sample also referenced by the platform install guides. Executable name: `hello_vitals`.
 - [Insights Example](insights_example): Streams the higher-level "insights" metric output from a camera or video file. Executable name: `insights_example`.
-- [Minimal Example](minimal_example): The smallest possible runnable SmartSpectra C++ application - minimum code to demonstrate the SDK lifecycle. Executable name: `minimal_example`.
+- [Minimal Example](minimal_example): The smallest possible runnable SmartSpectra C++ application - minimum code to demonstrate the SDK lifecycle, with optional file input via `--input_video_path`. Executable name: `minimal_example`.
 - [SmartSpectra Example](smart_spectra_example): Streams metrics and validation status to the terminal while displaying the camera (or input video) feed. Demonstrates the standard SmartSpectra setup pipeline. Executable name: `smart_spectra_example`.
 
 App-style samples built by platform-specific tooling:
@@ -37,12 +38,23 @@ App-style samples built by platform-specific tooling:
 ## Prerequisites
 
 1. Install the SmartSpectra C++ SDK for your platform:
-   <https://smartspectra.presagetech.com/docs/cpp>
+   [C++ SDK documentation](../README.md)
 2. Register and obtain a Presage Technologies Physiology API key from
    <https://physiology.presagetech.com/auth/register>.
 3. Install the build tools required by your platform. The SDK installation guide
    lists the CMake, compiler, and package-manager setup for Linux, macOS, and
    Windows.
+4. Ubuntu 22.04 / Mint 21 (`jammy`) only: before building the repository
+   samples, add the Presage apt source first. Then, if the stock
+   `libopencv-dev` was already installed before that apt source was
+   configured, purge it and reinstall it:
+
+```bash
+sudo apt purge libopencv-dev
+sudo apt autoremove
+sudo apt update
+sudo apt install libopencv-dev
+```
 
 ## Building Samples
 
@@ -219,12 +231,23 @@ per sample wrapper, and keep the bundle identifier, entitlement values, and
 provisioning profile aligned. If any of those values drift, macOS typically
 reports keychain entitlement errors such as `errSecMissingEntitlement (-34018)`.
 
+### Distributing your own app (notarization)
+
+The steps above sign an app so it can **run the SDK locally** during
+development. **Redistributing** an app that bundles `libsmartspectra.dylib` to
+other Macs is a separate concern: the Homebrew-installed library is ad-hoc
+signed, so you must re-sign the embedded copy with your Developer ID (hardened
+runtime + secure timestamp) and make the bundle self-contained before Apple
+notarization will accept it. See
+[Distributing an app that embeds the SDK](../docs/macos.md#distributing-an-app-that-embeds-the-sdk-signing--notarization)
+in the macOS guide.
+
 ## Command Line Interface
 
-All six portable CLI samples (`dense_facemesh`, `full_example`,
-`gstreamer_example`, `insights_example`, `minimal_example`,
-`smart_spectra_example`) parse flags via Abseil and support the standard Abseil
-help surface. To list the flags declared by a sample, pass `--help=main`:
+The portable CLI samples that use Abseil flags (`dense_facemesh`,
+`full_example`, `gstreamer_example`, `insights_example`, `minimal_example`,
+`smart_spectra_example`) support the standard Abseil help surface. To list the
+flags declared by a sample, pass `--help=main`:
 
 ```bash
 ./build/full_example/full_example --help=main
@@ -235,6 +258,9 @@ To read about a specific command line option, pass `--help=<OPTION_NAME>`:
 ```bash
 ./build/full_example/full_example --help=verbosity
 ```
+
+`hello_vitals` takes a positional API key argument instead of Abseil flags so
+the docs can keep the quickstart focused on the smallest runnable project.
 
 The app-style samples (`macos_swiftui_example`, `winui3_example`) do not use
 Abseil flags and have their own platform-native settings UIs; the `--help=main`

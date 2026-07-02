@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Security-Policy"
+          content="default-src 'self'; style-src 'self' 'unsafe-inline'; worker-src 'self' blob:; media-src blob:;">
+    <title>SmartSpectra Quickstart</title>
+    <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+    <header>
+        <h1>SmartSpectra Quickstart</h1>
+        <span id="status-badge" class="status status-uninitialized">Uninitialized</span>
+    </header>
+
+    <div id="error-banner" class="error-banner" hidden>
+        <span class="error-banner-code" id="error-code">—</span>
+        <span class="error-banner-message" id="error-message"></span>
+    </div>
+
+    <main>
+        <!-- Left column: preview + controls + numeric readouts ------------- -->
+        <section class="left-col">
+            <div class="preview">
+                <video id="preview" autoplay playsinline muted></video>
+                <div id="validation" class="hint">Click <strong>Start</strong> when ready.</div>
+            </div>
+
+            <div class="readouts">
+                <div class="readout">
+                    <div class="readout-label">Heart Rate</div>
+                    <div class="readout-value"><span id="readout-pulse">—</span> <span class="readout-unit">BPM</span></div>
+                </div>
+                <div class="readout">
+                    <div class="readout-label">Breathing</div>
+                    <div class="readout-value"><span id="readout-breathing">—</span> <span class="readout-unit">BR/min</span></div>
+                </div>
+            </div>
+
+            <div class="metrics-toggles">
+                <div class="panel-label">Measurement bundle</div>
+                <div class="toggle toggle-static">
+                    <span class="check check-on"></span>
+                    <span>Breathing <em>(always on)</em></span>
+                </div>
+                <label class="toggle">
+                    <input type="checkbox" id="m-cardio">
+                    <span>Cardio Measurements <em>(pulse rate, arterial pressure, HRV)</em></span>
+                </label>
+                <label class="toggle">
+                    <input type="checkbox" id="m-face">
+                    <span>Face Metrics <em>(landmarks, blinking, talking, expressions)</em></span>
+                </label>
+            </div>
+
+            <div class="controls">
+                <button id="btn-start" type="button">Start</button>
+                <button id="btn-stop"  type="button" disabled>Stop</button>
+                <button id="btn-reset" type="button" disabled>Reset</button>
+            </div>
+        </section>
+
+        <!-- Right column: stacked live charts ----------------------------- -->
+        <section class="right-col">
+            <div class="chart-panel">
+                <div class="chart-header">
+                    <div class="chart-title">Breathing Rate</div>
+                    <div class="chart-unit">BR/min</div>
+                </div>
+                <div class="chart-canvas-wrap">
+                    <canvas id="chart-breathing-rate"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-panel">
+                <div class="chart-header">
+                    <div class="chart-title">Breathing Pleth Waveform</div>
+                    <div class="chart-unit">raw</div>
+                </div>
+                <div class="chart-canvas-wrap">
+                    <canvas id="chart-breathing-trace"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-panel" id="panel-pulse-rate">
+                <div class="chart-header">
+                    <div class="chart-title">Pulse Rate</div>
+                    <div class="chart-unit">BPM</div>
+                </div>
+                <div class="chart-canvas-wrap">
+                    <canvas id="chart-pulse-rate"></canvas>
+                    <div class="chart-placeholder">Enable Cardio Measurements to see pulse rate + arterial pressure</div>
+                </div>
+            </div>
+
+            <div class="chart-panel" id="panel-arterial-pressure">
+                <div class="chart-header">
+                    <div class="chart-title">Arterial Pressure Trace</div>
+                    <div class="chart-unit">raw</div>
+                </div>
+                <div class="chart-canvas-wrap">
+                    <canvas id="chart-arterial-pressure"></canvas>
+                    <div class="chart-placeholder">Enable Cardio Measurements to see pulse rate + arterial pressure</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        Set your API key in <code>renderer.js</code> before running.
+    </footer>
+
+    <script src="./dist/renderer.bundle.js"></script>
+</body>
+</html>

@@ -13,7 +13,7 @@ extensions.configure<com.android.build.api.dsl.ApplicationExtension>("android") 
     defaultConfig {
         applicationId = "com.presagetech.smartspectra_example"
         minSdk = 28
-        targetSdk = 34
+        targetSdk = 36
         versionCode = 4
         versionName = "4.0.1"
 

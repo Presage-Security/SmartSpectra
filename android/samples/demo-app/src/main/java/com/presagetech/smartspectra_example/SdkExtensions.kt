@@ -20,10 +20,6 @@ internal val SmartSpectraSdk.edaMeasurementsEnabled: Boolean
     get() = config.requestedMetrics.orEmpty().any { it in SmartSpectraConfig.edaMetrics }
 
 internal fun SmartSpectraError.userFacingMessage(context: Context): String {
-    if (looksLikeRejectedApiKey()) {
-        return context.getString(R.string.smart_spectra_error_authentication_failed)
-    }
-
     return when (code) {
         SmartSpectraError.Code.AUTHENTICATION_FAILED ->
             context.getString(R.string.smart_spectra_error_authentication_failed)
@@ -45,12 +41,4 @@ internal fun SmartSpectraError.userFacingMessage(context: Context): String {
         SmartSpectraError.Code.NON_MONOTONIC_TIMESTAMP,
         -> context.getString(R.string.smart_spectra_error_processing)
     }
-}
-
-private fun SmartSpectraError.looksLikeRejectedApiKey(): Boolean {
-    val normalized = message.lowercase()
-    return "401" in normalized ||
-        "unauthorized" in normalized ||
-        "device_keys" in normalized ||
-        "api key" in normalized
 }

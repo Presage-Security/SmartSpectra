@@ -300,7 +300,7 @@ class ViewController: UIViewController {
         insightButton.configuration?.showsActivityIndicator = true
         insightLabel.text = "Analyzing\u{2026}"
         do {
-            try sdk.requestInsight("Give a short, user-friendly analysis of the current heart rate, breathing rate, blood pressure trace, and electrodermal activity.")
+            try sdk.requestInsight("Give a short, user-friendly analysis of the current heart rate, breathing rate, arterial pressure trace, and electrodermal activity.")
         } catch {
             insightLabel.text = "Error: \(Self.userFacingMessage(for: error))"
             insightButton.isEnabled = true
