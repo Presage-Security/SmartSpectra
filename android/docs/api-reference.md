@@ -206,6 +206,7 @@ SDK error codes. Raw values are stable across SDK versions and match the C++/Swi
 - `PROCESSING_FAILED(8)`
 - `FRAME_CONVERSION_FAILED(9)`
 - `NON_MONOTONIC_TIMESTAMP(10)`
+- `TIMESTAMP_GAP(11)`
 
 ## SmartSpectraException
 
