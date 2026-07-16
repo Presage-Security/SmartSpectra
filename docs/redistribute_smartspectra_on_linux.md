@@ -84,9 +84,7 @@ Replace `debian-app-example` with your own app name when you adapt the example.
 │   └── <app-name>                          (the executable)
 ├── lib/
 │   ├── libsmartspectra.so                  (bundled from SDK tarball)
-│   ├── smartspectra_manifest.json          (written at install time)
-│   └── smartspectra/
-│       └── libopencv_*.so.*                (bundled private OpenCV runtime)
+│   └── smartspectra_manifest.json          (written at install time)
 └── share/
     └── smartspectra/
         └── graph/
@@ -99,42 +97,32 @@ Plus one file outside the app's prefix, written by `postinst`:
 ```text
 # /etc/ld.so.conf.d/<app-name>.conf
 /opt/<app-name>/lib
-/opt/<app-name>/lib/smartspectra
 ```
 
 `postrm` removes that fragment on `remove` / `purge`.
 
 ## RPATH and per-app ldconfig
 
-Two mechanisms together resolve the bundled-library chain when the end-user
-launches the binary.
+Two mechanisms place the bundled `libsmartspectra.so` on the loader's path
+when the end-user launches the binary.
 
 **RPATH on the binary.** The example binary is linked with
 `INSTALL_RPATH=$ORIGIN/../lib` and `INSTALL_RPATH_USE_LINK_PATH=FALSE` so the
 resulting `DT_RUNPATH` is exactly `$ORIGIN/../lib`. From
 `/opt/<app-name>/bin/<app>` this walks to `/opt/<app-name>/lib/`, where
-`libsmartspectra.so` lives. The binary's `DT_RUNPATH` resolves only that one
-direct dependency — under `--enable-new-dtags` (the linker default since
-~2008) `DT_RUNPATH` does **not** propagate to transitive dependencies, so it
-plays no role in finding the bundled OpenCV runtime that
-`libsmartspectra.so` itself depends on.
+`libsmartspectra.so` lives.
 
-**ldconfig fragment for the SDK's transitive chain.** The SDK's shared
-library has no embedded `DT_RUNPATH` / `DT_RPATH`, so its `DT_NEEDED`
-entries for the bundled OpenCV runtime can be resolved only via the system
-loader cache. To populate the cache, `postinst` writes:
+**ldconfig fragment for `libsmartspectra.so`.** The SDK's shared library has
+no embedded `DT_RUNPATH` / `DT_RPATH`, and `/opt/<app-name>/lib` is not on the
+loader's default search path, so `postinst` also registers it with the system
+loader cache:
 
 ```text
 # /etc/ld.so.conf.d/<app-name>.conf
 /opt/<app-name>/lib
-/opt/<app-name>/lib/smartspectra
 ```
 
-and runs `ldconfig`. The system cache then maps the bundled OpenCV runtime
-to `/opt/<app-name>/lib/smartspectra/`, so the SDK's `DT_NEEDED` chain
-resolves at load time. The redistributed layout keeps the OpenCV runtime in
-the same `lib/smartspectra/` subdir the SDK uses when installed via apt, so
-the installed tree mirrors the SDK's own install shape.
+and runs `ldconfig`, so `libsmartspectra.so` resolves at load time.
 
 `postrm` removes the ldconfig fragment on `remove` / `purge` so the cache no
 longer maps libraries to the now-removed prefix.

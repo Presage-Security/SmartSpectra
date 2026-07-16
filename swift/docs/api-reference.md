@@ -115,7 +115,15 @@ Configuration for ``SmartSpectraSDK``.  Access configuration through ``SmartSpec
   ```
 
 - ```swift
+  public var logLevel : SmartSpectraLogLevel = .default
+  ```
+
+- ```swift
   public var imageOutputEnabled : Bool = true
+  ```
+
+- ```swift
+  public var enableTelemetry : Bool = true
   ```
 
 - ```swift
@@ -186,6 +194,7 @@ Measurement-readiness codes.
 - `case chestNotVisible = 7`
 - `case cameraTuning = 10`
 - `case frameRateTooLow = 11`
+- `case excessiveMotion = 12`
 
 ## SmartSpectraError
 
@@ -229,3 +238,13 @@ SDK error codes. No `.ok` case — in Swift, success means no error thrown.  Raw
 - `case processingFailed = 8`
 - `case frameConversionFailed = 9`
 - `case nonMonotonicTimestamp = 10`
+
+## SmartSpectraLogLevel
+
+Verbosity of SDK logging, set via ``SmartSpectraConfig/logLevel``.  Levels are cumulative: a level shows its own messages plus everything more severe. The setting covers both the SDK's Swift-side logging and the native engine. ``debug`` cannot restore debug-only statements that were compiled out of the release engine binary.  Raw values are stable across SDK versions and match the C++/Android wire values. Never change an existing value.
+
+- `case debug = 0`
+- `case info = 1`
+- `case warning = 2`
+- `case error = 3`
+- `case none = 4`

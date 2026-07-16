@@ -371,6 +371,24 @@ built on a Jammy base, so a packaged app (e.g. an AppImage) runs on Ubuntu
 22.04 and any newer distribution. glibc and the C++ runtime come from the
 host system — they are not vendored in the platform package.
 
+## Logging
+
+SDK log verbosity defaults to warnings and errors only. To change it, pass
+`logLevel` in the SDK options:
+
+```js
+const { SmartSpectraSDK, SmartSpectraLogLevel } = require('@smartspectra/node-sdk');
+
+const sdk = new SmartSpectraSDK({
+    apiKey: '...',
+    logLevel: SmartSpectraLogLevel.kInfo,
+});
+```
+
+Levels are cumulative — `kDebug`, `kInfo`, `kWarning` (default), `kError`,
+`kNone`. `kDebug` cannot restore debug-only statements compiled out of the
+release engine binary.
+
 ## Performance notes
 
 - koffi adds ~100 ns per FFI call — negligible for `sendFrame()` at 30 fps.

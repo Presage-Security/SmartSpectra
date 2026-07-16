@@ -7,6 +7,22 @@ description: C++-specific migration notes for SmartSpectra SDK upgrades.
 
 > Applies to SmartSpectra C++ SDK v3.x.
 
+## C++ SDK v3.3.0 Migration
+
+### Default log verbosity is now warnings and errors only
+
+The SDK previously emitted informational log chatter by default. From v3.3.0
+the default level is `SmartSpectraLogLevel::kWarning`. If you relied on the
+informational output, restore it via `SmartSpectraConfig::log_level`:
+
+```cpp
+SmartSpectraConfig config;
+config.log_level = presage::smartspectra::SmartSpectraLogLevel::kInfo;
+```
+
+Setting the `GLOG_minloglevel` environment variable still works and is never
+overridden by the SDK default.
+
 ## C++ SDK v3.1.0-rc.4 Migration
 
 ### `MetricsToJsonSoA` return type

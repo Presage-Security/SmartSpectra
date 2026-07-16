@@ -30,6 +30,18 @@ Entry point for the SmartSpectra SDK. Most apps use the shared singleton initial
   Dispatch an on-demand insight request alongside the vitals samples buffered since the last send.
 
 - ```kotlin
+  @SmartSpectraTestingApi public fun setVideoInputEnabled(enabled: Boolean)
+  ```
+
+  Enables or disables video-frame input mode for automated testing. While enabled, the SDK does not open the device camera (so no camera hardware or `CAMERA` permission is needed) and expects the caller to supply frames through [addVideoFrame]. Call before [start]; toggle back to `false` to return to normal camera capture.
+
+- ```kotlin
+  @SmartSpectraTestingApi public fun addVideoFrame(frame: Bitmap, timestampUs: Long)
+  ```
+
+  Feeds one decoded video frame into the measurement pipeline while video-frame input mode is active (see [setVideoInputEnabled]). Call after [start] has completed. Decode your recorded clip however you like (for example `MediaMetadataRetriever` or `MediaCodec`) and deliver frames in playback order.
+
+- ```kotlin
   @JvmStatic @JvmOverloads fun initialize( context: Context, config: SmartSpectraConfig = SmartSpectraConfig(), ): SmartSpectraSdk
   ```
 
@@ -94,12 +106,24 @@ Configuration for [SmartSpectraSdk]. Most apps access configuration through [Sma
   ```
 
 - ```kotlin
+  public var logLevel: SmartSpectraLogLevel = SmartSpectraLogLevel.DEFAULT
+  ```
+
+  Verbosity of SDK logging — both the SDK's own logging and the native engine. Set it before [SmartSpectraSdk.initialize] for full effect; later changes apply to the SDK's own logging immediately and to the engine when the next measurement session starts. Defaults to [SmartSpectraLogLevel.WARNING] (warnings and errors only).
+
+- ```kotlin
   public var cameraPosition: CameraPosition
   ```
 
 - ```kotlin
   public var imageOutputEnabled: Boolean = true
   ```
+
+- ```kotlin
+  public var enableTelemetry: Boolean = true
+  ```
+
+  Controls whether the SDK reports anonymous, aggregate usage telemetry. On by default; set `false` to opt out. When enabled, the SDK sends a per-session summary — no raw frames, metric values, file paths, or user/device identifiers — to help Presage improve SDK reliability. Reporting is best-effort and never blocks a measurement. Read when a measurement session starts.
 
 - ```kotlin
   public var previewSurfaceProvider: Preview.SurfaceProvider?
@@ -173,6 +197,7 @@ Configuration for [SmartSpectraSdk]. Most apps access configuration through [Sma
 - `CHEST_NOT_VISIBLE(7)`
 - `CAMERA_TUNING(10)`
 - `FRAME_RATE_TOO_LOW(11)`
+- `EXCESSIVE_MOTION(12)`
 
 ## SmartSpectraError
 
@@ -215,3 +240,13 @@ SDK error codes. Raw values are stable across SDK versions and match the C++/Swi
 - ```kotlin
   val error: SmartSpectraError
   ```
+
+## SmartSpectraLogLevel
+
+Verbosity of SDK logging, set via [SmartSpectraConfig.logLevel]. Levels are cumulative: a level shows its own messages plus everything more severe. The setting covers both the SDK's Kotlin-side (Timber) logging and the native engine. [DEBUG] cannot restore debug-only statements that were compiled out of the release engine binary. Wire values are stable across SDK versions and match the C++ `SmartSpectraLogLevel` values. Never change an existing value.
+
+- `DEBUG(0, Log.DEBUG)`
+- `INFO(1, Log.INFO)`
+- `WARNING(2, Log.WARN)`
+- `ERROR(3, Log.ERROR)`
+- `NONE(4, Log.ASSERT + 1)`

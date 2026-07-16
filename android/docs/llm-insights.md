@@ -7,7 +7,7 @@ description: Request and receive LLM Insights from the Android SmartSpectra SDK.
 
 Platform-specific usage for the Android SDK. For what LLM Insights are, the
 request/response model, required metrics, and the privacy notice, see the
-[LLM Insights overview](../../docs/llm-insights.md).
+[LLM Insights overview](../../docs/llm-insights/index.md).
 
 The insight API lives on the `SmartSpectraSdk` singleton
 (`SmartSpectraSdk.shared`).
@@ -90,6 +90,6 @@ which case the observer is not called.
 
 ## See also
 
-- [LLM Insights overview](../../docs/llm-insights.md)
+- [LLM Insights overview](../../docs/llm-insights/index.md)
 - [Android API reference](api-reference.md)
 - [Data Types](../../docs/data-types.md)

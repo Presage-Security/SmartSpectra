@@ -6,6 +6,13 @@ plugins {
 
 val androidNdkVersion = rootProject.extra["androidNdkVersion"] as String
 
+val demoAppApiKey = providers.gradleProperty("demoAppApiKey")
+    .orElse(providers.environmentVariable("SMARTSPECTRA_API_KEY"))
+    .orElse("")
+
+fun String.asBuildConfigString(): String =
+    replace("\\", "\\\\").replace("\"", "\\\"")
+
 extensions.configure<com.android.build.api.dsl.ApplicationExtension>("android") {
     namespace = "com.presagetech.smartspectra_example"
     compileSdk = 36
@@ -20,9 +27,17 @@ extensions.configure<com.android.build.api.dsl.ApplicationExtension>("android") 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    buildFeatures {
+        buildConfig = true
+    }
     buildTypes {
         debug {
             isMinifyEnabled = false
+            buildConfigField(
+                "String",
+                "SMARTSPECTRA_API_KEY",
+                "\"${demoAppApiKey.get().asBuildConfigString()}\"",
+            )
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules-debug.pro"
@@ -32,6 +47,7 @@ extensions.configure<com.android.build.api.dsl.ApplicationExtension>("android") 
         }
         release {
             isMinifyEnabled = false
+            buildConfigField("String", "SMARTSPECTRA_API_KEY", "\"\"")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

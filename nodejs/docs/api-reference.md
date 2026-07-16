@@ -133,6 +133,16 @@ MetricType integer codes. Defaults to `breathingMetrics` when omitted.
 enableAccumulatedOutput?: boolean
 ```
 
+```typescript
+logLevel?: SmartSpectraLogLevelValue
+```
+
+Verbosity of SDK logging, applied when the session initializes. Defaults to SmartSpectraLogLevel.kWarning (warnings and errors only).
+
+```typescript
+enableTelemetry?: boolean
+```
+
 ## VideoFileOptions
 
 ```typescript
@@ -217,6 +227,7 @@ frameTransform?: FrameTransformValue
 - `readonly kChestNotVisible:    7`
 - `readonly kCameraTuning:       10`
 - `readonly kFrameRateTooLow:    11`
+- `readonly kExcessiveMotion:    12`
 
 ## SmartSpectraErrorCode
 
@@ -244,3 +255,13 @@ Deserialize a protobuf Metrics buffer from the 'metrics' or 'accumulatedMetrics'
 Register a protobuf Metrics class exposing `deserializeBinary(buf)` (google-protobuf) or `decode(buf)` (protobufjs). `decodeMetrics()` will use it; otherwise the raw Buffer is returned.
 
 `export declare function setMetricsClass(cls: unknown): void`
+
+## SmartSpectraLogLevel
+
+Verbosity of SDK logging, set via the SmartSpectraSDK `logLevel` option. Levels are cumulative: a level shows its own messages plus everything more severe.
+
+- `readonly kDebug:   0`
+- `readonly kInfo:    1`
+- `readonly kWarning: 2`
+- `readonly kError:   3`
+- `readonly kNone:    4`

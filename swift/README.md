@@ -32,6 +32,19 @@ The Quick Start is intended so that the developer can replace `Cool Vitals/Conte
 - Use `let sdk = SmartSpectraSDK.shared`.
 - Buffer pulse, breathing, arterial pressure, chest, and abdomen samples locally before drawing charts.
 
+## Logging
+
+SDK log verbosity defaults to warnings and errors only. To change it, set
+`logLevel` on the SDK config:
+
+```swift
+SmartSpectraSDK.shared.config.logLevel = .info
+```
+
+Levels are cumulative — `.debug`, `.info`, `.warning` (default), `.error`,
+`.none`. `.debug` cannot restore debug-only statements compiled out of the
+release engine binary.
+
 ## Choose Your Guide
 
 Use [Option 1: API Key](docs/option-1-api-key.md) for the fastest manual setup.

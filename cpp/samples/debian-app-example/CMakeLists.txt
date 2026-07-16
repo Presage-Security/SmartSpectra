@@ -28,8 +28,8 @@ find_package(SmartSpectra REQUIRED)
 add_executable(debian-app-example main.cc)
 target_link_libraries(debian-app-example PRIVATE SmartSpectra::SDK)
 
-# Resolve bundled runtime libs (libsmartspectra.so + Presage opencv) relative
-# to the binary at install time: /opt/debian-app-example/bin/<exe> -> ../lib.
+# Resolve the bundled runtime lib (libsmartspectra.so) relative to the binary
+# at install time: /opt/debian-app-example/bin/<exe> -> ../lib.
 # INSTALL_RPATH_USE_LINK_PATH=FALSE prevents the link-time RPATH from polluting
 # the final RUNPATH; the resulting DT_RUNPATH is exactly `$ORIGIN/../lib`.
 set_target_properties(debian-app-example PROPERTIES
@@ -50,7 +50,6 @@ set_target_properties(debian-app-example PROPERTIES
 set(DAE_INSTALL_PREFIX "/opt/debian-app-example")
 set(DAE_BIN_DIR        "${DAE_INSTALL_PREFIX}/bin")
 set(DAE_LIB_DIR        "${DAE_INSTALL_PREFIX}/lib")
-set(DAE_OPENCV_DIR     "${DAE_LIB_DIR}/smartspectra")
 set(DAE_SHARE_DIR      "${DAE_INSTALL_PREFIX}/share/smartspectra")
 
 install(TARGETS debian-app-example DESTINATION "${DAE_BIN_DIR}")
@@ -73,28 +72,21 @@ install(
     DESTINATION "${DAE_LIB_DIR}"
 )
 
-# Bundle the eight-module Presage OpenCV runtime, preserving the SDK's
-# lib/smartspectra/ subdir layout. The SDK ships them at
-# <sdk>/lib/smartspectra/libopencv_*.so.411; we install them to
-# /opt/debian-app-example/lib/smartspectra/ so the redistributed layout
-# mirrors what apt install of the SDK produces under /usr/local/lib/smartspectra/.
-# Load-time resolution still works because libsmartspectra.so has no
-# DT_RUNPATH (cc_shared_library strips $ORIGIN linkopts), so its
-# DT_NEEDED libopencv_*.so.411 chain is resolved via the ldconfig cache
-# populated by the postinst-registered .conf (which lists both
-# /opt/debian-app-example/lib and /opt/debian-app-example/lib/smartspectra).
-# The binary's RPATH=$ORIGIN/../lib was never load-bearing for OpenCV: under
-# --enable-new-dtags (linker default) DT_RUNPATH does not propagate to
-# transitive dependencies — it only resolves libsmartspectra.so itself.
-set(_dae_opencv_modules
-    calib3d core features2d flann imgcodecs imgproc video videoio
+# Bundle the SDK's private runtime directory, <sdk>/lib/smartspectra/, beside
+# the .so. On Linux it carries the SDK's own LGPL FFmpeg build (plus its
+# license texts), which libsmartspectra.so resolves via its
+# $ORIGIN/smartspectra RUNPATH — searched before the system's ldconfig cache,
+# so the SDK-provided LGPL libraries are used even when a distro FFmpeg with
+# the same sonames is installed. Skipping this leaves libsmartspectra.so
+# unable to load (libavcodec.so.NN not found) on systems without a matching
+# distro FFmpeg. OPTIONAL: the directory is absent on SDK flavors that resolve
+# FFmpeg from the OS instead of bundling it.
+install(
+    DIRECTORY "${_dae_sdk_lib_dir}/smartspectra/"
+    DESTINATION "${DAE_LIB_DIR}/smartspectra"
+    USE_SOURCE_PERMISSIONS
+    OPTIONAL
 )
-foreach(_mod ${_dae_opencv_modules})
-    install(
-        FILES "${_dae_sdk_lib_dir}/smartspectra/libopencv_${_mod}.so.411"
-        DESTINATION "${DAE_OPENCV_DIR}"
-    )
-endforeach()
 
 # Bundle the SDK's graph/ tree (models + computation graphs). Source layout:
 # <sdk>/share/graph/{models,...}; bundled-into layout:
@@ -213,8 +205,9 @@ endif()
 set(CPACK_DEBIAN_PACKAGE_DEPENDS "${_dae_debian_depends}")
 
 # Maintainer scripts: postinst writes /etc/ld.so.conf.d/debian-app-example.conf
-# and runs ldconfig so libsmartspectra.so's DT_NEEDED libopencv_*.so.411 chain
-# resolves at load time. postrm removes the conf and re-runs ldconfig.
+# and runs ldconfig so libsmartspectra.so (bundled under /opt/debian-app-example/lib,
+# which is not on the default loader path) is discoverable at load time. postrm
+# removes the conf and re-runs ldconfig.
 configure_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/cmake/postinst.in"
     "${CMAKE_CURRENT_BINARY_DIR}/postinst"

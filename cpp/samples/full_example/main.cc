@@ -80,6 +80,9 @@ ABSL_FLAG(std::string, api_key, "", "API key for the Physiology service.");
 ABSL_FLAG(bool, save_metrics_to_disk, false, "Save metrics to disk.");
 ABSL_FLAG(bool, use_accumulated_stream, false, "Use accumulated output stream for metrics.");
 ABSL_FLAG(std::string, output_directory, "out", "Directory for saved metrics.");
+ABSL_FLAG(std::string, video_output_directory, "",
+          "If set, record the processed video (Motion-JPEG AVI) plus a per-frame "
+          "timestamp sidecar into this directory during measurement.");
 ABSL_FLAG(bool, enable_hud, true, "Enable HUD overlay.");
 // endregion ===========================================================================================================
 
@@ -152,6 +155,13 @@ int main(int argc, char** argv) {
     }
     config.enable_accumulated_output = use_accumulated && save_metrics;
 
+    // Optional: record the processed video via the SDK's built-in Motion-JPEG
+    // AVI writer (+ timestamp sidecar) for later replay through --input_video_path.
+    if (const std::string rec_dir = absl::GetFlag(FLAGS_video_output_directory);
+        !rec_dir.empty()) {
+        config.video_output_directory = rec_dir;
+    }
+
     // Capture before config is moved into SmartSpectra; the HUD layout and the
     // OnMetrics gate both key off whether EDA was requested at config time.
     const bool eda_requested =
@@ -201,10 +211,20 @@ int main(int argc, char** argv) {
     // Callbacks fire on graph scheduler threads; the main loop renders on the main thread.
     std::mutex hud_mutex;
 
+    // Validation hint text, updated from the callback thread and rendered on
+    // the frame each iteration of the main loop. Protected by hud_mutex
+    // (held briefly under copy in the render path).
+    std::string last_validation_hint;
+
     // --- Callbacks ---
     smart_spectra.SetOnValidationStatusChanged(
-        [&last_status, verbosity](const spectra::ValidationStatus& vs, int64_t ts) {
+        [&last_status, &last_validation_hint, &hud_mutex, verbosity](
+                const spectra::ValidationStatus& vs, int64_t ts) {
             auto previous = last_status.exchange(vs.code);
+            {
+                std::lock_guard<std::mutex> lock(hud_mutex);
+                last_validation_hint = vs.hint;
+            }
             if (verbosity > 0 && previous != vs.code) {
                 std::cout << "Validation status: " << vs.code
                           << " (" << vs.hint << ")"
@@ -354,7 +374,29 @@ int main(int argc, char** argv) {
 
     cv::Mat frame;
     bool running = true;
+    bool session_started = false;
     while (running) {
+        // Headless mode has no key handler to end the loop. A file source
+        // self-stops at EOF (the session returns to kIdle) while a camera stays
+        // kRunning until externally stopped — so exit once a started headless
+        // session leaves the running state. kError is terminal (e.g. auth or
+        // model-load failure before the graph ever runs) and full_example does
+        // not Reset(), so exit on it too. Without this a
+        // `--input_video_path --headless` run spins forever on the retained
+        // last frame after the video ends (or after a startup failure).
+        if (headless) {
+            const auto status = smart_spectra.GetStatus();
+            if (status == spectra::ProcessingStatus::kRunning) session_started = true;
+            const bool terminal =
+                status == spectra::ProcessingStatus::kError ||
+                (session_started && status != spectra::ProcessingStatus::kStarting &&
+                 status != spectra::ProcessingStatus::kRunning &&
+                 status != spectra::ProcessingStatus::kStopping);
+            if (terminal) {
+                running = false;
+                break;
+            }
+        }
         // Display frames come from OnVideoOutput callback for both camera and file
         {
             std::lock_guard<std::mutex> lock(display_frame_mutex);
@@ -369,6 +411,7 @@ int main(int argc, char** argv) {
             continue;
         }
 
+
         // HUD rendering on display frame (lock shared with callback threads)
         if (enable_hud) {
             std::lock_guard<std::mutex> lock(hud_mutex);
@@ -381,6 +424,20 @@ int main(int argc, char** argv) {
                 log_render_err(knee_plotter.Render(frame, edge_color), "Knee trace");
                 log_render_err(knee_label.Render(frame, edge_color), "Knee label");
             }
+            // Validation banner: code + hint pinned to the top of the frame.
+            const auto code = last_status.load(std::memory_order_relaxed);
+            const bool ok = (code == spectra::ValidationCode::kOk);
+            const std::string banner =
+                std::string(spectra::ToString(code)) +
+                (last_validation_hint.empty() ? std::string{}
+                                              : ": " + last_validation_hint);
+            const cv::Scalar bg = ok ? cv::Scalar(30, 80, 30) : cv::Scalar(20, 20, 160);
+            const cv::Scalar fg = cv::Scalar(240, 240, 240);
+            const int row_h = 28;
+            cv::rectangle(frame, cv::Rect(0, 0, frame.cols, row_h),
+                          bg, cv::FILLED);
+            cv::putText(frame, banner, cv::Point(10, row_h - 9),
+                        cv::FONT_HERSHEY_SIMPLEX, 0.55, fg, 1, cv::LINE_AA);
         }
 
         if (headless) {

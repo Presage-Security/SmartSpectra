@@ -98,6 +98,18 @@ description: API Reference for the SmartSpectra SDK.
   ```
 
 - ```cpp
+  SmartSpectraLogLevel log_level = kDefaultLogLevel
+  ```
+
+- ```cpp
+  SdkRuntimeContext runtime_context
+  ```
+
+- ```cpp
+  bool enable_telemetry = true
+  ```
+
+- ```cpp
   std::optional<std::string> video_output_directory
   ```
 
@@ -273,6 +285,7 @@ description: API Reference for the SmartSpectra SDK.
 - `kChestNotVisible = 7`
 - `kCameraTuning = 10`
 - `kFrameRateTooLow = 11`
+- `kExcessiveMotion = 12`
 
 ## SmartSpectraError
 
@@ -352,3 +365,31 @@ using OnErrorFn = std::function<void(const SmartSpectraError& error)>
 ```cpp
 using OnInsightFn = std::function<void(const Insight& insight)>
 ```
+
+## SmartSpectraLogLevel
+
+- `kDebug   = 0`
+- `kInfo    = 1`
+- `kWarning = 2`
+- `kError   = 3`
+- `kNone    = 4`
+
+## SdkRuntimeContext
+
+### Properties
+
+- ```cpp
+  std::string sdk_binding
+  ```
+
+- ```cpp
+  std::string platform
+  ```
+
+- ```cpp
+  std::string os_version
+  ```
+
+- ```cpp
+  std::string device_model
+  ```

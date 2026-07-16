@@ -98,7 +98,7 @@ The sample plays the file through the same pipeline as a live camera, prints
 metrics as they arrive, and exits when the file finishes — a non-zero exit
 code (or no metrics printed) means the run failed. Use a short clip (a few
 seconds, well-lit, mostly still face) in a widely-supported container/codec
-such as MP4 (H.264); the sample decodes it with OpenCV.
+such as MP4 (H.264).
 
 A provider-neutral CI step (GitHub Actions), after installing or building the
 SDK for your platform:

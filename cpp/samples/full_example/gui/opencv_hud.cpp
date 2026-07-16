@@ -88,7 +88,10 @@ OpenCvHud::OpenCvHud(
             OpenCvHud::indicator_width, OpenCvHud::label_width,
             "Breathing (Chest)",
             std::move(breathing_upper_confident_color), std::move(breathing_upper_unconfident_color),
-            this->max_trace_points
+            this->max_trace_points,
+            /*display_rate=*/true, /*display_trace=*/true,
+            /*secondary_name=*/"", 0, 0,
+            /*show_rate_confidence=*/true
         ));
 
         // The breathing rate is identical to the chest rate, so suppress its

@@ -8,6 +8,7 @@ This repository hosts SmartSpectra SDK from PresageTech for measuring vitals suc
   - [Getting Started](#getting-started)
   - [Features](#features)
   - [Model Cards and Limitations](#model-cards-and-limitations)
+  - [Telemetry and Privacy](#telemetry-and-privacy)
   - [Authentication](#authentication)
   - [Platform-Specific Guides](#platform-specific-guides)
     - [Android](#android)
@@ -52,6 +53,10 @@ Model cards include:
 - Upper and lower breathing waveforms
 
 Review the [SmartSpectra model cards and limitations](docs/model-cards-and-limitations.md) for metric-specific operating ranges, validation notes, and known limitations.
+
+## Telemetry and Privacy
+
+The SDK can report a small, aggregate, per-session diagnostic summary so we can measure release quality across the devices and conditions the SDK runs on. It is aggregate-only — no raw video, no measured vitals values, no user or device identifiers — and it is opt-out. See [SDK Telemetry & Privacy](docs/telemetry-and-privacy.md) for exactly what is and isn't collected and how to disable it.
 
 ## Authentication
 

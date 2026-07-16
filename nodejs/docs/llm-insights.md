@@ -7,7 +7,7 @@ description: Request and receive LLM Insights from the Node.js SmartSpectra SDK.
 
 Platform-specific usage for the Node.js SDK (`@smartspectra/node-sdk`). For what
 LLM Insights are, the request/response model, required metrics, and the privacy
-notice, see the [LLM Insights overview](../../docs/llm-insights.md).
+notice, see the [LLM Insights overview](../../docs/llm-insights/index.md).
 
 The main-process (`@smartspectra/node-sdk`) and Electron renderer
 (`@smartspectra/node-sdk/renderer`) entry points expose the same API; only the
@@ -82,6 +82,6 @@ callback does not fire.
 
 ## See also
 
-- [LLM Insights overview](../../docs/llm-insights.md)
+- [LLM Insights overview](../../docs/llm-insights/index.md)
 - [Node.js API reference](api-reference.md)
 - [Data Types](../../docs/data-types.md)

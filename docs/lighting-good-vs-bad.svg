@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 300" width="800" height="300" role="img" aria-labelledby="lighting-title lighting-desc">
+  <title id="lighting-title">Good vs. bad lighting</title>
+  <desc id="lighting-desc">Left: a face lit evenly from the front, with soft, symmetric light. Right: the same face lit from one side only, casting a hard shadow across half the face.</desc>
+
+  <!-- Good panel -->
+  <g transform="translate(20,20)">
+    <rect x="0" y="0" width="360" height="260" rx="14" fill="#fcfcfb" stroke="#e1e0d9" stroke-width="1.5"/>
+
+    <circle cx="27" cy="30" r="10" fill="#0ca30c"/>
+    <path d="M22,30 L26,34 L33,25" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="46" y="35" font-family="system-ui,-apple-system,'Segoe UI',sans-serif" font-size="16" font-weight="600" fill="#0b0b0b">Good lighting</text>
+    <text x="20" y="56" font-family="system-ui,-apple-system,'Segoe UI',sans-serif" font-size="12.5" fill="#52514e">Even, diffuse light from the front</text>
+
+    <!-- symmetric light source -->
+    <g stroke="#eda100" stroke-width="3" stroke-linecap="round">
+      <line x1="180" y1="66" x2="180" y2="52"/>
+      <line x1="152" y1="73" x2="141" y2="62"/>
+      <line x1="208" y1="73" x2="219" y2="62"/>
+    </g>
+    <circle cx="180" cy="86" r="10" fill="#eda100"/>
+
+    <!-- face -->
+    <circle cx="180" cy="150" r="60" fill="#d9cdbb"/>
+    <ellipse cx="161" cy="126" rx="30" ry="20" fill="#ffffff" opacity="0.3"/>
+    <circle cx="162" cy="140" r="5.5" fill="#3a352c"/>
+    <circle cx="198" cy="140" r="5.5" fill="#3a352c"/>
+    <path d="M154,168 Q180,182 206,168" fill="none" stroke="#3a352c" stroke-width="3" stroke-linecap="round"/>
+
+    <text x="20" y="238" font-family="system-ui,-apple-system,'Segoe UI',sans-serif" font-size="12.5" fill="#52514e">No harsh shadows on either side</text>
+  </g>
+
+  <!-- Bad panel -->
+  <g transform="translate(420,20)">
+    <rect x="0" y="0" width="360" height="260" rx="14" fill="#fcfcfb" stroke="#e1e0d9" stroke-width="1.5"/>
+
+    <circle cx="27" cy="30" r="10" fill="#d03b3b"/>
+    <path d="M23,26 L31,34 M31,26 L23,34" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round"/>
+    <text x="46" y="35" font-family="system-ui,-apple-system,'Segoe UI',sans-serif" font-size="16" font-weight="600" fill="#0b0b0b">Bad lighting</text>
+    <text x="20" y="56" font-family="system-ui,-apple-system,'Segoe UI',sans-serif" font-size="12.5" fill="#52514e">Backlit or one-sided, harsh shadow</text>
+
+    <!-- one-sided light source, upper right -->
+    <g stroke="#eda100" stroke-width="3" stroke-linecap="round">
+      <line x1="248" y1="60" x2="238" y2="70"/>
+      <line x1="262" y1="72" x2="248" y2="76"/>
+      <line x1="258" y1="86" x2="245" y2="88"/>
+    </g>
+    <circle cx="258" cy="70" r="10" fill="#eda100"/>
+
+    <!-- face, shadow falls on the side away from the light -->
+    <circle cx="180" cy="150" r="60" fill="#d9cdbb"/>
+    <path d="M180,90 A60,60 0 0,0 180,210 Z" fill="#7c705c"/>
+    <circle cx="162" cy="140" r="5.5" fill="#2a2620"/>
+    <circle cx="198" cy="140" r="5.5" fill="#2a2620"/>
+    <path d="M154,168 Q180,182 206,168" fill="none" stroke="#2a2620" stroke-width="3" stroke-linecap="round"/>
+
+    <text x="20" y="238" font-family="system-ui,-apple-system,'Segoe UI',sans-serif" font-size="12.5" fill="#52514e">Hard shadow line cuts across the face</text>
+  </g>
+</svg>

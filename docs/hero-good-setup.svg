@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 340" width="800" height="340" role="img" aria-labelledby="hero-title hero-desc">
+  <title id="hero-title">A good SmartSpectra capture setup</title>
+  <desc id="hero-desc">A single subject sits centered at a table, evenly lit by a window, with a device mounted on a stable stand at chest height. A green camera-frame bracket shows the face and upper chest fully in view.</desc>
+
+  <rect x="0" y="0" width="800" height="340" rx="16" fill="#fcfcfb" stroke="#e1e0d9" stroke-width="1.5"/>
+
+  <circle cx="34" cy="34" r="10" fill="#0ca30c"/>
+  <path d="M29,34 L33,38 L40,29" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="53" y="39" font-family="system-ui,-apple-system,'Segoe UI',sans-serif" font-size="17" font-weight="600" fill="#0b0b0b">A good setup</text>
+  <text x="20" y="60" font-family="system-ui,-apple-system,'Segoe UI',sans-serif" font-size="12.5" fill="#52514e">Centered, evenly lit, camera steady, face and chest in frame</text>
+
+  <!-- table -->
+  <rect x="40" y="270" width="720" height="12" rx="4" fill="#c3c2b7"/>
+
+  <!-- window (light source) -->
+  <rect x="40" y="90" width="72" height="92" rx="4" fill="#eaf4ff" stroke="#c3c2b7" stroke-width="2"/>
+  <line x1="76" y1="90" x2="76" y2="182" stroke="#c3c2b7" stroke-width="2"/>
+  <line x1="40" y1="136" x2="112" y2="136" stroke="#c3c2b7" stroke-width="2"/>
+
+  <!-- device on a stable stand -->
+  <g>
+    <ellipse cx="260" cy="272" rx="24" ry="6" fill="#898781"/>
+    <rect x="256" y="200" width="8" height="72" fill="#898781"/>
+    <rect x="228" y="150" width="64" height="96" rx="8" fill="#2c2c2a"/>
+    <rect x="234" y="158" width="52" height="80" rx="3" fill="#dfe7f5"/>
+    <circle cx="260" cy="166" r="2.5" fill="#2c2c2a"/>
+  </g>
+
+  <!-- subject -->
+  <g>
+    <path d="M450,270 Q450,206 486,193 L554,193 Q590,206 590,270 Z" fill="#d9cdbb"/>
+    <circle cx="520" cy="150" r="46" fill="#d9cdbb"/>
+    <ellipse cx="506" cy="132" rx="22" ry="14" fill="#ffffff" opacity="0.3"/>
+    <circle cx="505" cy="146" r="4.5" fill="#3a352c"/>
+    <circle cx="535" cy="146" r="4.5" fill="#3a352c"/>
+    <path d="M500,166 Q520,178 540,166" fill="none" stroke="#3a352c" stroke-width="2.5" stroke-linecap="round"/>
+  </g>
+
+  <!-- camera-frame bracket: wide enough for the shoulders, down to the table -->
+  <g stroke="#0ca30c" stroke-width="3" stroke-linecap="round" fill="none">
+    <path d="M450,90 L430,90 L430,110"/>
+    <path d="M590,90 L610,90 L610,110"/>
+    <path d="M430,250 L430,270 L450,270"/>
+    <path d="M610,250 L610,270 L590,270"/>
+  </g>
+  <rect x="588" y="64" width="40" height="22" rx="11" fill="#0ca30c"/>
+  <text x="608" y="80" text-anchor="middle" font-family="system-ui,-apple-system,'Segoe UI',sans-serif" font-size="11.5" font-weight="700" fill="#ffffff">OK</text>
+
+  <!-- captions -->
+  <text x="76" y="200" text-anchor="middle" font-family="system-ui,-apple-system,'Segoe UI',sans-serif" font-size="12.5" fill="#52514e">Even, natural light</text>
+  <text x="260" y="300" text-anchor="middle" font-family="system-ui,-apple-system,'Segoe UI',sans-serif" font-size="12.5" fill="#52514e">Stable stand,</text>
+  <text x="260" y="316" text-anchor="middle" font-family="system-ui,-apple-system,'Segoe UI',sans-serif" font-size="12.5" fill="#52514e">chest height</text>
+  <text x="520" y="300" text-anchor="middle" font-family="system-ui,-apple-system,'Segoe UI',sans-serif" font-size="12.5" fill="#52514e">Centered, face + chest</text>
+  <text x="520" y="316" text-anchor="middle" font-family="system-ui,-apple-system,'Segoe UI',sans-serif" font-size="12.5" fill="#52514e">visible</text>
+</svg>

@@ -7,7 +7,7 @@ description: Request and receive LLM Insights from the C++ SmartSpectra SDK.
 
 Platform-specific usage for the C++ SDK. For what LLM Insights are, the
 request/response model, required metrics, and the privacy notice, see the
-[LLM Insights overview](../../docs/llm-insights.md).
+[LLM Insights overview](../../docs/llm-insights/index.md).
 
 ## Enable the required metrics
 
@@ -88,6 +88,6 @@ the user's physiology.
 
 ## See also
 
-- [LLM Insights overview](../../docs/llm-insights.md)
+- [LLM Insights overview](../../docs/llm-insights/index.md)
 - [C++ API reference](api-reference.md)
 - [Data Types](../../docs/data-types.md)

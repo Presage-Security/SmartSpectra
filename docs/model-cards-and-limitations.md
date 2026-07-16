@@ -11,6 +11,8 @@ description: Model cards, operating ranges, and known limitations for SmartSpect
 
 The SDK exposes one language-agnostic metrics payload across platforms. This overview summarizes the documented capability surface and calls out validation gaps directly. See the [payload schema](data-types.md) for field names and wire types.
 
+For camera setup, lighting, and framing guidance — plus how to read the SDK's live validation feedback — see [Getting a Good Measurement](measurement-quality.md).
+
 ## Relative Arterial Pressure Waveform
 
 **Output:** Waveform of relative arterial pressure (amplitude in arbitrary units vs. time). Represents waveform shape only (e.g., heartbeat timing, shape and relative changes). Not a blood pressure measurement and cannot be used to estimate systolic or diastolic pressure.

@@ -30,6 +30,7 @@ struct MetricsGroup {
     bool display_secondary_rate = false;
     bool rate_is_high_confidence = false;
     bool secondary_rate_is_high_confidence = false;
+    bool show_rate_confidence = false;
     const cv::Scalar confident_color;
     const cv::Scalar unconfident_color;
 
@@ -47,7 +48,8 @@ struct MetricsGroup {
         bool display_trace = true,
         const std::string& secondary_name = "",
         int secondary_indicator_width = 0,
-        int secondary_label_width = 0
+        int secondary_label_width = 0,
+        bool show_rate_confidence = false
     );
 };
 

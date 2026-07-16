@@ -27,6 +27,10 @@ cmake --build build --target full_example
 
 # Run with video file input
 ./build/samples/full_example/full_example --input_video_path=/path/to/video.mp4 --api_key=YOUR_API_KEY_HERE
+
+# Record the processed video while measuring (Motion-JPEG AVI + per-frame timestamp
+# sidecar written into the given directory), then replay it via --input_video_path
+./build/samples/full_example/full_example --camera_device_index=0 --api_key=YOUR_API_KEY_HERE --video_output_directory=/path/to/recordings
 ```
 
 Adding `eda` to `--requested_metrics` (e.g. `--requested_metrics=pulse_rate,arterial_pressure_trace,chest_trace,abdomen_trace,breathing_rate,eda`) surfaces the streaming EDA trace as a fourth HUD row beneath the breathing rows.

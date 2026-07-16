@@ -35,8 +35,8 @@ All platforms need:
 - **C++17 compiler** (GCC, Clang, or MSVC 2022)
 - An **API key** from [physiology.presagetech.com](https://physiology.presagetech.com/auth/login)
 
-The SDK package is self-contained — you do not need to install OpenCV,
-protobuf, curl, or OpenSSL separately on any platform.
+The SDK package is self-contained — you do not need to install protobuf, curl,
+or OpenSSL separately on any platform.
 
 ## Pick your platform
 
@@ -66,6 +66,24 @@ Once your first build runs:
 - [Redistribute SmartSpectra on Linux](../docs/redistribute_smartspectra_on_linux.md) — bundle the published Linux SDK tarball into your own `.deb`
 - [Migration guide](docs/migration-guide.md) — upgrading from v1.x or v2.x
 - [API reference](docs/api-reference.md)
+
+## Logging
+
+SDK log verbosity defaults to warnings and errors only. To change it, set
+`log_level` on the config before constructing `SmartSpectra`:
+
+```cpp
+SmartSpectraConfig config;
+config.api_key = "...";
+config.log_level = presage::smartspectra::SmartSpectraLogLevel::kInfo;
+SmartSpectra spectra(config);
+```
+
+Levels are cumulative — `kDebug`, `kInfo`, `kWarning` (default), `kError`,
+`kNone`. `kDebug` also enables verbose diagnostics where they exist, but it
+cannot restore debug-only statements compiled out of release binaries. A
+`GLOG_minloglevel` environment variable always takes precedence — when it is
+set, the SDK leaves logging untouched.
 
 ## Bugs & Troubleshooting
 

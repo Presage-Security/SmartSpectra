@@ -88,10 +88,11 @@ Notes on the shape:
 
 ## The recorded video
 
-Supply your own short clip — a few seconds of a well-lit, mostly still face,
-framed like a real measurement — and keep it in your repo's test assets. Use
+Supply your own short clip — around 30–60 seconds of a well-lit, mostly still
+face, framed like a real measurement (long enough for rates to compute; a few
+seconds isn't) — and keep it in your repo's test assets. Use
 a widely-supported container/codec such as MP4 (H.264); the SDK decodes it
-with OpenCV. See the [metrics guide](metrics.md) for which metrics to request
+automatically. See the [metrics guide](metrics.md) for which metrics to request
 and how to read the decoded payloads.
 
 ## A CI pipeline, in general terms

@@ -22,16 +22,18 @@ What you can automate depends on how the platform accepts input:
 | --- | --- | --- |
 | C++ (Linux/macOS/Windows) | Video-fed measurement | A recorded video file you supply |
 | Node.js | Video-fed measurement | A recorded video file you supply |
-| Android | Build-integration smoke | No camera required |
-| iOS | Build-integration smoke | No camera required |
+| Android | Video-fed measurement (testing-only opt-in API) | A recorded video file you supply |
+| iOS | Video-fed measurement (testing-only opt-in API) | A recorded video file you supply |
 
-- **Video-fed measurement** (C++, Node.js) — the desktop SDKs accept a recorded
-  video file in place of a live camera, so CI can run a full measurement and
-  assert that readings came out. No camera or display is needed.
-- **Build-integration smoke** (iOS, Android) — the mobile SDKs measure from the
-  live device camera and do not accept a recorded video file, so a full
-  video-fed measurement can't run on a camera-less CI machine. What you *can*
-  automate is a smoke test: the SDK builds, links, launches headless,
+- **Video-fed measurement** — every SDK can run a full measurement from a
+  recorded video in place of a live camera, so CI can assert that readings
+  came out. No camera or display is needed. On desktop (C++, Node.js) the
+  file input is regular public API; on mobile (iOS, Android) it is a
+  **testing-only API behind an explicit opt-in** (`@_spi(Testing)` on iOS,
+  `@OptIn(SmartSpectraTestingApi::class)` on Android) so it can't leak into
+  production code.
+- **Build-integration smoke** — the lighter fallback on any platform when you
+  don't have a recorded clip: prove the SDK builds, links, launches headless,
   initializes, and surfaces the expected permission/error states.
 
 ## What you'll need
@@ -46,16 +48,17 @@ For any of the above:
 
 For video-fed measurement, additionally:
 
-- **A short recorded video you supply** — a few seconds of a well-lit, mostly
-  still face, framed like a real measurement. Keep the clip in your own test
-  assets. See the platform guide for the container/codec each SDK expects.
+- **A short recorded video you supply** — around 30–60 seconds of a well-lit,
+  mostly still face, framed like a real measurement (long enough for rates to
+  compute; a few seconds isn't). Keep the clip in your own test assets. See
+  the platform guide for the container/codec each SDK expects.
 
 ## The video-fed model
 
-A video-fed headless test is the same shape on C++ and Node.js:
+A video-fed headless test is the same shape on every platform:
 
 ```text
-recorded video  ->  SDK file input  ->  metric callbacks  ->  assertions
+recorded video  ->  SDK video input  ->  metric callbacks  ->  assertions
         (no camera, no display)
 ```
 
@@ -72,8 +75,9 @@ Whatever CI system you use, the shape is the same:
 1. **Expose the API key** as a job secret.
 2. **Install or build** the SmartSpectra SDK for the platform (follow the
    platform's install guide).
-3. **Run the sample headlessly** — feed your recorded video (C++/Node.js), or
-   launch the SDK headless (iOS/Android) for the build-integration smoke.
+3. **Run the sample headlessly** — feed your recorded video through the
+   platform's video input (a headless sample on desktop, an instrumented /
+   XCTest run on mobile).
 4. **Fail the job** if the run crashed or didn't produce the expected output.
 
 A minimal, provider-neutral sketch (GitHub Actions, video-fed) — adapt the
@@ -111,16 +115,16 @@ steps for its platform (see the sidebar):
   headless sample with recorded-video input on Linux, macOS, and Windows.
 - **[Node.js](../nodejs/docs/headless-testing-in-ci.md)** — headless sample
   that plays a recorded video through the SDK.
-- **[Android](../android/docs/headless-testing-in-ci.md)** — headless
-  build-integration smoke (video-fed measurement is not available; a live
-  camera is required to measure).
-- **[iOS](../swift/docs/headless-testing-in-ci.md)** — headless build-integration
-  smoke (same limitation as Android).
+- **[Android](../android/docs/headless-testing-in-ci.md)** — video-fed
+  measurement as an instrumented test on an emulator, via the opt-in
+  `SmartSpectraTestingApi` frame-feed.
+- **[iOS](../swift/docs/headless-testing-in-ci.md)** — video-fed measurement
+  as an XCTest on the iOS Simulator, via the `@_spi(Testing)` video input.
 
 ## Limitations
 
 - **No offline mode.** A measurement authenticates against the SmartSpectra
   service; the CI runner needs network access.
-- **Mobile is smoke-only.** The Android and iOS SDKs measure from the live
-  camera and do not accept a recorded video file, so a full measurement can't
-  be automated on a camera-less CI machine.
+- **Mobile video input is testing-only.** The Android and iOS video APIs sit
+  behind explicit opt-ins; keep them out of production code paths. In
+  production, mobile measures from the live device camera.

@@ -8,6 +8,20 @@ description: Android-specific migration notes for SmartSpectra SDK upgrades.
 > Applies to SmartSpectra Android SDK v3.x.
 > Migrating from a v3.0 release-candidate prior to rc.12, or from v2.x.
 
+## Android SDK v3.3.0 Migration
+
+### Default log verbosity is now warnings and errors only
+
+The SDK previously emitted informational logcat chatter by default. From
+v3.3.0 the default level is `SmartSpectraLogLevel.WARNING`, covering both the
+SDK's Kotlin-side logging and the native engine. If you relied on the
+informational output, restore it via `SmartSpectraConfig.logLevel`:
+
+```kotlin
+val config = SmartSpectraConfig().apply { logLevel = SmartSpectraLogLevel.INFO }
+SmartSpectraSdk.initialize(context, config)
+```
+
 ## Edge Metrics Migration
 
 The `metricsBuffer` pathway has been removed. Android apps should now read all vitals data from `metrics`.
