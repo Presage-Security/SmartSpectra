@@ -353,7 +353,8 @@ class ViewController: UIViewController {
             return "Configuration failed: \(sdkError.message)"
         case .invalidState:
             return "SDK is in an invalid state for this action."
-        case .serverError, .processingFailed, .frameConversionFailed, .nonMonotonicTimestamp:
+        case .serverError, .processingFailed, .frameConversionFailed, .nonMonotonicTimestamp,
+             .timestampGap:
             return sdkError.message
         }
     }

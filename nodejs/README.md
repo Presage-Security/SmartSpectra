@@ -148,6 +148,8 @@ codes, and enums — lives in the [API reference](docs/api-reference.md),
 generated from the SDK's bundled TypeScript declarations so it tracks the
 published package. For which metrics to request and how to read the decoded
 payloads, see the [metrics guide](docs/metrics.md).
+For natural-language analysis of the measured vitals, see the
+[LLM Insights guide](docs/llm-insights.md).
 
 ## Electron integration
 

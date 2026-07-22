@@ -41,6 +41,9 @@ Documentation is available at <https://smartspectra.presagetech.com/>.
 - **Camera Selection**  
   Front or rear facing camera selection on iOS or Android and specification of camera input for applications using the C++ SDK.
 
+- **LLM Insights**  
+  Turn the vitals the SDK computes on-device into natural-language analysis from a large language model, on request. See the [LLM Insights overview](docs/llm-insights/index.md).
+
 ## Model Cards and Limitations
 
 Model cards include:

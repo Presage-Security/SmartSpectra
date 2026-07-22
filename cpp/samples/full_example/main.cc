@@ -125,7 +125,7 @@ spectra::gui::ConfidenceSample ToHrvSample(const presage::smartspectra::Hrv& val
     return {
         value.timestamp(),
         static_cast<float>(value.rmssd()),
-        true,
+        value.stable(),
         value.confidence()
     };
 }

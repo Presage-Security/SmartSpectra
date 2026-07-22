@@ -50,3 +50,7 @@ release engine binary.
 Use [Option 1: API Key](docs/option-1-api-key.md) for the fastest manual setup.
 
 Use [Option 2: OAuth](docs/option-2-oauth.md) if you need OAuth.
+
+## LLM Insights
+
+See [LLM Insights](docs/llm-insights.md) for natural-language analysis of the measured vitals.

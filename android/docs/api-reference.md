@@ -73,6 +73,8 @@ Entry point for the SmartSpectra SDK. Most apps use the shared singleton initial
   public val imageOutput: LiveData<Bitmap?> = _imageOutput
   ```
 
+  Latest engine display frame as an ARGB_8888 [Bitmap], or `null` while image output is disabled. The bitmap is reused from a small internal pool and refilled on later frames. `ImageView.setImageBitmap` keeps the reference (it does not copy) and reads the pixels at draw time, so displaying each frame as it arrives is safe — the pool covers the delivery latency. You MUST copy it (`Bitmap.copy(...)` or draw into your own bitmap) if you retain or cache it, or refresh the view slower than frames arrive; otherwise its pixels change under you.
+
 - ```kotlin
   val processingStatus: LiveData<ProcessingStatus>
   ```
@@ -158,6 +160,8 @@ Configuration for [SmartSpectraSdk]. Most apps access configuration through [Sma
 - ```kotlin
   public val edaMetrics: List<MetricType> = listOf( MetricType.EDA_TRACE, )
   ```
+
+  Electrodermal activity (EDA) trace metric bundle.
 
 ## CameraPosition
 

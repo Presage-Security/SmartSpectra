@@ -243,6 +243,7 @@ message Hrv {
   double baevsky = 4;
   int64 timestamp = 5;
   float confidence = 6;
+  bool stable = 7;
 }
 ```
 
@@ -252,6 +253,7 @@ message Hrv {
 - `double` `baevsky` -- Baevsky's Stress Index, in 1/ms^2 (inverse-square milliseconds)
 - `int64` `timestamp` -- Absolute timestamp at which the HRV measurement was taken, in microseconds, since Linux epoch
 - `float` `confidence` -- Confidence score for the HRV measurement, expressed as a percentage in the range [0.0, 100.0]
+- `bool` `stable` -- Whether the HRV measurement is considered stable/reliable
 
 ## Strict
 
@@ -307,9 +309,9 @@ message Breathing {
 }
 ```
 
-- `repeated` [`MeasurementWithConfidence`](#measurementwithconfidence) `rate` -- Respiratory rate measurements with confidence scores
-- `repeated` [`Measurement`](#measurement) `upper_trace` -- Chest breathing movement trace measurements
-- `repeated` [`Measurement`](#measurement) `lower_trace` -- Abdominal breathing movement trace measurements
+- `repeated` [`MeasurementWithConfidence`](#measurementwithconfidence) `rate` -- Respiratory rate measurements with confidence scores. `stable` marks confidence at or above the minimum accepted accuracy standard for breathing rate (+/-1 br/min), which corresponds to confidence >= 45; see the [breathing model card](https://vandv.presagetech.com/breathing_model_card.html) for the confidence-to-error mapping.
+- `repeated` [`Measurement`](#measurement) `upper_trace` -- Chest breathing movement trace measurements. The trace has no confidence of its own; `stable` is inherited from the breathing rate verdict (>= 45); see the [breathing model card](https://vandv.presagetech.com/breathing_model_card.html).
+- `repeated` [`Measurement`](#measurement) `lower_trace` -- Abdominal breathing movement trace measurements. The trace has no confidence of its own; `stable` is inherited from the breathing rate verdict (>= 45); see the [breathing model card](https://vandv.presagetech.com/breathing_model_card.html).
 - `repeated` [`Measurement`](#measurement) `amplitude` -- Breathing amplitude measurements
 - `repeated` [`DetectionStatus`](#detectionstatus) `apnea` -- Apnea (breathing cessation) detection status
 - `repeated` [`Measurement`](#measurement) `respiratory_line_length` -- Respiratory line length measurements for breathing pattern analysis
@@ -383,9 +385,9 @@ message Cardio {
 }
 ```
 
-- `repeated` [`MeasurementWithConfidence`](#measurementwithconfidence) `pulse_rate` -- Heart rate measurements with confidence scores
-- `repeated` [`MeasurementWithConfidence`](#measurementwithconfidence) `arterial_pressure_trace` -- Arterial pressure trace (uncalibrated, unitless) measurements with confidence scores
-- `repeated` [`Hrv`](#hrv) `hrv` -- Heart rate variability measurements with confidence scores
+- `repeated` [`MeasurementWithConfidence`](#measurementwithconfidence) `pulse_rate` -- Heart rate measurements with confidence scores. `stable` marks confidence at or above the minimum accepted accuracy standard for heart rate (+/-3 bpm), which corresponds to confidence >= 40; see the [arterial pressure model card](https://vandv.presagetech.com/arterial_pressure_model_card.html) for the confidence-to-error mapping. Heart rate is derived from the same signal.
+- `repeated` [`MeasurementWithConfidence`](#measurementwithconfidence) `arterial_pressure_trace` -- Arterial pressure trace (uncalibrated, unitless) measurements with confidence scores. `stable` uses the same threshold as heart rate -- the minimum accepted accuracy standard (+/-3 bpm), confidence >= 40 -- since both derive from the arterial pressure signal; see the [arterial pressure model card](https://vandv.presagetech.com/arterial_pressure_model_card.html).
+- `repeated` [`Hrv`](#hrv) `hrv` -- Heart rate variability measurements with confidence scores. `stable` marks confidence at or above the minimum accepted accuracy standard for HRV (+/-5 ms), which corresponds to confidence >= 50; see the [HRV model card](https://vandv.presagetech.com/hrv_model_card.html) for the confidence-to-error mapping.
 
 ## Metrics
 

@@ -66,6 +66,7 @@ Once your first build runs:
 - [Redistribute SmartSpectra on Linux](../docs/redistribute_smartspectra_on_linux.md) — bundle the published Linux SDK tarball into your own `.deb`
 - [Migration guide](docs/migration-guide.md) — upgrading from v1.x or v2.x
 - [API reference](docs/api-reference.md)
+- [LLM Insights](docs/llm-insights.md) — natural-language analysis of the measured vitals from an LLM, on request
 
 ## Logging
 

@@ -9,6 +9,16 @@ description: API Reference for the SmartSpectra SDK.
 
 Vitals measurement entry point. Owns one processing pipeline and surfaces lifecycle events via `on()`. Lifecycle methods throw a JS `Error` on failure with numeric `code` (a `SmartSpectraErrorCode` value), `message`, and boolean `retryable` properties.
 
+```ts
+import { SmartSpectraSDK, PixelFormat, decodeMetrics } from '@smartspectra/node-sdk';
+const sdk = new SmartSpectraSDK({ apiKey: 'YOUR_KEY' });
+sdk.on('metrics', (buf, ts) => console.log(decodeMetrics(buf)));
+sdk.useCustomInput();
+sdk.start();
+sdk.sendFrame(rgbBuf, width, height, stride, PixelFormat.kRGB, timestampUs);
+await sdk.destroy();
+```
+
 ### Methods
 
 - ```typescript
@@ -19,17 +29,25 @@ Vitals measurement entry point. Owns one processing pipeline and surfaces lifecy
   start(): void
   ```
 
+  Initialize and begin a custom-input session.
+
 - ```typescript
   stop(): void
   ```
+
+  Request the session to stop. Idempotent.
 
 - ```typescript
   stopAsync(): Promise<void>
   ```
 
+  Async variant of stop() — the native stop blocks until the pipeline drains; prefer this in event-loop-sensitive contexts.
+
 - ```typescript
   reset(): void
   ```
+
+  Rebuild the processing pipeline after kError; source must be reconfigured before next start().
 
 - ```typescript
   waitUntilComplete(timeoutMs?: number): boolean
@@ -113,15 +131,23 @@ Vitals measurement entry point. Owns one processing pipeline and surfaces lifecy
   static readonly version: string
   ```
 
+  SDK package version.
+
 - ```typescript
   readonly processingStatus: ProcessingStatusValue
   ```
 
+  Current ProcessingStatus integer value.
+
 ## SmartSpectraOptions
+
+Options passed to the SmartSpectra constructor.
 
 ```typescript
 apiKey?: string
 ```
+
+API key for server-validated auth.
 
 ```typescript
 requestedMetrics?: number[]
@@ -133,6 +159,8 @@ MetricType integer codes. Defaults to `breathingMetrics` when omitted.
 enableAccumulatedOutput?: boolean
 ```
 
+Also emit an accumulated metrics packet at the end of each session.
+
 ```typescript
 logLevel?: SmartSpectraLogLevelValue
 ```
@@ -143,51 +171,79 @@ Verbosity of SDK logging, applied when the session initializes. Defaults to Smar
 enableTelemetry?: boolean
 ```
 
+Aggregate SDK telemetry. Defaults to `true`; set `false` to opt out.
+
 ## VideoFileOptions
+
+Playback options for useFile().
 
 ```typescript
 timestampsPath?: string | null
 ```
 
+Path to a per-frame timestamps file (one timestamp per line).
+
 ```typescript
 interframeDelayMs?: number
 ```
+
+Throttle between frames in ms; omit/0 = as fast as possible.
 
 ```typescript
 startOffsetMs?: number
 ```
 
+Seek this far into the file before playback (ms); omit/0 = start.
+
 ```typescript
 maxDurationMs?: number
 ```
+
+Stop after this much content (ms); omit/0 = no limit.
 
 ```typescript
 frameTransform?: FrameTransformValue
 ```
 
+Spatial transform applied to every frame.
+
 ## CameraOptions
+
+Camera capture options for useCamera().
 
 ```typescript
 deviceIndex?: number
 ```
 
+Camera device index; omit/0 = default device.
+
 ```typescript
 width?: number
 ```
+
+Capture width in px; omit/0 = SDK default.
 
 ```typescript
 height?: number
 ```
 
+Capture height in px; omit/0 = SDK default.
+
 ```typescript
 fps?: number
 ```
+
+Capture frame rate; omit/0 = SDK default.
 
 ```typescript
 frameTransform?: FrameTransformValue
 ```
 
+Spatial transform applied to every frame.
+
 ## FrameTransform
+
+Frame transform applied by the SDK to every pushed frame.
 
 - `readonly kNone:             0`
 - `readonly kRotate90CW:       1`
@@ -197,6 +253,8 @@ frameTransform?: FrameTransformValue
 - `readonly kMirrorVertical:   5`
 
 ## PixelFormat
+
+Pixel format of a raw frame buffer passed to sendFrame().
 
 - `readonly kRGB:  0`
 - `readonly kBGR:  1`
@@ -208,6 +266,8 @@ frameTransform?: FrameTransformValue
 
 ## ProcessingStatus
 
+Processing lifecycle status. Integer values are stable across SDK versions.
+
 - `readonly kUninitialized: 0`
 - `readonly kIdle: 1`
 - `readonly kStarting: 2`
@@ -216,6 +276,8 @@ frameTransform?: FrameTransformValue
 - `readonly kError: 5`
 
 ## ValidationCode
+
+Measurement-readiness codes delivered via the 'validationStatus' event.
 
 - `readonly kOk:                 0`
 - `readonly kNoFaceFound:        1`
@@ -230,6 +292,8 @@ frameTransform?: FrameTransformValue
 - `readonly kExcessiveMotion:    12`
 
 ## SmartSpectraErrorCode
+
+Error codes on errors thrown by lifecycle methods and delivered via the 'error' event.
 
 - `readonly kOk:                    0`
 - `readonly kInvalidState:          1`
