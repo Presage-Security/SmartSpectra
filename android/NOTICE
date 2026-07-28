@@ -9,15 +9,15 @@ The following Apache-licensed components are included in this shipped artifact:
   - AndroidX Camera Camera2
   - AndroidX Camera Core
   - AndroidX Camera Lifecycle
-  - AndroidX Core KTX
-  - AndroidX Lifecycle LiveData KTX
+  - AndroidX Core
+  - AndroidX Lifecycle LiveData
   - AndroidX Lifecycle Process
   - AndroidX Startup Runtime
   - FlatBuffers
   - Flogger
   - Flogger System Backend
   - gemmlowp
-  - Guava
+  - Guava ListenableFuture
   - HighwayHash
   - JSR 305
   - KleidiAI
@@ -27,4 +27,3 @@ The following Apache-licensed components are included in this shipped artifact:
   - OpenCV
   - ruy
   - TensorFlow (TensorFlow Lite)
-  - Timber

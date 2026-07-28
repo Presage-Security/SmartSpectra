@@ -69,6 +69,10 @@ add is sent off-device to the Presage gateway — see the
   **15 seconds** of measurement (see
   [Required metrics configuration](index.md#required-metrics-configuration))
   before expecting a data-grounded answer.
+- **Keep prompts under the size limit.** A prompt is capped at **2048 bytes**
+  (counted in bytes, so a non-ASCII character can use more than one). A prompt
+  over the limit is rejected on-device, before the request is sent — shorten it,
+  and trim any [context you add](#add-your-own-context) if it grows large.
 - **Only three metrics are available.** Pulse rate, HRV, and breathing rate are
   the entire physiological surface a prompt can rely on.
 - **Only the current session is in scope.** The buffered window covers the

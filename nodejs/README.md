@@ -57,7 +57,7 @@ thread-safe trampolines.
 
 | Requirement | Version |
 | --- | --- |
-| Node.js | >= 18 (Node 20 LTS recommended) |
+| Node.js | >= 20 (Node 24 LTS recommended) |
 | Electron (optional) | >= 28 |
 
 The native runtime ships in per-platform npm packages pulled in automatically
@@ -104,6 +104,10 @@ the missing package.
 - Runnable reference app: [electron-quickstart](https://github.com/Presage-Security/SmartSpectra/tree/main/nodejs/samples/electron-quickstart)
 
 ## Headless Node Quickstart
+
+> The snippets below are ES modules (`import` + top-level `await`) — save them as `.mjs`, or
+> set `"type": "module"` in your `package.json`. In a CommonJS project, use `require()` and
+> wrap the `await` calls in an `async` function.
 
 ```ts
 import {

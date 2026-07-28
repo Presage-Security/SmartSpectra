@@ -290,6 +290,10 @@ Measurement-readiness codes delivered via the 'validationStatus' event.
 - `readonly kCameraTuning:       10`
 - `readonly kFrameRateTooLow:    11`
 - `readonly kExcessiveMotion:    12`
+- `readonly kFaceTooClose:       13`
+- `readonly kFaceTooFar:         14`
+- `readonly kFaceTooHigh:        15`
+- `readonly kFaceTooLow:         16`
 
 ## SmartSpectraErrorCode
 

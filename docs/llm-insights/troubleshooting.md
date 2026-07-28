@@ -33,10 +33,12 @@ returns a `SmartSpectraError`; the exact codes are:
 
 - **`kInvalidState`** — there is no active session. Call `Start()` first (or the
   session was already stopped).
-- **`kProcessingFailed`** — the request could not be dispatched. Causes: no
-  response sink was registered before requesting; the SDK could not reach the
-  server to establish the session (this is the one case where a *network*
-  failure surfaces synchronously); or the session is shutting down.
+- **`kProcessingFailed`** — the request could not be dispatched. Causes: the
+  prompt exceeds the **2048-byte** size limit (see
+  [Writing prompts](writing-prompts.md#keep-in-mind)); no response sink was
+  registered before requesting; the SDK could not reach the server to establish
+  the session (this is the one case where a *network* failure surfaces
+  synchronously); or the session is shutting down.
 
 How each platform reports a failed request:
 
@@ -103,6 +105,7 @@ transient and retry with backoff.
 | Failure mode | Surface | What you observe | What to do |
 | --- | --- | --- | --- |
 | No active session | 1 | `kInvalidState` / thrown | `Start()` a session before requesting |
+| Prompt exceeds the size limit | 1 | `kProcessingFailed` / thrown | Shorten the prompt to **≤ 2048 bytes** (see [Writing prompts](writing-prompts.md#keep-in-mind)) |
 | No response sink registered | 1 | `kProcessingFailed` / thrown | Register the sink **before** the first request |
 | Can't reach server to establish the session | 1 | `kProcessingFailed` / thrown | Check connectivity and API key; safe to retry |
 | Network unavailable / server unreachable (after dispatch) | 2 | `error` with a transport message | Retry with backoff |

@@ -6,6 +6,7 @@ This repository hosts SmartSpectra SDK from PresageTech for measuring vitals suc
 
 - [SmartSpectra SDK](#smartspectra-sdk)
   - [Getting Started](#getting-started)
+  - [Build with an AI Assistant](#build-with-an-ai-assistant)
   - [Features](#features)
   - [Model Cards and Limitations](#model-cards-and-limitations)
   - [Telemetry and Privacy](#telemetry-and-privacy)
@@ -20,6 +21,15 @@ This repository hosts SmartSpectra SDK from PresageTech for measuring vitals suc
 
 To get started, follow the instructions for one of our currently supported platforms. Each platform has its own integration guide and example applications to help you get up and running quickly.
 Documentation is available at <https://smartspectra.presagetech.com/>.
+
+## Build with an AI Assistant
+
+This repo ships `using-smartspectra`, an [Agent Skill](https://agentskills.io) that teaches an AI coding assistant how to build apps with the SDK. The same skill works in both Claude Code and OpenAI Codex:
+
+- **Claude Code:** `/plugin marketplace add Presage-Security/SmartSpectra`, then `/plugin install smartspectra-sdk@smartspectra`
+- **Codex:** `$skill-installer Presage-Security/SmartSpectra/.agents/skills/using-smartspectra`
+
+Then ask your assistant to build with SmartSpectra. Full guide: [docs/agent-skill.md](docs/agent-skill.md).
 
 ## Features
 

@@ -191,6 +191,7 @@ Configuration for [SmartSpectraSdk]. Most apps access configuration through [Sma
 
 ## ValidationCode
 
+- `val wireValue: Int`
 - `OK(0)`
 - `NO_FACE_FOUND(1)`
 - `MULTIPLE_FACES_FOUND(2)`
@@ -202,6 +203,10 @@ Configuration for [SmartSpectraSdk]. Most apps access configuration through [Sma
 - `CAMERA_TUNING(10)`
 - `FRAME_RATE_TOO_LOW(11)`
 - `EXCESSIVE_MOTION(12)`
+- `FACE_TOO_CLOSE(13)`
+- `FACE_TOO_FAR(14)`
+- `FACE_TOO_HIGH(15)`
+- `FACE_TOO_LOW(16)`
 
 ## SmartSpectraError
 
@@ -223,7 +228,7 @@ A typed error from the SmartSpectra SDK. Lifecycle methods throw [SmartSpectraEx
 
 ## SmartSpectraError.Code
 
-SDK error codes. Raw values are stable across SDK versions and match the C++/Swift wire values. Never change an existing value; only append new codes at the end.
+SDK error codes. Raw values are stable across SDK versions and match the C++/Swift wire values.
 
 - `INVALID_STATE(1)`
 - `AUTHENTICATION_FAILED(2)`
@@ -247,7 +252,7 @@ SDK error codes. Raw values are stable across SDK versions and match the C++/Swi
 
 ## SmartSpectraLogLevel
 
-Verbosity of SDK logging, set via [SmartSpectraConfig.logLevel]. Levels are cumulative: a level shows its own messages plus everything more severe. The setting covers both the SDK's Kotlin-side (Timber) logging and the native engine. [DEBUG] cannot restore debug-only statements that were compiled out of the release engine binary. Wire values are stable across SDK versions and match the C++ `SmartSpectraLogLevel` values. Never change an existing value.
+Verbosity of SDK logging, set via [SmartSpectraConfig.logLevel]. Levels are cumulative: a level shows its own messages plus everything more severe. The setting covers both the SDK logging and the native engine. [DEBUG] cannot restore debug-only statements that were compiled out of the release engine binary. Wire values are stable across SDK versions and match the C++ `SmartSpectraLogLevel` values.
 
 - `DEBUG(0, Log.DEBUG)`
 - `INFO(1, Log.INFO)`

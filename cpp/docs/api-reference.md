@@ -7,15 +7,49 @@ description: API Reference for the SmartSpectra SDK.
 
 ## SmartSpectra
 
+Entry point for video-based vitals measurement: owns the processing pipeline and routes output streams to registered callbacks.
+
+Typical usage:
+
+```cpp
+SmartSpectraConfig config;
+config.api_key = "...";
+config.requested_metrics = SmartSpectraConfig::DefaultSupportedMetrics();
+
+SmartSpectra spectra(config);
+
+// 1. Register callbacks (all optional, call before Start).
+spectra.SetOnValidationStatusChanged([](const ValidationStatus& vs, int64_t ts) { ... });
+spectra.SetOnMetrics([](const Metrics& m, int64_t ts) { ... });
+spectra.SetOnError([](const SmartSpectraError& e) { ... });
+
+// 2. Configure input source (optional — defaults to camera 0).
+spectra.UseCamera().Build();
+spectra.UseFile("video.mp4").SetTimestamps("ts.txt").Build();
+
+// 3. Start (auth + graph + source in one call).
+if (auto err = spectra.Start(); !err.ok()) { LOG(ERROR) << err.FullMessage(); }
+
+// 4. Wait (file sources stop at EOF; camera sources run until Stop()).
+spectra.WaitUntilComplete();
+spectra.Stop();
+```
+
+Thread safety: all public methods are thread-safe and may be called from any thread. Callbacks fire on internal worker threads — NOT the calling thread. Do not call any SmartSpectra method from within a callback without external synchronization; the internal mutex is not re-entrant.
+
 ### Methods
 
 - ```cpp
   static constexpr std::string_view version = SMART_SPECTRA_VERSION_STRING
   ```
 
+  The SDK version string.
+
 - ```cpp
   void SetOnProcessingStatusChanged(OnProcessingStatusChangedFn cb)
   ```
+
+  Registers a callback for processing-status changes. Register callbacks before Start(). Callbacks run on internal worker threads, so synchronize any state you share with your own threads.
 
 - ```cpp
   void SetOnValidationStatusChanged(OnValidationStatusChangedFn cb)
@@ -41,33 +75,76 @@ description: API Reference for the SmartSpectra SDK.
   void SetOnError(OnErrorFn cb)
   ```
 
+  Registers a callback invoked when an unrecoverable error occurs. It fires once per error, so it need not be idempotent; the error state clears on the next Start().
+
 - ```cpp
   void SetOnInsight(OnInsightFn cb)
   ```
+
+  Receives insight responses — both the auto-fired periodic VITALS (every 15 s of processing) and on-demand responses to RequestInsight(). Route on Insight::type() when differentiation matters.
 
 - ```cpp
   [[nodiscard]] SmartSpectraError Start()
   ```
 
+  Starts a measurement session: authenticates, builds the processing pipeline, and begins processing. Returns the first error encountered, or Ok on success.
+
 - ```cpp
   [[nodiscard]] SmartSpectraError Stop()
   ```
+
+  Stops the active measurement session. Safe to call when no session is running — it returns success immediately.
 
 - ```cpp
   [[nodiscard]] SmartSpectraError Reset()
   ```
 
+  Recovers from an unrecoverable error by tearing down and rebuilding the session. Use this after GetStatus() reports an error; for a normal restart after Stop(), call Start() instead. Source configuration is preserved.
+
 - ```cpp
   bool WaitUntilComplete( std::chrono::milliseconds timeout = std::chrono::milliseconds::max())
   ```
+
+  Blocks until the session finishes or the timeout elapses. Returns true if it completed normally, false on timeout. File sources finish at end-of-file; camera sources finish when Stop() is called.
 
 - ```cpp
   [[nodiscard]] SmartSpectraError RequestInsight( const std::string& text, int32_t* out_request_id = nullptr)
   ```
 
+  Dispatches an on-demand insight prompt. Requires an active session (call Start() first). The matching Insight response is delivered asynchronously through the OnInsightFn callback; callers can correlate it via Insight::request_id().
+
+  `text` is the prompt. When buffered vitals exist at dispatch time the request is combined (prompt + latest metrics); otherwise it is prompt-only.
+
+  If `out_request_id` is non-null it receives the RequestId assigned to the dispatched request. Returns kInvalidState when no session is active, kProcessingFailed when the request fails to dispatch (e.g. no insight callback registered, or server-side error).
+
 - ```cpp
   CameraBuilder      UseCamera(int device_index = 0)
   ```
+
+  Video source (call before Start).
+
+  Simple verbs that return builders for optional config. Only one source is active at a time — calling Use* again overwrites the previous choice.
+
+  ```cpp
+  // Camera (default if nothing is called):
+  spectra.UseCamera().Build();          // device 0, 1280x720, 30fps
+  spectra.UseCamera(2).SetResolution(1920, 1080).SetFps(60).Build();
+
+  // Video file:
+  spectra.UseFile("video.mp4").Build();
+  spectra.UseFile("video.mp4").SetTimestamps("ts.txt").SetStartOffset(5000).Build();
+
+  // Custom frame push (GStreamer, gRPC, etc.):
+  std::shared_ptr<CustomInput> input;
+  if (auto err = spectra.UseCustomInput()
+                     .SetFrameTransform(FrameTransform::kRotate90CW)
+                     .Build(input); !err.ok()) { ... }
+  if (auto err = spectra.Start(); !err.ok()) { ... }
+  if (auto err = input->Send(frame, timestamp_us); !err.ok()) { ... }
+  // input is a shared_ptr<CustomInput> — safe even if spectra is destroyed.
+  ```
+
+  All source builders support .SetFrameTransform() for input rotation/mirroring.
 
 - ```cpp
   VideoFileBuilder   UseFile(const std::string& path)
@@ -81,6 +158,8 @@ description: API Reference for the SmartSpectra SDK.
   ProcessingStatus GetStatus() const
   ```
 
+  Returns the current processing status.
+
 ## SmartSpectraConfig
 
 ### Properties
@@ -88,6 +167,8 @@ description: API Reference for the SmartSpectra SDK.
 - ```cpp
   std::string api_key
   ```
+
+  API key authentication (simplest mode — no attestation needed).
 
 - ```cpp
   std::vector<MetricType> requested_metrics
@@ -101,21 +182,31 @@ description: API Reference for the SmartSpectra SDK.
   SmartSpectraLogLevel log_level = kDefaultLogLevel
   ```
 
+  Verbosity of SDK logging, applied when the instance initializes. Logging is process-wide: the most recently initialized instance's level is in effect.
+
 - ```cpp
   SdkRuntimeContext runtime_context
   ```
+
+  Low-cardinality labels describing the public SDK/runtime surface. Used only for aggregate SDK telemetry; no stable device/user identifiers.
 
 - ```cpp
   bool enable_telemetry = true
   ```
 
+  Opt out of aggregate SDK telemetry by setting this false. On by default. Telemetry is aggregate-only (no raw frames, metric values, file paths, user identifiers, or device IDs). When enabled, a per-session summary is POSTed to the authenticated continuous server — best-effort, never blocking a measurement session.
+
 - ```cpp
   std::optional<std::string> video_output_directory
   ```
 
+  Directory for video output files written by graph calculators.
+
 - ```cpp
   static const std::vector<MetricType>& BreathingMetrics()
   ```
+
+  Predefined metric bundles. Each returns the standard set of metrics for its category; pass one (or combine several) into requested_metrics. DefaultSupportedMetrics is what the SDK measures when requested_metrics is left empty.
 
 - ```cpp
   static const std::vector<MetricType>& DefaultSupportedMetrics()
@@ -137,9 +228,13 @@ description: API Reference for the SmartSpectra SDK.
   void AddMetrics(const std::vector<MetricType>& metrics)
   ```
 
+  Add metrics to requested_metrics with deduplication.
+
 - ```cpp
   void RemoveMetrics(const std::vector<MetricType>& metrics)
   ```
+
+  Remove metrics from requested_metrics.
 
 ## CameraBuilder
 
@@ -160,6 +255,8 @@ description: API Reference for the SmartSpectra SDK.
 - ```cpp
   [[nodiscard]] SmartSpectraError Build()
   ```
+
+  Applies the configuration and returns the result.
 
 ## VideoFileBuilder
 
@@ -189,6 +286,8 @@ description: API Reference for the SmartSpectra SDK.
   [[nodiscard]] SmartSpectraError Build()
   ```
 
+  Applies the configuration and returns the result.
+
 ## CustomInputBuilder
 
 ### Methods
@@ -201,6 +300,8 @@ description: API Reference for the SmartSpectra SDK.
   [[nodiscard]] SmartSpectraError Build(std::shared_ptr<CustomInput>& out)
   ```
 
+  Creates the custom input handle. On success `out` holds a valid handle and Ok is returned; on failure `out` is unchanged and the error describes the cause. Building twice from the same builder fails on the second call.
+
 ## CustomInput
 
 ### Methods
@@ -209,7 +310,13 @@ description: API Reference for the SmartSpectra SDK.
   virtual SmartSpectraError Send(const FrameBuffer& frame, int64_t timestamp_us) = 0
   ```
 
+  Submits a frame for processing. The frame is consumed synchronously — its pixels are copied before Send() returns — so you only need to keep `frame` and its backing memory valid for the duration of the call; nothing is retained afterward. (Callers passing borrowed plane pointers, e.g. an Android ImageProxy, rely on this.)
+
 ## FrameBuffer
+
+Non-owning view of a raw pixel buffer. Passed to CustomInput::Send().
+
+For planar YUV formats (kNV12, kNV21): `data` points to the Y plane; the UV/VU plane immediately follows at `data + stride_bytes * height`. `stride_bytes` is the Y-plane stride; the chroma plane stride is equal. This layout is produced by most camera APIs (AImage, CVPixelBuffer, V4L2).
 
 ### Properties
 
@@ -235,6 +342,8 @@ description: API Reference for the SmartSpectra SDK.
 
 ## FrameTransform
 
+Spatial transform applied to each frame before it enters the graph.
+
 - `kNone             = 0`
 - `kRotate90CW       = 1`
 - `kRotate90CCW      = 2`
@@ -243,6 +352,8 @@ description: API Reference for the SmartSpectra SDK.
 - `kMirrorVertical   = 5`
 
 ## PixelFormat
+
+Pixel format of a raw frame buffer passed to CustomInput::Send().
 
 - `kRGB  = 0`
 - `kBGR  = 1`
@@ -254,6 +365,8 @@ description: API Reference for the SmartSpectra SDK.
 
 ## ProcessingStatus
 
+Processing lifecycle status, reported via OnProcessingStatusChangedFn and GetStatus().
+
 - `kUninitialized = 0`
 - `kIdle          = 1`
 - `kStarting      = 2`
@@ -262,6 +375,8 @@ description: API Reference for the SmartSpectra SDK.
 - `kError         = 5`
 
 ## ValidationStatus
+
+Measurement-readiness status delivered via OnValidationStatusChangedFn.
 
 ### Properties
 
@@ -275,6 +390,8 @@ description: API Reference for the SmartSpectra SDK.
 
 ## ValidationCode
 
+Measurement-readiness codes delivered via OnValidationStatusChangedFn.
+
 - `kOk = 0`
 - `kNoFaceFound = 1`
 - `kMultipleFacesFound = 2`
@@ -286,6 +403,10 @@ description: API Reference for the SmartSpectra SDK.
 - `kCameraTuning = 10`
 - `kFrameRateTooLow = 11`
 - `kExcessiveMotion = 12`
+- `kFaceTooClose = 13`
+- `kFaceTooFar = 14`
+- `kFaceTooHigh = 15`
+- `kFaceTooLow = 16`
 
 ## SmartSpectraError
 
@@ -305,6 +426,8 @@ description: API Reference for the SmartSpectra SDK.
 
 ## SmartSpectraErrorCode
 
+Error codes returned by synchronous API calls and delivered via OnErrorFn.
+
 - `kOk                    = 0`
 - `kInvalidState          = 1`
 - `kAuthenticationFailed  = 2`
@@ -319,6 +442,8 @@ description: API Reference for the SmartSpectra SDK.
 - `kTimestampGap          = 11`
 
 ## OnProcessingStatusChangedFn
+
+All callbacks fire on internal worker threads, not the thread that called Start(). Do not call SmartSpectra methods from within a callback without external synchronization — the internal mutex is not re-entrant.
 
 ```cpp
 using OnProcessingStatusChangedFn = std::function<void(ProcessingStatus status)>
@@ -362,11 +487,15 @@ using OnErrorFn = std::function<void(const SmartSpectraError& error)>
 
 ## OnInsightFn
 
+Delivered asynchronously after RequestInsight() dispatches successfully and for auto-fired periodic VITALS responses. Match the response to the prompt via Insight::request_id(); the payload is either Insight::analysis() on success or Insight::error() on failure.
+
 ```cpp
 using OnInsightFn = std::function<void(const Insight& insight)>
 ```
 
 ## SmartSpectraLogLevel
+
+Verbosity of SDK logging, set once at startup via SmartSpectraConfig::log_level. Levels are cumulative: a level shows its own messages plus everything more severe. kDebug additionally enables verbose diagnostics.
 
 - `kDebug   = 0`
 - `kInfo    = 1`
@@ -375,6 +504,8 @@ using OnInsightFn = std::function<void(const Insight& insight)>
 - `kNone    = 4`
 
 ## SdkRuntimeContext
+
+Low-cardinality runtime labels for aggregate SDK telemetry. These describe where the public SDK surface is running well/okay/failing without carrying stable device, user, or installation identifiers.
 
 ### Properties
 

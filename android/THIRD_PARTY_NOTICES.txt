@@ -13,15 +13,15 @@ Apache-2.0
   - AndroidX Camera Camera2
   - AndroidX Camera Core
   - AndroidX Camera Lifecycle
-  - AndroidX Core KTX
-  - AndroidX Lifecycle LiveData KTX
+  - AndroidX Core
+  - AndroidX Lifecycle LiveData
   - AndroidX Lifecycle Process
   - AndroidX Startup Runtime
   - FlatBuffers
   - Flogger
   - Flogger System Backend
   - gemmlowp
-  - Guava
+  - Guava ListenableFuture
   - HighwayHash
   - JSR 305
   - KleidiAI
@@ -31,7 +31,6 @@ Apache-2.0
   - OpenCV
   - ruy
   - TensorFlow (TensorFlow Lite)
-  - Timber
 
 BSD-2-Clause
   - cpuinfo
@@ -84,6 +83,7 @@ LicenseRef-libpng
   - libpng (bundled in OpenCV)
 
 Play Integrity API Terms of Service
+  - Play Core Native SDK
   - Play Integrity API
 
 curl
@@ -296,7 +296,7 @@ Full license texts included in this file
    See the License for the specific language governing permissions and
    limitations under the License.
 
-Applies to: Abseil, AndroidX Camera Camera2, AndroidX Camera Core, AndroidX Camera Lifecycle, AndroidX Core KTX, AndroidX Lifecycle LiveData KTX, AndroidX Lifecycle Process, AndroidX Startup Runtime, FlatBuffers, Flogger, Flogger System Backend, gemmlowp, Guava, HighwayHash, JSR 305, KleidiAI, Kompute, MediaPipe, ml_dtypes, OpenCV, ruy, TensorFlow (TensorFlow Lite), Timber
+Applies to: Abseil, AndroidX Camera Camera2, AndroidX Camera Core, AndroidX Camera Lifecycle, AndroidX Core, AndroidX Lifecycle LiveData, AndroidX Lifecycle Process, AndroidX Startup Runtime, FlatBuffers, Flogger, Flogger System Backend, gemmlowp, Guava ListenableFuture, HighwayHash, JSR 305, KleidiAI, Kompute, MediaPipe, ml_dtypes, OpenCV, ruy, TensorFlow (TensorFlow Lite)
 
 ===== BSD-2-Clause =====
 Copyright (c) <year> <owner>. All rights reserved.
@@ -1644,7 +1644,7 @@ Applies to: libpng (bundled in OpenCV)
 ===== Play Integrity API Terms of Service =====
 (External terms -- not reproduced here; see the reference below.)
 
-Applies to: Play Integrity API
+Applies to: Play Core Native SDK, Play Integrity API
 
 ===== curl =====
 COPYRIGHT AND PERMISSION NOTICE
@@ -1674,4 +1674,5 @@ Applies to: curl
 
 Additional packaging notes
 --------------------------
+- Play Core Native SDK: The Play Core Native SDK (Play Integrity native API) is governed by the Google Play Terms of Service (https://play.google.com/about/play-terms/), not an open-source license; its terms are referenced here rather than reproduced.
 - Play Integrity API: The Play Integrity API is governed by the Google Play Terms of Service (https://play.google.com/about/play-terms/), not an open-source license; its terms are referenced here rather than reproduced.

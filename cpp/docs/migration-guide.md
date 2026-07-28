@@ -367,26 +367,33 @@ under the new include base.
 #include <physiology/modules/messages/metrics.h>
 #include <physiology/modules/messages/metric_types.pb.h>
 #include <physiology/modules/messages/status.h>
-#include <physiology/modules/protobuf_enum.h>     // re-homed (see below)
 
 // After:
 #include <smartspectra/messages/metrics.h>
 #include <smartspectra/messages/metric_types.pb.h>
 #include <smartspectra/messages/status.h>
-#include <smartspectra/messages/protobuf_enum.h>  // moved next to metric_types.h
 ```
 
 ### Pruned Public Headers
 
-Two headers that were previously installed publicly are no longer shipped:
+Several headers — and the raw proto sources — that were previously installed
+publicly are no longer shipped:
 
 - `<physiology/modules/configuration.h>` — generated build-feature `#define`s,
   never a stable public API. No replacement.
 - `<physiology/modules/filesystem_absl.h>` — internal filesystem helper. No
   replacement.
+- `<smartspectra/messages/protobuf_enum.h>` — internal enum-reflection helper
+  (`AllEnumValues`); reachable only via full Protobuf reflection and unused by
+  the public API. No replacement.
+- `<smartspectra/video_source/camera_controls.h>` — the `CameraControls`
+  interface is not reachable through the public SDK (camera setup goes through
+  `UseCamera`, which owns the source internally). No replacement.
+- The raw `messages/*.proto` sources — build against the generated
+  `messages/*.pb.h` (still shipped) instead.
 
-If your code transitively included either header, vendor your own equivalent
-or open an issue describing the use case.
+If your code transitively included any of these, vendor your own equivalent or
+open an issue describing the use case.
 
 ### Version Header
 

@@ -137,13 +137,17 @@ bad. Surface the `hint` text directly to end users; it's designed to be shown as
 | `OK` | Frame passes all checks. | Nothing — this is the "good" state. |
 | `NO_FACE_FOUND` | No face detected in frame. | Get a face into frame, facing the camera. |
 | `MULTIPLE_FACES_FOUND` | More than one face detected. | Make sure only one person is in frame. |
-| `FACE_NOT_CENTERED` | Face detected but off-center. | Center your face in the frame. |
-| `FACE_SIZE_OUT_OF_RANGE` | Face is too large or too small in frame. | Move closer or farther from the camera. |
+| `FACE_NOT_CENTERED` | Face detected but off-center horizontally (left/right). | Center your face in the frame. |
 | `TOO_DARK` | Image is underexposed. | Add light, or move to a brighter area. |
 | `TOO_BRIGHT` | Image is overexposed. | Reduce light, or move away from a bright/backlit source. |
 | `CHEST_NOT_VISIBLE` | Chest not visible or too far away (breathing/chest metrics). | Reframe so the upper chest is visible. |
 | `CAMERA_TUNING` | Camera is still auto-adjusting exposure/focus. | Wait a moment before recording. |
 | `FRAME_RATE_TOO_LOW` | Sustained camera frame rate has dropped too low. | Improve lighting (see above) or reduce concurrent device load. |
+| `EXCESSIVE_MOTION` | Body or head motion exceeds the reliable-measurement threshold. | Hold still — motion may affect accuracy. |
+| `FACE_TOO_CLOSE` | Face fills too much of the frame. | Move away from the camera. |
+| `FACE_TOO_FAR` | Face is smaller than the minimum usable size. | Move closer to the camera. |
+| `FACE_TOO_HIGH` | Face is too high in the frame (off-center vertically). | Move down, or tilt the camera up. |
+| `FACE_TOO_LOW` | Face is too low in the frame (off-center vertically). | Move up, or tilt the camera down. |
 
 This is the same enum across platforms — Swift's `ValidationCode`, Kotlin's `ValidationCode`,
 C++'s `spectra::ValidationCode`, and the Node client's `ValidationCodeValue` all carry the same

@@ -9,6 +9,15 @@ choosing metrics, and integrating on your platform (C++, Swift/iOS, Kotlin/Andro
 The skill is one portable `SKILL.md` in the standard [Agent Skills](https://agentskills.io)
 format, so the same skill works in both Claude Code and OpenAI Codex.
 
+## Install — npx (any agent)
+
+The quickest path is the open [`skills`](https://skills.sh) CLI — one command reads the skill
+from this repo and installs it, prompting for your agent:
+
+```bash
+npx skills add Presage-Security/SmartSpectra --skill using-smartspectra
+```
+
 ## Install — Claude Code
 
 Add this repo as a plugin marketplace, then install the plugin:
@@ -34,5 +43,5 @@ Or, when working inside a clone of this repo, Codex discovers it automatically f
 Ask your agent to use SmartSpectra — e.g. *"build a minimal app that measures and displays
 my pulse"* — and the `using-smartspectra` skill guides it the rest of the way.
 
-For full docs, API references, and per-platform sample apps, see
-<https://smartspectra.presagetech.com/>.
+Full guide (both agents): <https://smartspectra.presagetech.com/docs/agent-skill>. For SDK API
+references and per-platform sample apps, see <https://smartspectra.presagetech.com/>.

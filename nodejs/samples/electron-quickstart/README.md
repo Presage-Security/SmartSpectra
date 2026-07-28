@@ -31,7 +31,7 @@ own protobuf codegen.
 
 | Requirement | Notes |
 | --- | --- |
-| Node.js 18+ | LTS recommended. |
+| Node.js 20+ | Node 24 LTS recommended. |
 | `@smartspectra/node-sdk` | Pulled from npm by `npm install`. It delivers its native runtime through per-platform packages declared as regular dependencies — no install script, no token, no system libraries. |
 | A Presage API key | From <https://physiology.presagetech.com/>. Set the `API_KEY` constant in `renderer.js` (replace the `YOUR_API_KEY_HERE` placeholder). |
 

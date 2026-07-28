@@ -15,7 +15,6 @@ import com.presagetech.smartspectra_example.R
 import com.presagetech.smartspectra_example.ui.screening.CameraProcessFragment
 import com.presagetech.smartspectra_example.ui.screening.ConfigurationErrorFragment
 import com.presagetech.smartspectra_example.ui.screening.PermissionsRequestFragment
-import timber.log.Timber
 
 /**
  * This is the MainActivity of SmartSpectra module the project structure is base on SingleActivity
@@ -31,7 +30,6 @@ internal class SmartSpectraActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        Timber.w("Resumed Smart Spectra Activity")
         retryPermissionFlow()
     }
 
@@ -75,7 +73,6 @@ internal class SmartSpectraActivity : AppCompatActivity() {
         if (currentFragment?.javaClass == fragment.javaClass) {
             return
         }
-        Timber.i("Opening fragment: ${fragment::class.java.simpleName}")
         supportFragmentManager.beginTransaction()
             .replace(R.id.host_fragment, fragment)
             .commit()
