@@ -1,0 +1,29 @@
+NOTICE
+
+Android
+
+This product includes software developed by third parties.
+
+The following Apache-licensed components are included in this shipped artifact:
+  - Abseil
+  - AndroidX Camera Camera2
+  - AndroidX Camera Core
+  - AndroidX Camera Lifecycle
+  - AndroidX Core
+  - AndroidX Lifecycle LiveData
+  - AndroidX Lifecycle Process
+  - AndroidX Startup Runtime
+  - FlatBuffers
+  - Flogger
+  - Flogger System Backend
+  - gemmlowp
+  - Guava ListenableFuture
+  - HighwayHash
+  - JSR 305
+  - KleidiAI
+  - Kompute
+  - MediaPipe
+  - ml_dtypes
+  - OpenCV
+  - ruy
+  - TensorFlow (TensorFlow Lite)
