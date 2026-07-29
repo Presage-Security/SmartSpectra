@@ -1,0 +1,25 @@
+NOTICE
+
+Swift
+
+This product includes software developed by third parties.
+
+The following Apache-licensed components are included in this shipped artifact:
+  - Abseil
+  - CNCF xDS API
+  - Envoy data-plane-api
+  - FlatBuffers
+  - gemmlowp
+  - Google APIs
+  - gRPC
+  - HighwayHash
+  - KleidiAI
+  - Kompute
+  - MediaPipe
+  - ml_dtypes
+  - OpenCensus Proto
+  - OpenCV
+  - protoc-gen-validate
+  - ruy
+  - Swift Protobuf
+  - TensorFlow (TensorFlow Lite)
