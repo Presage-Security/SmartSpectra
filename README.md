@@ -31,6 +31,8 @@ This repo ships `using-smartspectra`, an [Agent Skill](https://agentskills.io) t
 
 Then ask your assistant to build with SmartSpectra. Full guide: [docs/agent-skill.md](docs/agent-skill.md).
 
+Presage also hosts an MCP (Model Context Protocol) server at `https://mcp.presagetech.com/mcp`. Connect it and your assistant can work with your developer account directly — fetch or rotate your API key, register an iOS or Android app ID, download its OAuth config file, and check your plan and credits. Setup: [docs/mcp-server.md](docs/mcp-server.md).
+
 ## Features
 
 - **Cardiac Waveform**  
@@ -74,6 +76,7 @@ The SDK can report a small, aggregate, per-session diagnostic summary so we can 
 ## Authentication
 
 - We support API key authentication for C++, iOS, and Android. We also support OAuth authentication for iOS and Android. See the platform-specific guides for setup instructions.
+- Either path can be set up by an AI assistant instead of by hand — see [docs/mcp-server.md](docs/mcp-server.md).
 
 ## Platform-Specific Guides
 

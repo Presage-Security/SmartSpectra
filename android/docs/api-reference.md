@@ -207,6 +207,7 @@ Configuration for [SmartSpectraSdk]. Most apps access configuration through [Sma
 - `FACE_TOO_FAR(14)`
 - `FACE_TOO_HIGH(15)`
 - `FACE_TOO_LOW(16)`
+- `FACE_NOT_FORWARD(17)`
 
 ## SmartSpectraError
 

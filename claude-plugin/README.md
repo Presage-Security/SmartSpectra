@@ -27,6 +27,10 @@ Add this repo as a plugin marketplace, then install the plugin:
 /plugin install smartspectra-sdk@smartspectra
 ```
 
+The plugin also bundles the hosted SmartSpectra MCP (Model Context Protocol) server. To use it,
+run `/mcp`, select `smartspectra`, and choose **Authenticate** — your browser opens to the
+SmartSpectra sign-in, and the account tools become available once you approve.
+
 ## Install — Codex
 
 Install the skill straight from this repo:
@@ -42,6 +46,11 @@ Or, when working inside a clone of this repo, Codex discovers it automatically f
 
 Ask your agent to use SmartSpectra — e.g. *"build a minimal app that measures and displays
 my pulse"* — and the `using-smartspectra` skill guides it the rest of the way.
+
+The skill covers getting an API key as a manual step. The MCP server does that part for the agent —
+it can fetch or rotate your key, register an app ID, and download its OAuth config file. The Claude
+Code plugin bundles it; on the npx and Codex paths, connect it yourself:
+<https://smartspectra.presagetech.com/docs/mcp-server>.
 
 Full guide (both agents): <https://smartspectra.presagetech.com/docs/agent-skill>. For SDK API
 references and per-platform sample apps, see <https://smartspectra.presagetech.com/>.

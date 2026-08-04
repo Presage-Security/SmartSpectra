@@ -60,6 +60,11 @@ thread-safe trampolines.
 | Node.js | >= 20 (Node 24 LTS recommended) |
 | Electron (optional) | >= 28 |
 
+You also need an API key from
+[physiology.presagetech.com](https://physiology.presagetech.com/auth/login). An AI assistant
+connected to the [SmartSpectra MCP Server](../docs/mcp-server.md) can fetch it from your account
+for you.
+
 The native runtime ships in per-platform npm packages pulled in automatically
 as dependencies — no install script and no system libraries to install.
 

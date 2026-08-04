@@ -312,6 +312,7 @@ Measurement-readiness codes.
 - `case faceTooFar = 14`
 - `case faceTooHigh = 15`
 - `case faceTooLow = 16`
+- `case faceNotForward = 17`
 
 ## SmartSpectraError
 

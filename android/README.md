@@ -40,6 +40,8 @@ Use [Option 1: API Key](docs/option-1-api-key.md) for the fastest manual setup.
 
 Use [Option 2: OAuth](docs/option-2-oauth.md) if you need OAuth.
 
+Either way, an AI assistant connected to the [SmartSpectra MCP Server](../docs/mcp-server.md) can do the account side for you — fetch your API key, or register your package name and signing certificate fingerprint and download `presage_services.xml`.
+
 ## LLM Insights
 
 See [LLM Insights](docs/llm-insights.md) for natural-language analysis of the measured vitals.

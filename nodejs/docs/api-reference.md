@@ -294,6 +294,7 @@ Measurement-readiness codes delivered via the 'validationStatus' event.
 - `readonly kFaceTooFar:         14`
 - `readonly kFaceTooHigh:        15`
 - `readonly kFaceTooLow:         16`
+- `readonly kFaceNotForward:       17`
 
 ## SmartSpectraErrorCode
 

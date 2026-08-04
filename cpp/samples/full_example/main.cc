@@ -14,6 +14,7 @@
 #include <algorithm>
 #include <atomic>
 #include <chrono>
+#include <cstdlib>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -375,23 +376,26 @@ int main(int argc, char** argv) {
     cv::Mat frame;
     bool running = true;
     bool session_started = false;
+    bool session_failed = false;
     while (running) {
+        const auto status = smart_spectra.GetStatus();
+        if (status == spectra::ProcessingStatus::kError) {
+            session_failed = true;
+            break;
+        }
+
         // Headless mode has no key handler to end the loop. A file source
         // self-stops at EOF (the session returns to kIdle) while a camera stays
-        // kRunning until externally stopped — so exit once a started headless
-        // session leaves the running state. kError is terminal (e.g. auth or
-        // model-load failure before the graph ever runs) and full_example does
-        // not Reset(), so exit on it too. Without this a
+        // kRunning until externally stopped, so exit once a started headless
+        // session leaves the running state. Without this a
         // `--input_video_path --headless` run spins forever on the retained
-        // last frame after the video ends (or after a startup failure).
+        // last frame after the video ends.
         if (headless) {
-            const auto status = smart_spectra.GetStatus();
             if (status == spectra::ProcessingStatus::kRunning) session_started = true;
             const bool terminal =
-                status == spectra::ProcessingStatus::kError ||
-                (session_started && status != spectra::ProcessingStatus::kStarting &&
-                 status != spectra::ProcessingStatus::kRunning &&
-                 status != spectra::ProcessingStatus::kStopping);
+                session_started && status != spectra::ProcessingStatus::kStarting &&
+                status != spectra::ProcessingStatus::kRunning &&
+                status != spectra::ProcessingStatus::kStopping;
             if (terminal) {
                 running = false;
                 break;
@@ -453,9 +457,16 @@ int main(int argc, char** argv) {
         }
     }
 
-    if (const auto err = smart_spectra.Stop(); !err.ok()) {
-        std::cerr << "Stop failed: " << err.message << '\n';
+    if (!session_failed) {
+        if (const auto err = smart_spectra.Stop(); !err.ok()) {
+            std::cerr << "Stop failed: " << err.message << '\n';
+        }
     }
+
+    // Stop() can return successfully after a terminal error lands during its
+    // unlocked teardown, so inspect the final state before choosing the exit code.
+    session_failed =
+        session_failed || smart_spectra.GetStatus() == spectra::ProcessingStatus::kError;
 
     // Save accumulated metrics (non-accumulated-stream mode)
     if (save_metrics && !use_accumulated) {
@@ -469,5 +480,5 @@ int main(int argc, char** argv) {
 
     if (!headless) cv::destroyAllWindows();
     std::cout << "Done.\n";
-    return 0;
+    return session_failed ? EXIT_FAILURE : EXIT_SUCCESS;
 }

@@ -407,6 +407,7 @@ Measurement-readiness codes delivered via OnValidationStatusChangedFn.
 - `kFaceTooFar = 14`
 - `kFaceTooHigh = 15`
 - `kFaceTooLow = 16`
+- `kFaceNotForward = 17`
 
 ## SmartSpectraError
 

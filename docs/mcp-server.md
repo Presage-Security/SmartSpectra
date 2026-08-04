@@ -1,6 +1,6 @@
 ---
 title: SmartSpectra MCP Server
-description: Connect an AI assistant to your SmartSpectra account with the hosted MCP server — API keys, plan usage, app registrations, and docs search.
+description: Connect an AI assistant to your SmartSpectra account with the hosted MCP server — get or rotate your API key, register an iOS or Android app ID, download the OAuth config file, check plan usage and credits, and search these docs.
 ---
 
 # SmartSpectra MCP Server
@@ -15,7 +15,8 @@ https://mcp.presagetech.com/mcp
 
 Connect it to an MCP-capable AI assistant — Claude Code, claude.ai, Codex, Cursor, or any
 other compliant client — and the assistant can manage your SmartSpectra developer account for you:
-fetch or rotate your API key, check plan usage, register apps, and search these docs.
+fetch or rotate your API key, check your plan and credits, register apps, download the OAuth
+config file for a registered app, and search these docs.
 
 It pairs with the [AI agent skill](agent-skill.md): the skill teaches an assistant how to build
 with the SmartSpectra SDK; the MCP server gives it authorized access to your account, so
@@ -82,32 +83,50 @@ The client discovers the OAuth endpoints automatically and opens a browser to si
 | --- | --- |
 | `api_keys.get` | Return your current SmartSpectra API key. |
 | `api_keys.rotate` | Generate a new API key and invalidate the old one. |
-| `usage.get_plan` | Report your plan and current usage. |
-| `apps.list` | List your registered app IDs and their verification status. |
-| `apps.register` | Register (or update) an Apple or Android app ID. |
-| `apps.get_config` | Fetch the SDK configuration for a registered app. |
-| `apps.delete` | Delete an app registration. |
-| `account.delete` | Permanently delete your SmartSpectra account. |
+| `usage.get_plan` | Report your plan tier, remaining credits, and next renewal date. Credits are counted per account, not per registered app. |
+| `apps.list` | List your registered apps — platform, app ID, sandbox mode, and the registration ID used by the other app tools. |
+| `apps.register` | Register (or update) an Apple or Android app ID, including sandbox mode and the descriptive fields the portal asks for. |
+| `apps.get_config` | Fetch the OAuth config file for a registered app — `PresageService-Info.plist` on Apple, `presage_services.xml` on Android. |
+| `apps.delete` | Delete an app registration, identified by the registration ID from `apps.list`. |
 | `docs.map` | List the pages of this documentation site. |
 | `docs.search` | Search this documentation. |
-| `docs.read` | Read a documentation page. |
+| `docs.read` | Read a documentation page: `/`, `/docs`, any `/docs/...` path, `/llms.txt`, or `/llms-full.txt`. |
 
 The server also exposes a `using-smartspectra` prompt that loads the
 [agent skill](agent-skill.md) content directly, for clients without skill support.
 
+## Setting up OAuth through an assistant
+
+On iOS and Android, OAuth setup normally means registering your app in the portal by hand and
+downloading a config file. With this server connected, an assistant does both steps for you:
+`apps.register` with your bundle ID and Apple team ID (or package name and signing certificate
+SHA-256 fingerprint), then `apps.get_config` to fetch the config file and write it into your
+project at the right path.
+
+- **iOS** — [Option 2: OAuth](../swift/docs/option-2-oauth.md) covers where
+  `PresageService-Info.plist` goes and how to confirm OAuth is wired correctly.
+- **Android** — [Option 2: OAuth](../android/docs/option-2-oauth.md) covers
+  `presage_services.xml` and the signing-certificate fingerprint the registration needs.
+
+Sandbox mode is part of the registration. On iOS, ask for it when you want to test locally from
+Xcode builds pushed to your phone; without sandbox, the registration allows App Store and
+TestFlight builds only.
+
 ## Confirmations for destructive actions
 
-Tools that change your account — `api_keys.rotate`, `apps.register`, `apps.delete`, and
-`account.delete` — never act on the first call. The first call returns a
-`confirmation_required` response describing exactly what will happen; the assistant must call
-the tool again with the returned confirmation token to proceed. Tokens are short-lived, so a
-stale confirmation cannot be replayed later. Assistants surface this as an explicit "confirm
-this action" step — if yours does not, decline and run the action from the
-[Developer Admin Portal](https://physiology.presagetech.com/auth/login) instead.
+Tools that change your account — `api_keys.rotate`, `apps.register`, and `apps.delete` — never
+act on the first call. The first call returns a `confirmation_required` response describing
+exactly what will happen, plus a confirmation token; the assistant must call the tool again with
+that token to proceed. A token lasts five minutes, works once, and is bound to the exact
+arguments it was issued for, so a stale or altered confirmation cannot be replayed. Assistants
+surface this as an explicit "confirm this action" step — if yours does not, decline and run the
+action from the [Developer Admin Portal](https://physiology.presagetech.com/auth/login) instead.
 
-> **Important:** `account.delete` permanently deletes your API keys, sign-in, and account data.
-> `api_keys.rotate` invalidates the current key immediately — every app using it stops
-> authenticating until you deploy the new key.
+> **Important:** `api_keys.rotate` invalidates the current key immediately — every app using it
+> stops authenticating until you deploy the new key.
+
+Deleting your account is not available through the MCP server. Use the
+[Developer Admin Portal](https://physiology.presagetech.com/auth/login).
 
 ## Security notes
 

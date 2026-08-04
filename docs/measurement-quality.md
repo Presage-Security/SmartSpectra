@@ -148,6 +148,7 @@ bad. Surface the `hint` text directly to end users; it's designed to be shown as
 | `FACE_TOO_FAR` | Face is smaller than the minimum usable size. | Move closer to the camera. |
 | `FACE_TOO_HIGH` | Face is too high in the frame (off-center vertically). | Move down, or tilt the camera up. |
 | `FACE_TOO_LOW` | Face is too low in the frame (off-center vertically). | Move up, or tilt the camera down. |
+| `FACE_NOT_FORWARD` | Face has turned or tilted too far away from the camera. | Face the camera. |
 
 This is the same enum across platforms — Swift's `ValidationCode`, Kotlin's `ValidationCode`,
 C++'s `spectra::ValidationCode`, and the Node client's `ValidationCodeValue` all carry the same

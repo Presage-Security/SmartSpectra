@@ -1,6 +1,6 @@
 ---
 title: Using the AI agent skill
-description: Install the SmartSpectra agent skill in Claude Code or OpenAI Codex to build vitals apps with an AI coding assistant.
+description: Install the using-smartspectra agent skill in Claude Code or OpenAI Codex to build pulse and breathing apps with an AI coding assistant, on iOS, Android, C++, or Node.
 ---
 
 > **Important:** SDK metrics are offered for general wellness and informational purposes only. SDK metrics have not been cleared by the FDA and may not be used for medical diagnosis or treatment.

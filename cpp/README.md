@@ -33,7 +33,9 @@ All platforms need:
 
 - **CMake 3.22.1+**
 - **C++17 compiler** (GCC, Clang, or MSVC 2022)
-- An **API key** from [physiology.presagetech.com](https://physiology.presagetech.com/auth/login)
+- An **API key** from [physiology.presagetech.com](https://physiology.presagetech.com/auth/login) —
+  an AI assistant connected to the [SmartSpectra MCP Server](../docs/mcp-server.md) can fetch it
+  from your account for you
 
 The SDK package is self-contained — you do not need to install protobuf, curl,
 or OpenSSL separately on any platform.
