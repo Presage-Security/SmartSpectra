@@ -64,7 +64,7 @@ apt repository. APT selects the package matching your system's
 `dpkg --print-architecture` (`amd64` or `arm64`) automatically.
 
 The SmartSpectra SDK package is self-contained. You do not need to install
-OpenCV, protobuf, curl, OpenSSL, or other SDK runtime libraries separately.
+protobuf, curl, OpenSSL, or other SDK runtime libraries separately.
 
 Verify that the package is visible to build tools:
 

@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "smartspectra": {
+      "type": "http",
+      "url": "https://mcp.presagetech.com/mcp"
+    }
+  }
+}

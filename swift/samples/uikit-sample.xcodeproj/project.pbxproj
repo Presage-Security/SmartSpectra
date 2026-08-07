@@ -389,7 +389,7 @@
 			repositoryURL = "https://github.com/Presage-Security/SmartSpectra-Swift";
 			requirement = {
 				kind = exactVersion;
-				version = 3.2.1;
+				version = 3.3.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */

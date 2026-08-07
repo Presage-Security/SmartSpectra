@@ -8,6 +8,18 @@ description: Migration notes for SmartSpectra Swift SDK upgrades.
 > Applies to SmartSpectra Swift SDK v3.x.
 > Migrating from a v3.0 release-candidate prior to rc.13, or from v2.x.
 
+## Swift SDK v3.3.0 Migration
+
+### Default log verbosity is now warnings and errors only
+
+The SDK previously emitted informational log chatter by default. From v3.3.0
+the default level is `SmartSpectraLogLevel.warning`. If you relied on the
+informational output, restore it via `SmartSpectraConfig.logLevel`:
+
+```swift
+SmartSpectraSDK.shared.config.logLevel = .info
+```
+
 ## Protobuf Type Renames
 
 The Swift SDK's protobuf-generated types previously carried a `Presage_Physiology_` prefix derived from the proto package. The prefix has been stripped at the protoc-gen-swift level (`option swift_prefix = "";`), so all proto types are now exposed under their bare names.

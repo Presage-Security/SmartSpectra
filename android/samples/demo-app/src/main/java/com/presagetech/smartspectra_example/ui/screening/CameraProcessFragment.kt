@@ -35,7 +35,6 @@ import com.presagetech.smartspectra_example.userFacingMessage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import timber.log.Timber
 
 internal class CameraProcessFragment : Fragment() {
 
@@ -233,7 +232,6 @@ internal class CameraProcessFragment : Fragment() {
             }
 
             ProcessingStatus.ERROR -> {
-                Timber.e("Presage Processing error")
                 flipCameraButton.isEnabled = true
                 recordingButton.isEnabled = true
                 recordingButton.text = getString(R.string.start)

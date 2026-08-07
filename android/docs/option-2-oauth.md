@@ -116,6 +116,8 @@ You need to get it from Presage first:
 
 If you are testing a sandbox-enabled app registration, make sure the app row shows **Sandbox Status: Enabled**. Click **Enable** if sandbox is not already enabled.
 
+An AI assistant connected to the [SmartSpectra MCP Server](../../docs/mcp-server.md) can do this step for you: it registers the app ID and fingerprint (`apps.register`) and fetches `presage_services.xml` (`apps.get_config`) without you opening the portal. Registration asks you to confirm before it takes effect.
+
 See Google's [Authenticating Your Client](https://developers.google.com/android/guides/client-auth) guide for Android signing certificate fingerprints.
 
 To get the SHA-256 fingerprint from Gradle, run:

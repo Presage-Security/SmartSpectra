@@ -33,10 +33,9 @@ xcode-select --install
 
 ### Add the SDK
 
-The Homebrew formula installs the self-contained SmartSpectra SDK and exposes
-its CMake package metadata. You do not need to install OpenCV, protobuf, or
-other SDK runtime libraries separately — the formula declares them as
-dependencies and Homebrew installs them automatically.
+The Homebrew formula installs the SmartSpectra SDK and exposes its CMake
+package metadata. The SDK is self-contained — you do not need to install
+OpenCV or any other libraries separately.
 
 ```bash
 brew tap presage/smartspectra https://github.com/Presage-Security/homebrew-smartspectra
@@ -383,9 +382,10 @@ brew install presage/smartspectra/smartspectra
 
 ## Distributing an app that embeds the SDK (signing & notarization)
 
-If you ship a macOS app that bundles `libsmartspectra.dylib` to other Macs,
+If you ship a macOS app that bundles the SmartSpectra SDK to other Macs,
 [Apple notarization](https://developer.apple.com/documentation/security/notarizing-macos-software-before-distribution)
-will reject the submission unless every embedded Mach-O is signed with **your**
+will reject the submission unless every embedded Mach-O — `libsmartspectra.dylib`
+**and** each bundled FFmpeg dylib (see below) — is signed with **your**
 Developer ID, has the
 [**hardened runtime**](https://developer.apple.com/documentation/security/hardened-runtime)
 enabled, and carries a **secure timestamp**.
@@ -397,7 +397,23 @@ install names on install and re-signs it ad-hoc. So you must (re-)sign the
 copy you embed in your app bundle — you cannot rely on the signature it has
 when Homebrew installs it.
 
-### Re-sign the embedded library with your own identity
+### Embed the bundled FFmpeg libraries too
+
+The SDK isn't a single dylib: it also ships FFmpeg libraries in
+`<sdk>/lib/smartspectra/` (`libavcodec`, `libavformat`, `libavutil`,
+`libswscale`, `libswresample`) for video-file/`.mkv` decode, which
+`libsmartspectra.dylib` loads via an `@loader_path/smartspectra` runpath. Copy
+the whole `smartspectra/` folder next to `libsmartspectra.dylib` in
+`Contents/Frameworks/` — preserve the subfolder or it fails to load — and sign
+each of those dylibs just like `libsmartspectra.dylib`. They already use
+`@rpath`/`@loader_path`, so no `install_name_tool` rewriting is needed.
+
+> **LGPL.** The FFmpeg libraries are LGPL v2.1+ (`--disable-gpl
+> --disable-nonfree`). Redistribute the `COPYING.LGPLv2.1`, `COPYING.LGPLv3`, and
+> `THIRD_PARTY_FFMPEG.md` files shipped in `smartspectra/`, and keep them
+> dynamically linked/replaceable (LGPL §6).
+
+### Re-sign the embedded libraries with your own identity
 
 The embedded copy must be signed with the **same** identity as your app, for
 two reasons: notarization requires a Developer ID signature with a secure
@@ -411,16 +427,22 @@ which weakens its security posture and is not recommended.)
 **Xcode (recommended).** Add `libsmartspectra.dylib` to your target under
 **Frameworks, Libraries, and Embedded Content** and set it to **Embed & Sign**
 (not "Embed Without Signing"). Xcode then re-signs the embedded copy with your
-team's identity, hardened runtime, and a secure timestamp on each build.
+team's identity, hardened runtime, and a secure timestamp on each build. Add the
+`smartspectra/` dylibs via a **Copy Files** phase (to *Frameworks*, preserving
+the subpath); the CLI snippet below signs them all.
 
-**Command-line / non-Xcode builds.** Re-sign the bundled copy yourself, as the
-last step before signing the app (any `install_name_tool` edit invalidates a
+**Command-line / non-Xcode builds.** Re-sign every embedded dylib yourself, as
+the last step before signing the app (any `install_name_tool` edit invalidates a
 signature, so sign last):
 
 ```bash
-codesign --force --options runtime --timestamp \
-  --sign "Developer ID Application: <Your Org> (<TEAMID>)" \
-  "<YourApp>.app/Contents/Frameworks/libsmartspectra.dylib"
+FW="<YourApp>.app/Contents/Frameworks"
+# libsmartspectra.dylib + each bundled FFmpeg dylib under smartspectra/
+for dylib in "$FW/libsmartspectra.dylib" "$FW"/smartspectra/*.dylib; do
+  codesign --force --options runtime --timestamp \
+    --sign "Developer ID Application: <Your Org> (<TEAMID>)" \
+    "$dylib"
+done
 ```
 
 Then sign the app itself with the same identity and `--options runtime`, submit
@@ -428,18 +450,6 @@ with `xcrun notarytool submit --wait`, and `xcrun stapler staple` the result.
 See Apple's
 [Customizing the notarization workflow](https://developer.apple.com/documentation/security/customizing-the-notarization-workflow)
 for the full `notarytool`/`stapler` flow.
-
-### Make the bundle self-contained first
-
-The Homebrew library records **absolute** load paths
-(`/opt/homebrew/opt/smartspectra/lib/...`) and links its OpenCV dependencies by
-absolute `/opt/homebrew/opt/...` paths — those won't exist on a customer's Mac.
-Before signing, copy `libsmartspectra.dylib` **and its Homebrew
-dependency tree** into `Contents/Frameworks`, rewrite the install names to
-`@rpath`, and add an `@executable_path/../Frameworks` rpath to your executable.
-A tool such as
-[`dylibbundler`](https://github.com/auriamg/macdylibbundler) automates the copy
-and relocation; re-sign every relocated Mach-O afterward as shown above.
 
 > Note: the brew-installed library is not subject to Gatekeeper itself —
 > Homebrew downloads are not quarantined, so `brew install` users need no

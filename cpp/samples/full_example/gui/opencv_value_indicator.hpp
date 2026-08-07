@@ -16,9 +16,14 @@ namespace presage::smartspectra::gui {
 
 class OpenCvValueIndicator {
 public:
-    OpenCvValueIndicator(int x, int y, int width, int height, int precision_digits = 1);
+    OpenCvValueIndicator(int x, int y, int width, int height,
+                         int precision_digits = 1,
+                         bool show_confidence = false);
     ~OpenCvValueIndicator() = default;
     bool Render(cv::Mat& image, float value, cv::Scalar color);
+    // Renders "value (confidence)". Requires show_confidence=true in the
+    // constructor so the font was sized for the wider text.
+    bool Render(cv::Mat& image, float value, float confidence, cv::Scalar color);
     bool RenderNA(cv::Mat& image, cv::Scalar color);
     static const float min_value;
     static const float max_value;
@@ -28,7 +33,7 @@ private:
     cv::Point2i text_origin;
     const int font_face = cv::FONT_HERSHEY_DUPLEX;
     int precision_digits;
-
+    bool show_confidence;
 };
 
 } // namespace presage::smartspectra::gui

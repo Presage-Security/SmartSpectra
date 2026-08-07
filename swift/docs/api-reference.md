@@ -7,7 +7,17 @@ description: API Reference for the SmartSpectra SDK.
 
 ## SmartSpectraSDK
 
-Entry point for the SmartSpectra SDK.  Most apps use the shared instance:
+Entry point for the SmartSpectra SDK.
+
+Most apps use the shared instance:
+
+```swift
+let sdk = SmartSpectraSDK.shared
+sdk.config.apiKey = "your-key"
+try await sdk.start()
+```
+
+Tests and advanced integrations can create an isolated instance via ``init(config:)``. The underlying authentication handler and C++ preprocessing runtime are process-global, so only one SDK instance can drive an active measurement at a time.
 
 ### Initializers
 
@@ -15,7 +25,9 @@ Entry point for the SmartSpectra SDK.  Most apps use the shared instance:
   public init (config: SmartSpectraConfig)
   ```
 
-  Create an isolated SDK instance backed by the given configuration.  The authentication handler and preprocessing runtime are process-global, so only one instance can drive an active measurement at a time. Use this initializer for tests or advanced integrations where you intentionally need a separate observable state from ``shared``. Most apps should just use ``SmartSpectraSDK/shared``.
+  Create an isolated SDK instance backed by the given configuration.
+
+  The authentication handler and preprocessing runtime are process-global, so only one instance can drive an active measurement at a time. Use this initializer for tests or advanced integrations where you intentionally need a separate observable state from ``shared``. Most apps should just use ``SmartSpectraSDK/shared``.
 
 ### Methods
 
@@ -35,7 +47,9 @@ Entry point for the SmartSpectra SDK.  Most apps use the shared instance:
   @discardableResult public func requestInsight (_ text: String) throws -> Int32
   ```
 
-  Dispatch an on-demand insight request alongside the vitals samples buffered since the last send.  The provided `text` is sent as the current turn's prompt; prior calls' text is not retained or re-sent by the SDK. The dispatched request type mirrors the Presage Analytics Gateway contract: `combined` when vitals samples are buffered at dispatch time, `speech` when only the prompt is present. Vitals snapshots auto-fire approximately every 15 seconds with no prompt and are published through ``SmartSpectraSDK/insight`` alongside on-demand replies; callers route on the delivered Insight's `type` field.
+  Dispatch an on-demand insight request alongside the vitals samples buffered since the last send.
+
+  The provided `text` is sent as the current turn's prompt; prior calls' text is not retained or re-sent by the SDK. The dispatched request type mirrors the Presage Analytics Gateway contract: `combined` when vitals samples are buffered at dispatch time, `speech` when only the prompt is present. Vitals snapshots auto-fire approximately every 15 seconds with no prompt and are published through ``SmartSpectraSDK/insight`` alongside on-demand replies; callers route on the delivered Insight's `type` field.
 
 - ```swift
   @_spi(Testing)
@@ -53,6 +67,13 @@ Entry point for the SmartSpectra SDK.  Most apps use the shared instance:
 
 - ```swift
   @_spi(Testing)
+  public func setVideoInterframeDelay (milliseconds: Int)
+  ```
+
+  Configures optional video-file playback throttling in milliseconds.
+
+- ```swift
+  @_spi(Testing)
   public func setVideoInputEnabled (_ enabled: Bool)
   ```
 
@@ -64,41 +85,70 @@ Entry point for the SmartSpectra SDK.  Most apps use the shared instance:
   public static let shared = SmartSpectraSDK()
   ```
 
+  The shared SDK instance.
+
 - ```swift
   public internal(set) var metrics : Metrics?
   ```
+
+  Real-time metrics emitted while processing is active.
 
 - ```swift
   public internal(set) var imageOutput : UIImage?
   ```
 
+  Live camera preview image.
+
 - ```swift
   public internal(set) var processingStatus : ProcessingStatus = .idle
   ```
+
+  Current processing pipeline status.
 
 - ```swift
   public internal(set) var error : SmartSpectraError?
   ```
 
+  Latest error from the SDK.
+
 - ```swift
   public internal(set) var validationStatus : ValidationStatus?
   ```
+
+  Measurement readiness: face position, lighting, etc. Only meaningful while ``processingStatus`` is `.running`.
 
 - ```swift
   public internal(set) var insight : Insight?
   ```
 
+  Latest insight from the AI insights service.
+
 - ```swift
   public nonisolated static var version : String
   ```
+
+  SDK version string.
 
 - ```swift
   public let config : SmartSpectraConfig
   ```
 
+  Configuration for this SDK instance.
+
+  Mutate properties on this object rather than replacing it.
+
 ## SmartSpectraConfig
 
-Configuration for ``SmartSpectraSDK``.  Access configuration through ``SmartSpectraSDK/config`` rather than constructing one directly:
+Configuration for ``SmartSpectraSDK``.
+
+Access configuration through ``SmartSpectraSDK/config`` rather than constructing one directly:
+
+```swift
+let sdk = SmartSpectraSDK.shared
+sdk.config.apiKey = "your-key"
+```
+
+Standalone construction is available for tests and advanced integrations that pass a custom config into ``SmartSpectraSDK/init(config:)``.
 
 ### Initializers
 
@@ -114,33 +164,106 @@ Configuration for ``SmartSpectraSDK``.  Access configuration through ``SmartSpec
   public var cameraPosition : AVCaptureDevice.Position = .front
   ```
 
+  Camera position used for capture. Defaults to `.front`.
+
+- ```swift
+  public var logLevel : SmartSpectraLogLevel = .default
+  ```
+
+  Verbosity of SDK logging — both the SDK's Swift-side logging and the native engine. Takes effect immediately when set (like ``imageOutputEnabled``). Defaults to ``SmartSpectraLogLevel/warning`` (warnings and errors only).
+
 - ```swift
   public var imageOutputEnabled : Bool = true
   ```
+
+  Controls whether the SDK publishes preview frames to ``SmartSpectraSDK/imageOutput``.
+
+  When disabled, camera frames are still processed for vitals analysis, but the SDK skips `CVPixelBuffer` to `UIImage` conversion and preview updates. This is useful for custom integrations that do not display a live camera feed.
+
+  Example:
+
+  ```swift
+  let sdk = SmartSpectraSDK.shared
+  sdk.config.imageOutputEnabled = false
+  ```
+
+  - Note: Changes take effect immediately and do not require restarting processing.
+
+- ```swift
+  public var enableTelemetry : Bool = true
+  ```
+
+  Controls whether the SDK reports anonymous, aggregate usage telemetry.
+
+  Telemetry is on by default; set this to `false` to opt out. When enabled, the SDK sends a per-session summary. It does not include raw frames, metric values, file paths, user identifiers, or device identifiers. Reporting is best-effort and never blocks or affects a measurement session.
+
+  Example:
+
+  ```swift
+  let sdk = SmartSpectraSDK.shared
+  sdk.config.enableTelemetry = false
+  ```
+
+  - Note: Read when a measurement session starts.
 
 - ```swift
   public var apiKey : String?
   ```
 
+  API key from the Presage developer portal. Setting this automatically configures authentication.
+
 - ```swift
   public var requestedMetrics : [MetricType]?
+  ```
+
+  Which metrics to compute during processing.
+
+  This property provides granular control over which metric families the SDK requests. Derived feature flags such as cardio and face processing are inferred from the selected metric types.
+
+  Duplicate metrics are removed automatically while preserving the original order.
+
+  If you do not set this property, the SDK defaults to breathing-only metrics: chest breathing, abdomen breathing, breathing rate, breathing amplitude, apnea, respiratory line length, baseline, and inhale/exhale ratio.
+
+  Example:
+
+  ```swift
+  let sdk = SmartSpectraSDK.shared
+  sdk.config.requestedMetrics = [
+      .breathingRate,
+      .pulseRate,
+      .faceLandmarks
+  ]
+  ```
+
+  Example using the predefined bundles:
+
+  ```swift
+  config.requestedMetrics = SmartSpectraConfig.breathingMetrics + SmartSpectraConfig.cardioMetrics
   ```
 
 - ```swift
   public nonisolated static let breathingMetrics : [MetricType]
   ```
 
+  Breathing metric bundle. Equivalent to leaving ``SmartSpectraConfig/requestedMetrics`` unset.
+
 - ```swift
   public nonisolated static let cardioMetrics : [MetricType]
   ```
+
+  Cardio metric bundle (pulse rate, arterial pressure trace, HRV). Combine with ``breathingMetrics`` for the typical "vitals" bundle.
 
 - ```swift
   public nonisolated static let faceMetrics : [MetricType]
   ```
 
+  Face metric bundle (landmarks, blinking, talking, expressions).
+
 - ```swift
   public nonisolated static let edaMetrics : [MetricType]
   ```
+
+  Electrodermal activity (EDA) trace metric bundle.
 
 ## ProcessingStatus
 
@@ -156,21 +279,19 @@ Indicates the current state of the preprocessing pipeline.
 
 Measurement readiness: a stable code plus a human-readable hint. Orthogonal to ``ProcessingStatus`` (engine lifecycle).
 
-### Initializers
-
-- ```swift
-  public init (code: ValidationCode, hint: String)
-  ```
-
 ### Properties
 
 - ```swift
   public let code : ValidationCode
   ```
 
+  The stable, machine-readable readiness code.
+
 - ```swift
   public let hint : String
   ```
+
+  A human-readable hint describing what needs to change for a valid measurement.
 
 ## ValidationCode
 
@@ -186,16 +307,18 @@ Measurement-readiness codes.
 - `case chestNotVisible = 7`
 - `case cameraTuning = 10`
 - `case frameRateTooLow = 11`
+- `case excessiveMotion = 12`
+- `case faceTooClose = 13`
+- `case faceTooFar = 14`
+- `case faceTooHigh = 15`
+- `case faceTooLow = 16`
+- `case faceNotForward = 17`
 
 ## SmartSpectraError
 
-A typed error from the SmartSpectra SDK.  Thrown by ``SmartSpectraSDK/start()`` and ``SmartSpectraSDK/stop()``, and published on ``SmartSpectraSDK/error`` for async pipeline failures.
+A typed error from the SmartSpectra SDK.
 
-### Initializers
-
-- ```swift
-  public init (code: Code, message: String, retryable: Bool = false)
-  ```
+Thrown by ``SmartSpectraSDK/start()`` and ``SmartSpectraSDK/stop()``, and published on ``SmartSpectraSDK/error`` for async pipeline failures.
 
 ### Properties
 
@@ -203,21 +326,31 @@ A typed error from the SmartSpectra SDK.  Thrown by ``SmartSpectraSDK/start()`` 
   public let code : Code
   ```
 
+  The error category.
+
 - ```swift
   public let message : String
   ```
+
+  A human-readable description of what went wrong.
 
 - ```swift
   public let retryable : Bool
   ```
 
+  Whether the operation that produced this error can be retried.
+
 - ```swift
   public var errorDescription : String?
   ```
 
+  A human-readable description of the error; returns ``message``.
+
 ## SmartSpectraError.Code
 
-SDK error codes. No `.ok` case — in Swift, success means no error thrown.  Raw values are stable across SDK versions and match the C++/Android wire values. Never change an existing value; only append new codes at the end.
+SDK error codes. No `.ok` case — in Swift, success means no error thrown.
+
+Raw values are stable across SDK versions and match the C++/Android wire values.
 
 - `case invalidState = 1`
 - `case authenticationFailed = 2`
@@ -229,3 +362,18 @@ SDK error codes. No `.ok` case — in Swift, success means no error thrown.  Raw
 - `case processingFailed = 8`
 - `case frameConversionFailed = 9`
 - `case nonMonotonicTimestamp = 10`
+- `case timestampGap = 11`
+
+## SmartSpectraLogLevel
+
+Verbosity of SDK logging, set via ``SmartSpectraConfig/logLevel``.
+
+Levels are cumulative: a level shows its own messages plus everything more severe. The setting covers both the SDK's Swift-side logging and the native engine. ``debug`` cannot restore debug-only statements that were compiled out of the release engine binary.
+
+Raw values are stable across SDK versions and match the C++/Android wire values.
+
+- `case debug = 0`
+- `case info = 1`
+- `case warning = 2`
+- `case error = 3`
+- `case none = 4`

@@ -5,6 +5,7 @@
 
 
 // === standard library includes (if any) ===
+#include <cmath>
 #include <iomanip>
 #include <sstream>
 // === third-party includes (if any) ===
@@ -26,10 +27,17 @@ const float OpenCvValueIndicator::max_value = 999.9;
  * @param height - height of the text box
  * @param precision_digits - number of digits after the decimal point
  */
-OpenCvValueIndicator::OpenCvValueIndicator(int x, int y, int width, int height, int precision_digits)
-    : indicator_area(x, y, width, height), precision_digits(precision_digits) {
-    // Construct template_text with the correct number of zeros after the decimal
+OpenCvValueIndicator::OpenCvValueIndicator(int x, int y, int width, int height,
+                                           int precision_digits, bool show_confidence)
+    : indicator_area(x, y, width, height),
+      precision_digits(precision_digits),
+      show_confidence(show_confidence) {
+    // Construct template_text with the correct number of zeros after the decimal,
+    // and optionally a "(0.00)" suffix so the font is sized to fit the wider form.
     std::string template_text = "000." + std::string(this->precision_digits, '0');
+    if (this->show_confidence) {
+        template_text += " (100%)";
+    }
     int baseline = 0;
     auto text_bound_nominal = cv::getTextSize(template_text, font_face, 1, 1, &baseline);
     auto width_scale = static_cast<double>(text_bound_nominal.width) / width;
@@ -51,6 +59,20 @@ bool OpenCvValueIndicator::Render(cv::Mat& image, float value, cv::Scalar color)
     }
     std::stringstream text;
     text << std::setprecision(this->precision_digits) << std::fixed << value;
+    cv::putText(image, text.str(), text_origin, font_face, font_scale, std::move(color), 1, cv::LINE_AA);
+    return true;
+}
+
+bool OpenCvValueIndicator::Render(cv::Mat& image, float value, float confidence, cv::Scalar color) {
+    if (value > OpenCvValueIndicator::max_value || value < OpenCvValueIndicator::min_value) {
+        return false;
+    }
+    if (!CheckThatElementFitsImage("OpenCvValueIndicator", this->indicator_area, image)) {
+        return false;
+    }
+    std::stringstream text;
+    text << std::setprecision(this->precision_digits) << std::fixed << value
+         << " (" << static_cast<int>(std::round(confidence)) << "%)";
     cv::putText(image, text.str(), text_origin, font_face, font_scale, std::move(color), 1, cv::LINE_AA);
     return true;
 }

@@ -1,0 +1,9 @@
+{
+  "name": "smartspectra-sdk",
+  "version": "3.3.0",
+  "description": "Skills for using the SmartSpectra SDK (measure pulse, breathing, and more from video).",
+  "author": {
+    "name": "Presage Technologies",
+    "url": "https://presagetech.com"
+  }
+}

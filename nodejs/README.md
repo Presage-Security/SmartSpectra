@@ -57,8 +57,13 @@ thread-safe trampolines.
 
 | Requirement | Version |
 | --- | --- |
-| Node.js | >= 18 (Node 20 LTS recommended) |
+| Node.js | >= 20 (Node 24 LTS recommended) |
 | Electron (optional) | >= 28 |
+
+You also need an API key from
+[physiology.presagetech.com](https://physiology.presagetech.com/auth/login). An AI assistant
+connected to the [SmartSpectra MCP Server](../docs/mcp-server.md) can fetch it from your account
+for you.
 
 The native runtime ships in per-platform npm packages pulled in automatically
 as dependencies — no install script and no system libraries to install.
@@ -105,6 +110,10 @@ the missing package.
 
 ## Headless Node Quickstart
 
+> The snippets below are ES modules (`import` + top-level `await`) — save them as `.mjs`, or
+> set `"type": "module"` in your `package.json`. In a CommonJS project, use `require()` and
+> wrap the `await` calls in an `async` function.
+
 ```ts
 import {
   SmartSpectraSDK, PixelFormat, FrameTransform, ProcessingStatus,
@@ -148,6 +157,8 @@ codes, and enums — lives in the [API reference](docs/api-reference.md),
 generated from the SDK's bundled TypeScript declarations so it tracks the
 published package. For which metrics to request and how to read the decoded
 payloads, see the [metrics guide](docs/metrics.md).
+For natural-language analysis of the measured vitals, see the
+[LLM Insights guide](docs/llm-insights.md).
 
 ## Electron integration
 
@@ -370,6 +381,24 @@ they resolve siblings without any `LD_LIBRARY_PATH` plumbing.
 built on a Jammy base, so a packaged app (e.g. an AppImage) runs on Ubuntu
 22.04 and any newer distribution. glibc and the C++ runtime come from the
 host system — they are not vendored in the platform package.
+
+## Logging
+
+SDK log verbosity defaults to warnings and errors only. To change it, pass
+`logLevel` in the SDK options:
+
+```js
+const { SmartSpectraSDK, SmartSpectraLogLevel } = require('@smartspectra/node-sdk');
+
+const sdk = new SmartSpectraSDK({
+    apiKey: '...',
+    logLevel: SmartSpectraLogLevel.kInfo,
+});
+```
+
+Levels are cumulative — `kDebug`, `kInfo`, `kWarning` (default), `kError`,
+`kNone`. `kDebug` cannot restore debug-only statements compiled out of the
+release engine binary.
 
 ## Performance notes
 

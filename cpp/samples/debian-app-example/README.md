@@ -11,18 +11,16 @@ for the full guide; the rest of this file is a quick reference for the example i
 The `.deb` produced by this example:
 
 - Installs entirely under `/opt/debian-app-example/{bin,lib,share}`
-- Privately bundles `libsmartspectra.so` + the eight-module Presage OpenCV
-  runtime under `/opt/debian-app-example/lib/`
-- Sets `RPATH=$ORIGIN/../lib` on the binary so it finds the bundled libs
-- Writes `/etc/ld.so.conf.d/debian-app-example.conf` from `postinst` so
-  `libsmartspectra.so`'s `DT_NEEDED libopencv_*.so.411` chain resolves at
-  load time (the SDK strips `DT_RUNPATH` from libsmartspectra.so, so the
-  loader-cache mechanism is load-bearing — this mirrors what the SDK's
-  own `.deb` does for `/usr/local/lib/smartspectra/`)
+- Privately bundles `libsmartspectra.so` under `/opt/debian-app-example/lib/`.
+- Sets `RPATH=$ORIGIN/../lib` on the binary so it finds the bundled lib
+- Writes `/etc/ld.so.conf.d/debian-app-example.conf` from `postinst` so the
+  loader finds `libsmartspectra.so` under `/opt/debian-app-example/lib`, which
+  is not on the default search path (the SDK strips `DT_RUNPATH` from
+  libsmartspectra.so, so this loader-cache entry is load-bearing)
 - Declares its `Depends:` from the SDK's own
   `share/smartspectra/package/SmartSpectraPackageManifest.json` so the
-  apt-resolved tail (FFmpeg / GStreamer / TLS on Noble, OpenGL / Vulkan
-  baseline) stays in sync with what the SDK was built against
+  apt-resolved tail (FFmpeg / TLS on Noble, OpenGL / Vulkan baseline) stays
+  in sync with what the SDK was built against
 - Does **not** depend on `libsmartspectra-dev` — the end-user needs no
   Presage apt source
 
@@ -71,12 +69,11 @@ debian-app-example </dev/null
 ```
 
 A useful smoke test after installing the `.deb`: if the dynamic loader
-resolves the bundled `libsmartspectra.so` + opencv chain via the
-postinst-registered ldconfig entry, the binary launches and prints its
-usage banner before exiting with rc=1. An rc of `127` instead means the
-loader could not resolve a `DT_NEEDED` library — most likely the
-ldconfig fragment was not picked up; re-running `sudo ldconfig` after
-install resolves that.
+resolves the bundled `libsmartspectra.so` via the postinst-registered
+ldconfig entry, the binary launches and prints its usage banner before
+exiting with rc=1. An rc of `127` instead means the loader could not
+resolve `libsmartspectra.so` — most likely the ldconfig fragment was not
+picked up; re-running `sudo ldconfig` after install resolves that.
 
 ## Files installed by the `.deb`
 
@@ -84,7 +81,6 @@ install resolves that.
 | --- | --- |
 | `/opt/debian-app-example/bin/debian-app-example` | This example |
 | `/opt/debian-app-example/lib/libsmartspectra.so` | Bundled from SDK tarball |
-| `/opt/debian-app-example/lib/smartspectra/libopencv_*.so.411` (8 modules) | Bundled from SDK tarball |
 | `/opt/debian-app-example/lib/smartspectra_manifest.json` | Generated at install |
 | `/opt/debian-app-example/share/smartspectra/...` (models) | Bundled from SDK tarball |
 | `/etc/ld.so.conf.d/debian-app-example.conf` | Written by `postinst` |

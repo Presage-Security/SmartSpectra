@@ -24,7 +24,6 @@ import com.presagetech.smartspectra.SmartSpectraSdk
 import com.presagetech.smartspectra_example.ui.OnboardingTutorialActivity
 import com.presagetech.smartspectra_example.ui.SmartSpectraActivity
 import com.presagetech.smartspectra_example.utils.PreferencesUtils
-import timber.log.Timber
 import kotlin.math.roundToInt
 
 
@@ -199,7 +198,6 @@ class SmartSpectraButton(context: Context, attrs: AttributeSet?) : LinearLayout(
         showEulaDialog(context, linksMap[R.id.txt_terms_of_service].toString()) { agreed ->
             agreedToTermsOfService = agreed
             PreferencesUtils.saveBoolean(context, PreferencesUtils.AGREED_TO_TERMS_OF_SERVICE_KEY, agreed)
-            Timber.d("User agreed to terms of service: $agreed")
             if (!agreed) {
                 Toast.makeText(context, "You need to agree to Terms of Service before using our service.", Toast.LENGTH_LONG).show()
             }
@@ -215,7 +213,6 @@ class SmartSpectraButton(context: Context, attrs: AttributeSet?) : LinearLayout(
         showEulaDialog(context, linksMap[R.id.txt_privacy_policy].toString()) { agreed ->
             agreedToPrivacyPolicy = agreed
             PreferencesUtils.saveBoolean(context, PreferencesUtils.AGREED_TO_PRIVACY_POLICY_KEY, agreed)
-            Timber.d("User agreed to privacy policy: $agreed")
             if (!agreed) {
                 Toast.makeText(context, "You need to agree to privacy policy before using our service.", Toast.LENGTH_LONG).show()
             }
@@ -237,13 +234,11 @@ class SmartSpectraButton(context: Context, attrs: AttributeSet?) : LinearLayout(
         webView.loadUrl(url)
 
         agreeButton.setOnClickListener {
-            Timber.d("Agreed to Terms")
             dialog.dismiss()
             callback?.invoke(true)
         }
 
         declineButton.setOnClickListener {
-            Timber.d("Not accepted")
             dialog.dismiss()
             callback?.invoke(false)
         }

@@ -101,6 +101,8 @@ Use this `Signing & Capabilities` view in Xcode to find the Application ID and O
 
 ![Signing & Capabilities view showing where Xcode exposes the Bundle Identifier for the Application ID and the signing identity used to look up the Organization ID](../../cpp/docs/images/macos-xcode-signing-source.png)
 
+An AI assistant connected to the [SmartSpectra MCP Server](../../docs/mcp-server.md) can do this step for you: it registers the bundle identifier and team ID (`apps.register`, including sandbox mode) and fetches `PresageService-Info.plist` (`apps.get_config`) without you opening the portal. Registration asks you to confirm before it takes effect.
+
 If you cannot find a download for `PresageService-Info.plist`, stop here.
 
 That means you do not have the OAuth config file yet. Ask [Presage support](mailto:support@presagetech.com) or your Presage contact for the iOS OAuth plist for this app.

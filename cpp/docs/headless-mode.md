@@ -78,3 +78,38 @@ if (auto err = sdk.UseCustomInput().Build(handle); !err.ok()) {
 `SetOnMetrics` fires the same way regardless of frame source. See
 [C++ Metrics](metrics.md) for the metric request configuration and the
 metric catalog.
+
+## Running Headlessly in CI
+
+Feed a recorded video through `UseFile` instead of a live camera to run an
+unattended measurement in a CI pipeline — see
+[Headless Testing in CI](../../docs/headless-testing-in-ci.md) for the
+cross-platform model and prerequisites (API key, network access, your own
+recorded video).
+
+The `minimal_example` sample supports this out of the box:
+
+```bash
+./build/samples/minimal_example/minimal_example \
+  --api_key=YOUR_API_KEY --input_video_path=/path/to/video.mp4
+```
+
+The sample plays the file through the same pipeline as a live camera, prints
+metrics as they arrive, and exits when the file finishes — a non-zero exit
+code (or no metrics printed) means the run failed. Use a short clip (a few
+seconds, well-lit, mostly still face) in a widely-supported container/codec
+such as MP4 (H.264).
+
+A provider-neutral CI step (GitHub Actions), after installing or building the
+SDK for your platform:
+
+```yaml
+- name: Headless measurement smoke
+  run: |
+    ./build/samples/minimal_example/minimal_example \
+      --api_key="${{ secrets.SMARTSPECTRA_API_KEY }}" \
+      --input_video_path=./test-assets/face.mp4
+```
+
+There is no offline mode — the CI runner needs network access to the
+SmartSpectra service to authenticate and run a measurement.

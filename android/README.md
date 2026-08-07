@@ -40,6 +40,29 @@ Use [Option 1: API Key](docs/option-1-api-key.md) for the fastest manual setup.
 
 Use [Option 2: OAuth](docs/option-2-oauth.md) if you need OAuth.
 
+Either way, an AI assistant connected to the [SmartSpectra MCP Server](../docs/mcp-server.md) can do the account side for you — fetch your API key, or register your package name and signing certificate fingerprint and download `presage_services.xml`.
+
+## LLM Insights
+
+See [LLM Insights](docs/llm-insights.md) for natural-language analysis of the measured vitals.
+
+## Logging
+
+SDK log verbosity defaults to warnings and errors only. To change it, set
+`logLevel` on the config you pass to `initialize`:
+
+```kotlin
+val config = SmartSpectraConfig().apply {
+    logLevel = SmartSpectraLogLevel.INFO
+}
+SmartSpectraSdk.initialize(context, config)
+```
+
+Levels are cumulative — `DEBUG`, `INFO`, `WARNING` (default), `ERROR`, `NONE`.
+The setting covers both the SDK's Kotlin-side logging and the native engine.
+`DEBUG` cannot restore debug-only statements compiled out of the release
+engine binary.
+
 ## Supported Platforms
 
 | Platform                | Notes                             |

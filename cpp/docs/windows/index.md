@@ -24,7 +24,8 @@ specific need.
 ### Prerequisites
 
 Install [Visual Studio Build Tools 2022](https://visualstudio.microsoft.com/visual-cpp-build-tools/)
-or later with the **Desktop development with C++** workload.
+or later — or a full Visual Studio 2022 or newer install (Community edition works) — with the
+**Desktop development with C++** workload.
 
 During installation, select the **Desktop development with C++** workload and
 make sure **C++ CMake tools for Windows** is selected. The workload installs
@@ -65,8 +66,9 @@ At the end, the app should show console output with:
 
 ### 1. Open the developer command prompt
 
-Open the Windows **Start** menu and search for `x64 Developer Command Prompt`.
-Choose the x64 developer command prompt installed by Visual Studio Build Tools.
+Open the Windows **Start** menu and search for `x64 Developer Command Prompt` (a full Visual
+Studio install names it `x64 Native Tools Command Prompt for VS <year>`).
+Choose the x64 developer command prompt installed by Visual Studio (Build Tools or a full install).
 
 For a default Build Tools installation, that shortcut launches:
 
@@ -74,8 +76,9 @@ For a default Build Tools installation, that shortcut launches:
 C:\Windows\System32\cmd.exe /k ""C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\Common7\Tools\VsDevCmd.bat" -arch=x64 -host_arch=x64"
 ```
 
-If you installed Build Tools somewhere else, update the `VsDevCmd.bat` path to
-match that installation.
+If you installed Build Tools somewhere else — or use a full Visual Studio install — update the
+`VsDevCmd.bat` path to match. For example, Visual Studio 2026 Community installs it at
+`C:\Program Files\Microsoft Visual Studio\18\Community\Common7\Tools\VsDevCmd.bat`.
 
 ### 2. Create the project files
 
@@ -313,6 +316,7 @@ bin/
   vulkan-1.dll                # Vulkan loader used by the default inference backend
   smartspectra_manifest.json  # lets smartspectra.dll locate ../share/smartspectra
   opencv_world*.dll           # OpenCV runtime dependency — must ship with your app
+  opencv_videoio_ffmpeg*.dll  # OpenCV FFmpeg video-I/O backend (needed for video-file input)
 share/smartspectra/           # Bundled graph and model resources
 ```
 

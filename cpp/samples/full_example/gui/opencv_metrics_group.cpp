@@ -19,6 +19,9 @@ bool MetricsGroup::Render(cv::Mat& image) {
     if (this->display_rate) {
         if (this->rate.value == no_rate_value_to_display) {
             if (!this->rate_indicator.RenderNA(image, color)) return false;
+        } else if (this->show_rate_confidence) {
+            if (!this->rate_indicator.Render(image, this->rate.value,
+                                             this->rate.confidence, color)) return false;
         } else {
             if (!this->rate_indicator.Render(image, this->rate.value, color)) return false;
         }
@@ -50,7 +53,8 @@ MetricsGroup MetricsGroup::Create(
     bool display_trace,
     const std::string& secondary_name,
     int secondary_indicator_width,
-    int secondary_label_width
+    int secondary_label_width,
+    bool show_rate_confidence
 ) {
     const bool display_secondary_rate =
         !secondary_name.empty() && secondary_indicator_width > 0 && secondary_label_width > 0;
@@ -67,7 +71,8 @@ MetricsGroup MetricsGroup::Create(
 
     return MetricsGroup{
         OpenCvTracePlotter{x, y, display_trace ? trace_width : 0, trace_height, max_trace_points},
-        OpenCvValueIndicator{rate_indicator_x, y + trace_height / 2, indicator_width, trace_height},
+        OpenCvValueIndicator{rate_indicator_x, y + trace_height / 2, indicator_width, trace_height,
+                             /*precision_digits=*/1, /*show_confidence=*/show_rate_confidence},
         OpenCvLabel{label_x, y, label_width, trace_height, name},
         rate,
         OpenCvValueIndicator{
@@ -85,7 +90,7 @@ MetricsGroup MetricsGroup::Create(
         },
         secondary_rate,
         display_trace, display_rate, display_secondary_rate,
-        true, true,
+        true, true, show_rate_confidence,
         std::move(confident_color), std::move(unconfident_color)
     };
 }
