@@ -64,6 +64,14 @@ allprojects {
             if (requested.group == "io.netty") useVersion("4.1.136.Final")
         }
     }
+
+    // Dokka 2.2.0 resolves jsoup 1.16.1 for HTML documentation generation. Pin the
+    // fixed 1.23.1 release until Dokka updates its transitive dependency.
+    configurations.matching { it.name.startsWith("dokkaHtmlGeneratorRuntimeResolver") }.configureEach {
+        resolutionStrategy.eachDependency {
+            if (requested.group == "org.jsoup" && requested.name == "jsoup") useVersion("1.23.1")
+        }
+    }
 }
 
 // AGP 9's built-in Kotlin compiles .kt files but does not register the

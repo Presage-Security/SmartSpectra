@@ -18,7 +18,7 @@ This guide covers the `jammy` apt suite, which supports both `amd64` and
 ### Prerequisites
 
 - **CMake 3.22.1 or later** (the version shipped with Ubuntu 22.04 / Mint 21 is sufficient)
-- **C++17 compiler** such as GCC or Clang
+- **C++20 compiler** such as GCC or Clang
 - **Vulkan-capable graphics driver** — Linux builds use Vulkan inference by default. The SDK package installs the Vulkan loader dependency through apt, but the host must provide a working Vulkan driver.
 - **`cmake`, `curl`, `gpg`, and `pkg-config`** — used by the build, install, and verify steps below. Install with `sudo apt install cmake curl gpg pkg-config` if they are not already present.
 - **API key** from [physiology.presagetech.com](https://physiology.presagetech.com/auth/login)
@@ -72,7 +72,7 @@ Verify that the package is visible to build tools:
 pkg-config --modversion SmartSpectra
 ```
 
-The command prints the installed SDK version (for example, `1.7.0`). If it
+The command prints the installed SDK version (for example, `3.3.0`). If it
 prints nothing or reports that the package is missing, reinstall
 `libsmartspectra-dev` and confirm you are on a supported Ubuntu 22.04 /
 Mint 21 (`amd64` or `arm64`) host.
@@ -240,10 +240,10 @@ entire file:
 ```cmake
 cmake_minimum_required(VERSION 3.22.1)
 project(SmartSpectraHelloVitals CXX)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(SmartSpectra REQUIRED)
+find_package(SmartSpectra CONFIG REQUIRED)
 add_executable(hello_vitals hello_vitals.cpp)
 target_link_libraries(hello_vitals SmartSpectra::SDK)
 ```

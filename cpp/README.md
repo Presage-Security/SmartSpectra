@@ -1,6 +1,7 @@
 ---
-title: C++ SDK
-description: Get started with SmartSpectra C++ across Linux, macOS, and Windows.
+title: Get Started with the SmartSpectra C++ SDK
+description: Measure pulse and breathing from a camera or video file with the SmartSpectra C++ SDK on Linux, macOS, and Windows. C++17 and CMake.
+sidebarTitle: Overview
 ---
 
 # SmartSpectra C++ SDK
@@ -32,7 +33,7 @@ specific need.
 All platforms need:
 
 - **CMake 3.22.1+**
-- **C++17 compiler** (GCC, Clang, or MSVC 2022)
+- **C++20 compiler** (GCC, Clang, or MSVC 2022)
 - An **API key** from [physiology.presagetech.com](https://physiology.presagetech.com/auth/login) —
   an AI assistant connected to the [SmartSpectra MCP Server](../docs/mcp-server.md) can fetch it
   from your account for you
@@ -43,6 +44,10 @@ or OpenSSL separately on any platform.
 ## Pick your platform
 
 Each guide is self-contained: prerequisites → install → first running build.
+
+> **Start with a full runnable sample:** choose the quickstart for your
+> platform below. Each guide includes a complete `hello_vitals.cpp` and
+> `CMakeLists.txt`.
 
 - [**Linux Quickstart (Ubuntu/Mint)**](docs/linux/index.md) — apt-based install for Ubuntu 22.04 / Mint 21 and Ubuntu 24.04 / Mint 22 (`amd64` + `arm64`)
 - [**macOS Quickstart**](docs/macos.md) — Homebrew formula, Apple Silicon

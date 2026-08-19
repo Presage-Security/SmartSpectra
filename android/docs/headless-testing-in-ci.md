@@ -1,6 +1,7 @@
 ---
-title: Headless Testing in CI
+title: Headless Testing in CI on Android
 description: Run a full SmartSpectra measurement on an Android emulator in CI by feeding a recorded video, or smoke-test that the SDK builds and initializes.
+sidebarTitle: Headless Testing in CI
 ---
 
 # Headless Testing in CI (Android)
@@ -104,8 +105,13 @@ class VideoMeasurementTest {
                 }
                 if (sawPulse && sawBreathing) break
                 // Emulators software-render the pipeline: feed no faster than
-                // ~10 fps so frames aren't dropped. Timestamps carry the real
-                // timing, so throttling the feed doesn't skew computed rates.
+                // ~10 wall-clock fps so frames aren't dropped. This is the
+                // delivery rate, not the capture rate — each frame carries its
+                // own recorded timestamp, so the pipeline still sees the clip's
+                // real >=25 fps cadence (see Getting a Good Measurement) and
+                // computed rates are unaffected. Do not confuse this with
+                // lowering the capture frame rate, which would raise
+                // FRAME_RATE_TOO_LOW.
                 Thread.sleep(100)
             }
             retriever.release()

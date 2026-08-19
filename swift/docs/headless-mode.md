@@ -1,6 +1,7 @@
 ---
-title: Headless Mode
+title: Headless Mode on Swift
 description: Drive SmartSpectra SDK observable state directly from your own iOS UI — useful for background monitoring or custom interfaces.
+sidebarTitle: Headless Mode
 ---
 
 # Headless Mode (iOS)
@@ -19,7 +20,7 @@ Use this when you want to:
 
 ## Processing Status
 
-Lifecycle states (same across all platforms):
+Lifecycle states:
 
 | Status | Meaning |
 | --- | --- |

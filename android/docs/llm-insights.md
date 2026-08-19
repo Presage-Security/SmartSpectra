@@ -1,6 +1,7 @@
 ---
-title: LLM Insights
-description: Request and receive LLM Insights from the Android SmartSpectra SDK.
+title: LLM Insights on Android
+description: Ask natural-language questions about a measurement and receive LLM Insights through the SmartSpectra Android SDK, alongside the metrics stream.
+sidebarTitle: LLM Insights
 ---
 
 # Android LLM Insights
@@ -65,7 +66,7 @@ public fun requestInsight(text: String): Int
 ```
 
 ```kotlin
-pendingRequestId = runCatching { sdk.requestInsight("Summarize the user's stress level.") }
+pendingRequestId = runCatching { sdk.requestInsight("Summarize my current vital signs and flag anything unusual.") }
     .onFailure { /* dispatch failed */ }
     .getOrNull()
 ```

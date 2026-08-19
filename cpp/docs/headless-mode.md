@@ -1,6 +1,7 @@
 ---
-title: Headless Mode
+title: Headless Mode on C++
 description: The SmartSpectra C++ SDK is headless by default — wire up metric and frame callbacks for custom integrations.
+sidebarTitle: Headless Mode
 ---
 
 # Headless Mode (C++)
@@ -17,15 +18,16 @@ Use this when you want to:
 
 ## Processing Status
 
-Lifecycle states (same across all platforms):
+Lifecycle states, reported via `OnProcessingStatusChangedFn` and `GetStatus()`:
 
-| Status | Meaning |
-| --- | --- |
-| **Idle** | Pipeline is not running |
-| **Starting** | Pipeline is initializing |
-| **Running** | Actively measuring — data is flowing |
-| **Stopping** | Teardown in progress, will return to Idle |
-| **Error** | Something went wrong |
+| Status | Value | Meaning |
+| --- | --- | --- |
+| `kUninitialized` | 0 | SDK constructed but not yet initialized |
+| `kIdle` | 1 | Pipeline is not running |
+| `kStarting` | 2 | Pipeline is initializing |
+| `kRunning` | 3 | Actively measuring — data is flowing |
+| `kStopping` | 4 | Teardown in progress, will return to `kIdle` |
+| `kError` | 5 | Something went wrong |
 
 ## Example
 
@@ -96,9 +98,12 @@ The `minimal_example` sample supports this out of the box:
 
 The sample plays the file through the same pipeline as a live camera, prints
 metrics as they arrive, and exits when the file finishes — a non-zero exit
-code (or no metrics printed) means the run failed. Use a short clip (a few
-seconds, well-lit, mostly still face) in a widely-supported container/codec
-such as MP4 (H.264).
+code (or no metrics printed) means the run failed. Use a 30–60 second clip
+(well-lit, mostly still face) in a widely-supported container/codec such as
+MP4 (H.264). A clip of only a few seconds will not produce readings: pulse rate
+needs 12 seconds, breathing rate starts at roughly 10 seconds and is not
+confident until 30, and HRV starts at roughly 30 seconds and is not confident
+until 60.
 
 A provider-neutral CI step (GitHub Actions), after installing or building the
 SDK for your platform:

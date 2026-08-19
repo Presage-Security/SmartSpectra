@@ -1,6 +1,7 @@
 ---
-title: Migration Guide
-description: C++-specific migration notes for SmartSpectra SDK upgrades.
+title: C++ Migration Guide
+description: "Release-by-release migration notes for the SmartSpectra C++ SDK: breaking API changes, renamed headers, and what each upgrade requires."
+sidebarTitle: Migration Guide
 ---
 
 # SmartSpectra C++ SDK Migration Guide

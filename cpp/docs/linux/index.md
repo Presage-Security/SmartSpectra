@@ -1,5 +1,6 @@
 ---
-title: Overview
+title: Install the SmartSpectra C++ SDK on Linux
+sidebarTitle: Overview
 description: Install the SmartSpectra C++ SDK on Ubuntu and Linux Mint. Pick the guide that matches your distribution.
 ---
 

@@ -1,6 +1,7 @@
 ---
-title: "Option 2: OAuth"
-description: SmartSpectra Swift setup using OAuth instead of a hard-coded API key.
+title: "Option 2: OAuth on Swift"
+description: "Set up SmartSpectra on iOS with OAuth instead of a hard-coded API key: register the app, add PresageService-Info.plist, and verify it works."
+sidebarTitle: "Option 2: OAuth"
 ---
 
 # QuickStart - OAuth
@@ -59,7 +60,7 @@ In Xcode:
 
 1. Click `File` → `Add Package Dependencies...`
 2. Paste `https://github.com/Presage-Security/SmartSpectra-Swift/`
-3. For repeatable builds, choose `Exact Version` and enter a released tag such as `3.0.0`
+3. For repeatable builds, choose `Exact Version` and enter the latest released tag (`3.3.0` at time of writing)
 4. Use `Branch` → `main` only when testing the latest final public release before pinning a version
 5. Add the package to the `Cool Vitals` app target
 
@@ -92,9 +93,9 @@ You need to get it from Presage first:
 
 1. Sign in to the Presage developer portal: `https://physiology.presagetech.com/auth/login`
 2. Register for OAuth in the [Presage developer portal](https://physiology.presagetech.com/portal/apps)
-    - Your Bundle Identifier found in: `Signing & Capabilities` is what goes in the Application ID field
-    - Your Team ID found in your [Apple Developer Account](https://developer.apple.com) in the `Membership Details` is what goes in the Organization ID field
-    - Enable sandbox in the portal if you want to test locally by pushing XCode builds to your phone. When sandbox is turned off it allows app store and test flight builds only.
+    - Enter the app target's Bundle Identifier from `Signing & Capabilities` in the Application ID field. It must match exactly, including capitalization.
+    - Enter your Team ID in the Organization ID field. Find it in **Xcode → Settings → Accounts**, select your Apple ID and team, and read the `Team ID` value — or in your [Apple Developer Account](https://developer.apple.com) under `Membership Details`. A Team ID is exactly 10 uppercase alphanumeric characters; it is not a certificate fingerprint.
+    - Enable sandbox to additionally accept development App Attest identities from locally signed builds. Sandbox mode still accepts production identities from TestFlight and the App Store. When sandbox is disabled, only production identities are accepted.
 3. Download the iOS OAuth config file named `PresageService-Info.plist`
 
 Use this `Signing & Capabilities` view in Xcode to find the Application ID and Organization ID inputs mentioned above:
@@ -117,6 +118,12 @@ In Xcode:
    - enable `Copy items if needed`
    - make sure the `Cool Vitals` target is checked
 4. Click `Finish`
+
+Then select the app target, open `Signing & Capabilities`, and add the **App Attest** capability. OAuth uses Apple's App Attest service, which requires a supported physical iOS or iPadOS device and a correctly provisioned app. Confirm `DCAppAttestService.shared.isSupported` is `true` on the device. The simulator cannot create an App Attest identity.
+
+`IS_OAUTH_ENABLED` is the authentication-mode selector. Set it to `true` for OAuth; set it to `false`, omit the key (older plist revisions), or omit the plist entirely, to use `sdk.config.apiKey`. If OAuth is enabled and an API key is also supplied, OAuth takes precedence and the API key is ignored. Boolean values and legacy plist integer values `0` and `1` are accepted; strings such as `"true"` are rejected as a non-retryable configuration error — a present-but-invalid value never falls back to API-key authentication.
+
+When OAuth is enabled, `PresageService-Info.plist` must contain non-blank string values for `CLIENT_ID` and `SUB`. `BUNDLE_ID`, when present, must exactly match the Bundle Identifier of the running app target (surrounding whitespace is ignored); a plist without `BUNDLE_ID` (older plist revisions) skips this local pre-check — the server still verifies the app's bundle identifier during authentication. SmartSpectra treats an invalid static field or mismatch as a non-retryable configuration error before contacting the authentication service.
 
 ## Step 6 — Replace `ContentView.swift`
 
@@ -241,7 +248,7 @@ struct ContentView: View {
 
     private var validationTitle: String {
         guard let validationStatus = sdk.validationStatus else { return "Waiting" }
-        return validationName(validationStatus.code)
+        return validationStatus.hint
     }
 
     private var statusColor: Color {
@@ -342,6 +349,7 @@ struct ContentView: View {
                 }
                 .frame(height: compact ? 130 : 146)
 
+                guidanceText
             }
             .padding(.horizontal, horizontalPadding)
             .padding(.vertical, compact ? 10 : 14)
@@ -353,6 +361,16 @@ struct ContentView: View {
         .task(id: metricsUpdateToken) {
             mergeCurrentMetrics()
         }
+    }
+
+    // The SDK's `hint` is written for end users — surface it as-is.
+    private var guidanceText: some View {
+        Text(sdk.validationStatus?.hint ?? "Getting ready\u{2026}")
+            .font(.footnote)
+            .foregroundStyle(.white.opacity(0.85))
+            .multilineTextAlignment(.center)
+            .frame(maxWidth: .infinity)
+            .accessibilityLabel("Measurement guidance")
     }
 
     private var previewCard: some View {
@@ -581,21 +599,6 @@ struct ContentView: View {
         return String(format: "% .\(digits)f", value).replacingOccurrences(of: " ", with: "") + suffix
     }
 
-    private func validationName(_ code: ValidationCode) -> String {
-        switch code {
-        case .ok: return "OK"
-        case .noFaceFound: return "No Face"
-        case .multipleFacesFound: return "Multi Face"
-        case .faceNotCentered: return "Off Center"
-        case .faceSizeOutOfRange: return "Face Size"
-        case .tooDark: return "Too Dark"
-        case .tooBright: return "Too Bright"
-        case .chestNotVisible: return "Chest Missing"
-        case .cameraTuning: return "Tuning"
-        @unknown default: return "Unknown"
-        }
-    }
-
     private func expressionName(_ type: ExpressionType) -> String {
         switch type {
         case .unspecified: return "Unspecified"
@@ -680,12 +683,15 @@ private extension View {
 
 In Xcode:
 
-1. Choose a physical iPhone as the run destination
-2. Build and run the app
-3. Allow camera access when iOS asks
-4. Wait a few seconds for camera tuning and signal stabilization
+1. Choose a supported physical iOS or iPadOS device as the run destination
+2. Confirm the app target has the **App Attest** capability
+3. Build and run the app
+4. Allow camera access when iOS asks
+5. Wait a few seconds for camera tuning and signal stabilization
 
-Do not use the simulator.
+Run this on a physical device — the simulator has no camera. (For automated
+tests, where frames come from a video file instead, the simulator is supported;
+see [Headless testing in CI](headless-testing-in-ci.md).)
 
 ## What success looks like
 
@@ -715,4 +721,4 @@ If the screen does not match the target state, check these first:
 - `ContentView.swift` was only partially replaced
 - `PresageService-Info.plist` is not in target membership
 - the app is still running an older installed build on the phone
-- the app was run in the simulator instead of on a real device
+- the app was run in the simulator instead of on a supported physical iOS or iPadOS device

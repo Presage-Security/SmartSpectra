@@ -1,6 +1,7 @@
 ---
-title: Quick Start
-description: Get started with the SmartSpectra Android SDK — Kotlin, min SDK 28.
+title: Android Quick Start
+description: Measure pulse and breathing from the Android camera with the SmartSpectra Android SDK. Kotlin, minSdk 28; install, authenticate, and run.
+sidebarTitle: Quick Start
 ---
 
 # SmartSpectra Android Quickstart
@@ -11,6 +12,10 @@ This repo contains two build guides that produce similar user end states:
 - [Option 2: OAuth](docs/option-2-oauth.md)
 
 The only difference in builds is that the API key build gets up and running very fast, but hard-codes your API key. The OAuth build is more suitable for production deployments because it avoids hard-coding your API key.
+
+> **Start with the full runnable sample:** [Option 1: API Key](docs/option-1-api-key.md)
+> walks through a complete camera app. Use [Option 2: OAuth](docs/option-2-oauth.md)
+> when your app needs OAuth instead.
 
 ## Scope
 

@@ -1,6 +1,7 @@
 ---
-title: "Option 1: API Key"
-description: Fast manual SmartSpectra Swift setup using an API key.
+title: "Option 1: API Key on Swift"
+description: "The fastest SmartSpectra Swift setup: add the package, drop in an API key, and run a first pulse and breathing measurement on device."
+sidebarTitle: "Option 1: API Key"
 ---
 
 # QuickStart - API Key
@@ -72,7 +73,7 @@ In Xcode:
 
 1. Click `File` → `Add Package Dependencies...`
 2. Paste `https://github.com/Presage-Security/SmartSpectra-Swift/`
-3. For repeatable builds, choose `Exact Version` and enter a released tag such as `3.0.0`
+3. For repeatable builds, choose `Exact Version` and enter the latest released tag (`3.3.0` at time of writing)
 4. Use `Branch` → `main` only when testing the latest final public release before pinning a version
 5. Add the package to the `Cool Vitals` app target
 
@@ -223,7 +224,7 @@ struct ContentView: View {
 
     private var validationTitle: String {
         guard let validationStatus = sdk.validationStatus else { return "Waiting" }
-        return validationName(validationStatus.code)
+        return validationStatus.hint
     }
 
     private var statusColor: Color {
@@ -323,6 +324,8 @@ struct ContentView: View {
                     )
                 }
                 .frame(height: compact ? 130 : 146)
+
+                guidanceText
             }
             .padding(.horizontal, horizontalPadding)
             .padding(.vertical, compact ? 10 : 14)
@@ -334,6 +337,16 @@ struct ContentView: View {
         .task(id: metricsUpdateToken) {
             mergeCurrentMetrics()
         }
+    }
+
+    // The SDK's `hint` is written for end users — surface it as-is.
+    private var guidanceText: some View {
+        Text(sdk.validationStatus?.hint ?? "Getting ready\u{2026}")
+            .font(.footnote)
+            .foregroundStyle(.white.opacity(0.85))
+            .multilineTextAlignment(.center)
+            .frame(maxWidth: .infinity)
+            .accessibilityLabel("Measurement guidance")
     }
 
     private var previewCard: some View {
@@ -562,21 +575,6 @@ struct ContentView: View {
         return String(format: "% .\(digits)f", value).replacingOccurrences(of: " ", with: "") + suffix
     }
 
-    private func validationName(_ code: ValidationCode) -> String {
-        switch code {
-        case .ok: return "OK"
-        case .noFaceFound: return "No Face"
-        case .multipleFacesFound: return "Multi Face"
-        case .faceNotCentered: return "Off Center"
-        case .faceSizeOutOfRange: return "Face Size"
-        case .tooDark: return "Too Dark"
-        case .tooBright: return "Too Bright"
-        case .chestNotVisible: return "Chest Missing"
-        case .cameraTuning: return "Tuning"
-        @unknown default: return "Unknown"
-        }
-    }
-
     private func expressionName(_ type: ExpressionType) -> String {
         switch type {
         case .unspecified: return "Unspecified"
@@ -666,7 +664,9 @@ In Xcode:
 3. Allow camera access when iOS asks
 4. Wait a few seconds for camera tuning and signal stabilization
 
-Do not use the simulator.
+Run this on a physical device — the simulator has no camera. (For automated
+tests, where frames come from a video file instead, the simulator is supported;
+see [Headless testing in CI](headless-testing-in-ci.md).)
 
 ## What success looks like
 

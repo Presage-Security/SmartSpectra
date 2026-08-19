@@ -1,17 +1,20 @@
 ---
-title: Configuring Metrics
-description: Request and read SmartSpectra metrics from the Android SDK.
+title: Configuring Metrics on Android
+description: Request pulse, breathing, HRV and EDA metric groups from the SmartSpectra Android SDK, and read the samples its LiveData delivers.
+sidebarTitle: Configuring Metrics
 ---
 
 # Configuring Android Metrics
 
-By default, Android measurements request the breathing metric set. Add pulse rate when your app needs a basic cardio value.
+By default, Android measurements request the breathing metric set. Combine it
+with `SmartSpectraConfig.cardioMetrics` when your app needs pulse rate,
+arterial-pressure trace, and HRV.
 
 ## Breathing and Pulse
 
 ### Request Metrics
 
-Request the default breathing metrics plus `PULSE_RATE` before calling `start()`:
+Request the breathing and cardio bundles before calling `start()`:
 
 ```kotlin
 import com.presagetech.smartspectra.proto.MetricTypesProto.MetricType
@@ -20,7 +23,7 @@ import com.presagetech.smartspectra.SmartSpectraSdk
 
 val sdk = SmartSpectraSdk.shared
 sdk.config.requestedMetrics =
-    SmartSpectraConfig.breathingMetrics + listOf(MetricType.PULSE_RATE)
+    SmartSpectraConfig.breathingMetrics + SmartSpectraConfig.cardioMetrics
 ```
 
 ### Read Metrics
@@ -36,7 +39,11 @@ sdk.metrics.observe(viewLifecycleOwner) { metrics ->
 }
 ```
 
-Set `requestedMetrics = null` to return to the default breathing-only set. Cardio fields are empty unless you request a cardio metric such as `PULSE_RATE`.
+Set `requestedMetrics = null` to return to the default breathing-only set.
+`cardioMetrics` contains `PULSE_RATE`, `ARTERIAL_PRESSURE_TRACE`, and `HRV`.
+Cardio fields are empty unless you request a cardio metric.
+
+Requested metrics are validated against your subscription during SDK startup. If a metric is not authorized it is omitted from the output — the field is simply empty, with no error — so treat a persistently empty metric as a possible authorization gap rather than a signal-quality problem. If the authorization request itself fails, startup reports an error.
 
 ## Metric Update Patterns
 
@@ -94,10 +101,7 @@ Request additional metrics only when your app needs them:
 
 ```kotlin
 sdk.config.requestedMetrics =
-    SmartSpectraConfig.breathingMetrics + listOf(
-        MetricType.PULSE_RATE,
-        MetricType.ARTERIAL_PRESSURE_TRACE,
-        MetricType.HRV,
+    SmartSpectraConfig.breathingMetrics + SmartSpectraConfig.cardioMetrics + listOf(
         MetricType.EDA_TRACE,
         MetricType.FACE_LANDMARKS,
         MetricType.BLINKING,
@@ -147,6 +151,7 @@ Hrv {
     baevsky: Double
     timestamp: Long
     confidence: Float
+    stable: Boolean
 }
 
 Eda {

@@ -1,6 +1,6 @@
 ---
 title: Issues and Limitations
-description: Known issues and limitations for the SmartSpectra C++ SDK on Windows.
+description: Known issues and platform limitations for the SmartSpectra C++ SDK on Windows, and the workarounds available for each of them.
 ---
 
 # Issues and Limitations — Windows

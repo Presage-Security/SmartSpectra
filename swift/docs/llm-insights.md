@@ -1,6 +1,7 @@
 ---
-title: LLM Insights
-description: Request and receive LLM Insights from the Swift SmartSpectra SDK.
+title: LLM Insights on Swift
+description: Ask natural-language questions about a measurement and receive LLM Insights through the SmartSpectra Swift SDK, alongside the metrics stream.
+sidebarTitle: LLM Insights
 ---
 
 # Swift LLM Insights
@@ -67,7 +68,7 @@ public func requestInsight(_ text: String) throws -> Int32
 
 ```swift
 do {
-    pendingRequestId = try sdk.requestInsight("Summarize the user's stress level.")
+    pendingRequestId = try sdk.requestInsight("Summarize my current vital signs and flag anything unusual.")
 } catch {
     // e.g. processing not active
 }

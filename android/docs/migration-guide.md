@@ -1,6 +1,7 @@
 ---
-title: Migration Guide
-description: Android-specific migration notes for SmartSpectra SDK upgrades.
+title: Android Migration Guide
+description: "Release-by-release migration notes for the SmartSpectra Android SDK: breaking API changes, renamed symbols, and what each upgrade requires."
+sidebarTitle: Migration Guide
 ---
 
 # SmartSpectra Android SDK Migration Guide

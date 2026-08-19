@@ -1,6 +1,7 @@
 ---
-title: Headless Mode
+title: Headless Mode on Android
 description: Wire SmartSpectra SDK lifecycle and metrics LiveData into your own Android UI — useful for background monitoring or custom interfaces.
+sidebarTitle: Headless Mode
 ---
 
 # Headless Mode (Android)
@@ -18,7 +19,7 @@ Use this when you want to:
 
 ## Processing Status
 
-Lifecycle states (same across all platforms):
+Lifecycle states:
 
 | Status | Meaning |
 | --- | --- |

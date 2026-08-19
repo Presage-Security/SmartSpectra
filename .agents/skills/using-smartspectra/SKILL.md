@@ -107,10 +107,15 @@ rather than relying on memory or scaffolding an app from scratch, since the SDK 
 If the MCP server is connected, prefer its `docs.search` / `docs.read` tools over fetching the
 URLs below — same docs, already indexed.
 
+Every documentation page is available as **markdown** — append `.md` to its URL
+(`…/docs/swift/metrics.md`). Prefer that over the HTML: it is the same content without the page
+furniture, roughly a twentieth of the bytes.
+
 1. **Start at the index:** fetch `https://smartspectra.presagetech.com/llms.txt` — a plain-text
-   list of every doc page with a one-line description. Use it to find the page you need.
+   list of every doc page with a one-line description, linking each page's markdown. Use it to
+   find the page you need.
 2. **Fetch that page**, e.g.
-   `https://smartspectra.presagetech.com/docs/<platform>/<topic>`, where:
+   `https://smartspectra.presagetech.com/docs/<platform>/<topic>.md`, where:
    - `platform` ∈ `android`, `swift` (iOS), `cpp` (Linux/macOS/Windows), `nodejs`.
    - `topic` ∈ `api-reference`, `metrics`, `option-1-api-key`, `option-2-oauth`,
      `troubleshooting`, `migration-guide`, `headless-mode` (availability varies by platform —
@@ -121,4 +126,4 @@ URLs below — same docs, already indexed.
 3. **Whole corpus at once** (large — prefer a specific page):
    `https://smartspectra.presagetech.com/llms-full.txt`.
 
-Cross-cutting reference (platform-independent): `.../docs/data-types` (the payload schema).
+Cross-cutting reference (platform-independent): `.../docs/data-types.md` (the payload schema).

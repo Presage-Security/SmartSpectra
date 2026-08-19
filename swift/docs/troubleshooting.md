@@ -1,6 +1,7 @@
 ---
-title: Troubleshooting
+title: Swift Troubleshooting
 description: Solutions to common build, runtime, and integration issues with the SmartSpectra Swift SDK.
+sidebarTitle: Troubleshooting
 ---
 
 # iOS Troubleshooting
@@ -9,15 +10,21 @@ description: Solutions to common build, runtime, and integration issues with the
 
 ### Package not found in Xcode
 
-Ensure you're adding the package via **File → Add Package Dependencies...**, entering `https://github.com/Presage-Security/SmartSpectra-Swift`, and selecting a stable version such as `3.0.0` for repeatable builds. Use **Branch → main** only when testing the latest final public release before pinning a version.
+Ensure you're adding the package via **File → Add Package Dependencies...**, entering `https://github.com/Presage-Security/SmartSpectra-Swift`, and selecting the latest stable tag (`3.3.0` at time of writing) for repeatable builds. Pin the current release rather than an older one — the [migration guide](migration-guide.md) documents behaviour changes since 3.0. Use **Branch → main** only when testing the latest final public release before pinning a version.
 
 If you pasted a subdirectory URL such as `/tree/main/swift/sdk`, replace it with the repository root URL above. Swift Package Manager resolves the package from the repo root.
 
 ---
 
-### Build fails on simulator
+### Measurement does not start on the simulator
 
-The SDK requires a physical device with a camera. Select a real device target in Xcode — the simulator is not supported.
+The simulator has no camera, so camera-driven measurement needs a physical device.
+Select a real device target in Xcode for normal development.
+
+The simulator *is* supported for automated testing, where frames come from a video
+file rather than a camera — see
+[Headless testing in CI](headless-testing-in-ci.md), which runs a full measurement on
+the iOS Simulator.
 
 ---
 
@@ -63,7 +70,16 @@ If processing fails immediately with a missing-auth error, make sure you set `sd
 
 ### OAuth not working
 
-When registering your OAuth app, you need your **Apple Org ID** (Team ID, e.g. `AB12CDE34F`), not a certificate fingerprint. Find it in [App Store Connect](https://developer.apple.com/help/account/). Place the downloaded `PresageService-Info.plist` in your app's root directory — no additional code is needed.
+When registering your OAuth app, enter the app target's Bundle Identifier exactly as Xcode shows it, including capitalization. Enter your **Apple Org ID** (Team ID, e.g. `AB12CDE34F`) for the Organization ID: exactly 10 uppercase alphanumeric characters, not a certificate fingerprint. Find it in **Xcode → Settings → Accounts**, select your Apple ID and team, and read the `Team ID` value — or in your [Apple Developer Account](https://developer.apple.com) under `Membership Details`.
+
+Place the downloaded `PresageService-Info.plist` in your app, enable its app-target membership, and add the **App Attest** capability under the target's `Signing & Capabilities` tab. Run on a supported physical iOS or iPadOS device and confirm `DCAppAttestService.shared.isSupported` is `true`; the simulator cannot create an App Attest identity.
+
+The plist must set `IS_OAUTH_ENABLED` to `true` and contain non-blank string values for `CLIENT_ID` and `SUB`. `BUNDLE_ID`, when present, must exactly match the running app target's Bundle Identifier; older plists without `BUNDLE_ID` skip the local check and rely on the server's verification. An invalid field or mismatch produces a non-retryable `configurationFailed` error as soon as the SDK loads, before any authentication network request. The error message identifies the invalid field or mismatch without exposing its value.
+
+Portal sandbox behavior controls which App Attest identities the server accepts:
+
+- Enabled: accepts development identities from locally signed builds and production identities from TestFlight or the App Store.
+- Disabled: accepts production identities only.
 
 Your app repo should look roughly like this:
 

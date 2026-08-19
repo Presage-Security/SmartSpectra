@@ -1,6 +1,7 @@
 ---
-title: Configuring Metrics
-description: Request and read SmartSpectra metrics from the Node.js SDK.
+title: Configuring Metrics on Node.js
+description: Request pulse, breathing, HRV and EDA metric groups from the SmartSpectra Node.js SDK, and read the samples its event handlers deliver.
+sidebarTitle: Configuring Metrics
 ---
 
 The Node.js SDK passes requested metric codes through to the native SmartSpectra C++ SDK. Omitting `requestedMetrics` uses the default breathing bundle.
@@ -20,7 +21,7 @@ const sdk = new SmartSpectraSDK({
 });
 ```
 
-The bundle exports (`breathingMetrics`, `cardioMetrics`, `faceMetrics`, `micromotionMetrics`, `edaMetrics`) contain the `MetricType` integer codes defined in `metric_types.proto`. `defaultSupportedMetrics` is the bundle used when `requestedMetrics` is omitted (currently equal to `breathingMetrics`).
+The bundle exports (`breathingMetrics`, `cardioMetrics`, `faceMetrics`, `edaMetrics`) contain the `MetricType` integer codes defined in `metric_types.proto`. `defaultSupportedMetrics` is the bundle used when `requestedMetrics` is omitted (currently equal to `breathingMetrics`).
 
 ### Read Metrics
 
@@ -41,6 +42,8 @@ sdk.on('metrics', (buf, timestampUs) => {
 ```
 
 Cardio fields are empty unless you request a cardio metric such as `PULSE_RATE`.
+
+Requested metrics are validated against your subscription during SDK startup. If a metric is not authorized it is omitted from the output — the field is simply empty, with no error — so treat a persistently empty metric as a possible authorization gap rather than a signal-quality problem. If the authorization request itself fails, startup reports an error.
 
 ## Advanced
 
@@ -106,6 +109,7 @@ type Hrv = {
   baevsky: number;
   timestamp: number;
   confidence: number;
+  stable: boolean;
 };
 
 type Eda = {

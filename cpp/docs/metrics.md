@@ -1,6 +1,7 @@
 ---
-title: Configuring Metrics
-description: Request and read SmartSpectra metrics from the C++ SDK.
+title: Configuring Metrics on C++
+description: Request pulse, breathing, HRV and EDA metric groups from the SmartSpectra C++ SDK, and read the samples its callbacks deliver.
+sidebarTitle: Configuring Metrics
 ---
 
 # Configuring C++ Metrics
@@ -28,16 +29,25 @@ config.AddMetrics({MetricType::PULSE_RATE});
 
 ### Read Metrics
 
-Read the latest breathing and pulse samples from `SetOnMetrics`:
+Read the latest breathing and pulse samples from `SetOnMetrics`. This complete
+example includes the SDK construction and the pulse accessor:
 
 ```cpp
 #include <smartspectra/messages/metrics.h>
 #include <smartspectra/smartspectra.h>
+#include <smartspectra/smartspectra_config.h>
 #include <glog/logging.h>
 #include <utility>
 
+namespace spectra = presage::smartspectra;
+
+spectra::SmartSpectraConfig config;
+config.api_key = "YOUR_API_KEY";
+config.requested_metrics = spectra::SmartSpectraConfig::BreathingMetrics();
+config.AddMetrics(spectra::SmartSpectraConfig::CardioMetrics());
+
 spectra::SmartSpectra spectra(config);
-spectra.SetOnMetrics([](const presage::smartspectra::Metrics& metrics, int64_t) {
+spectra.SetOnMetrics([](const spectra::Metrics& metrics, int64_t) {
     if (metrics.has_breathing() && metrics.breathing().rate_size() > 0) {
         const auto& rate = metrics.breathing().rate(metrics.breathing().rate_size() - 1);
         LOG(INFO) << "Breathing rate: " << rate.value();
@@ -56,8 +66,10 @@ explicitly composing a breathing request. Cardio fields are empty unless you
 request a cardio metric such as `PULSE_RATE`.
 
 Requested metrics are validated against your subscription during SDK startup.
-If a metric is not authorized, it is omitted from the output. If the
-authorization request fails, `Start()` reports an error.
+If a metric is not authorized it is omitted from the output — the field is
+simply empty, with no error — so treat a persistently empty metric as a
+possible authorization gap rather than a signal-quality problem. If the
+authorization request itself fails, `Start()` reports an error.
 
 ## Metric Update Patterns
 
@@ -191,6 +203,7 @@ Hrv {
     double baevsky;
     int64 timestamp;
     float confidence;
+    bool stable;
 }
 
 Eda {

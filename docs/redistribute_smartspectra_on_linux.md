@@ -20,8 +20,8 @@ You're a developer who:
 - Ships a desktop app to enterprise Linux end-users
 - Wants the end-user install to be one `sudo apt install ./your-app.deb` step
 - Cannot ask end-users to configure a Presage apt source
-- Targets Debian-family distros — currently Ubuntu 22.04 / 24.04 (Mint 21 / 22),
-  with Debian 11+ as a documented equivalent. arm64 redistribution remains a
+- Targets Ubuntu 22.04 / 24.04 (Mint 21 / 22). Those are the supported
+  distributions; nothing else is tested. arm64 redistribution remains a
   follow-up
 
 If your end-users run a non-Debian-family distro (Fedora, RHEL, openSUSE, Arch),

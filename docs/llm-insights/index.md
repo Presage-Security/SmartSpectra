@@ -1,5 +1,6 @@
 ---
-title: LLM Insights
+title: LLM Insights Overview
+sidebarTitle: Overview
 description: Conceptual overview, common API interface, required configuration, and privacy notice for the SmartSpectra LLM Insights feature.
 ---
 
@@ -91,8 +92,8 @@ Insights are only meaningful when the metrics they summarize are being computed:
 
 ## Privacy & data notice
 
-When an insight is dispatched, the SDK sends the following to the Presage 3.0
-Analytics Gateway, which forwards it to the LLM:
+When an insight is dispatched, the SDK sends the following off-device to
+Presage, which forwards it to the LLM:
 
 - The **buffered metric values** — an allowlisted subset of the computed
   metrics (pulse rate, heart-rate variability, and breathing rate) as a

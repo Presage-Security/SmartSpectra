@@ -1,6 +1,7 @@
 ---
-title: LLM Insights
-description: Request and receive LLM Insights from the Node.js SmartSpectra SDK.
+title: LLM Insights on Node.js
+description: Ask natural-language questions about a measurement and receive LLM Insights through the SmartSpectra Node.js SDK, alongside the metrics stream.
+sidebarTitle: LLM Insights
 ---
 
 # Node.js LLM Insights
@@ -38,7 +39,7 @@ correlate the asynchronous response:
 ```js
 // main process:      requestInsight(text: string): number
 // renderer process:  requestInsight(text: string): Promise<number>
-const requestId = sdk.requestInsight('Summarize the user\'s stress level.'); // await in the renderer
+const requestId = sdk.requestInsight('Summarize my current vital signs and flag anything unusual.'); // await in the renderer
 ```
 
 The prompt is combined with the latest buffered metrics when they exist,

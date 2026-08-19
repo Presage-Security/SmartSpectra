@@ -1,6 +1,7 @@
 ---
-title: Headless Testing in CI
+title: Headless Testing in CI on iOS
 description: Run a full SmartSpectra measurement on the iOS Simulator in CI by feeding a recorded video, or smoke-test that the SDK builds and initializes.
+sidebarTitle: Headless Testing in CI
 ---
 
 # Headless Testing in CI (iOS)

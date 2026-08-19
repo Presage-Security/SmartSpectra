@@ -1,6 +1,7 @@
 ---
-title: LLM Insights
-description: Request and receive LLM Insights from the C++ SmartSpectra SDK.
+title: LLM Insights on C++
+description: Ask natural-language questions about a measurement and receive LLM Insights through the SmartSpectra C++ SDK, alongside the metrics stream.
+sidebarTitle: LLM Insights
 ---
 
 # C++ LLM Insights
@@ -61,7 +62,7 @@ through the callback above; correlate it via `Insight::request_id()`.
 
 ```cpp
 int32_t request_id = 0;
-if (const auto err = smart_spectra.RequestInsight("Summarize the user's stress level.", &request_id);
+if (const auto err = smart_spectra.RequestInsight("Summarize my current vital signs and flag anything unusual.", &request_id);
     !err.ok()) {
   std::cerr << err.FullMessage() << '\n';
 }

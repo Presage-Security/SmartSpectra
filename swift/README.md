@@ -1,6 +1,7 @@
 ---
-title: Quick Start
-description: Get started with the SmartSpectra Swift SDK for iOS — iOS 17+.
+title: Swift Quick Start
+description: Measure pulse and breathing from the iPhone camera with the SmartSpectra Swift SDK. Requires iOS 17 or later; install, authenticate, and run.
+sidebarTitle: Quick Start
 ---
 
 # SmartSpectra Swift Quickstart

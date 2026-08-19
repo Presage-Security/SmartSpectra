@@ -1,5 +1,5 @@
 ---
-title: Headless Testing in CI
+title: Headless Testing in CI Overview
 description: Run a SmartSpectra sample headlessly in a CI pipeline — feed a recorded video for automated measurement, or smoke-test that the SDK builds and starts.
 ---
 

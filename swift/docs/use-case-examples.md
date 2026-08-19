@@ -1,6 +1,7 @@
 ---
 title: Use Case Examples
 description: Example SmartSpectra Swift integration patterns for common app use cases.
+sidebarTitle: Use Case Examples
 ---
 
 # iOS Use Case Examples
@@ -35,7 +36,14 @@ struct ExampleHostView: View {
 Read the latest face landmarks from `sdk.metrics` and render them into your own overlay.
 Face landmarks are only populated when face metrics are requested.
 
+Landmarks are **pixel coordinates in the capture frame**, so scale `x` by the frame
+width and `y` by the frame *height* — they are different numbers. Capture defaults to
+1280x720; if you change the capture resolution, change these constants to match.
+
 ```swift
+let captureWidth: CGFloat = 1280
+let captureHeight: CGFloat = 720
+
 sdk.config.requestedMetrics = SmartSpectraConfig.breathingMetrics + SmartSpectraConfig.faceMetrics
 
 if let latestLandmarks = sdk.metrics?.face.landmarks.last {
@@ -46,8 +54,8 @@ if let latestLandmarks = sdk.metrics?.face.landmarks.last {
                     .fill(.blue)
                     .frame(width: 3, height: 3)
                     .position(
-                        x: CGFloat(landmark.x) * geometry.size.width / 1280.0,
-                        y: CGFloat(landmark.y) * geometry.size.height / 1280.0
+                        x: CGFloat(landmark.x) * geometry.size.width / captureWidth,
+                        y: CGFloat(landmark.y) * geometry.size.height / captureHeight
                     )
             }
         }

@@ -1,6 +1,6 @@
 ---
 title: Using the AI agent skill
-description: Install the using-smartspectra agent skill in Claude Code or OpenAI Codex to build pulse and breathing apps with an AI coding assistant, on iOS, Android, C++, or Node.
+description: Install the using-smartspectra agent skill in Claude Code or Codex, and build pulse and breathing apps with an AI coding assistant.
 ---
 
 > **Important:** SDK metrics are offered for general wellness and informational purposes only. SDK metrics have not been cleared by the FDA and may not be used for medical diagnosis or treatment.
@@ -37,6 +37,31 @@ $skill-installer Presage-Security/SmartSpectra/.agents/skills/using-smartspectra
 Codex detects newly installed skills automatically; restart Codex if it does not appear. When you
 are working inside a clone of the repo, Codex also discovers the skill automatically from
 `.agents/skills/`.
+
+## Install anywhere else
+
+For any other assistant, the same skill is served straight from this site:
+
+```text
+https://smartspectra.presagetech.com/skill.md
+```
+
+Point your tool at that URL, or paste the file into the assistant's instructions. It is the
+identical `SKILL.md` the plugin installs, so there is nothing to keep in sync.
+
+## Reading these docs as markdown
+
+The skill has your assistant read this site for exact API detail, and every page here is
+available as markdown — append `.md` to any documentation URL:
+
+```text
+https://smartspectra.presagetech.com/docs/swift/metrics.md
+```
+
+[llms.txt](https://smartspectra.presagetech.com/llms.txt) indexes every page with a one-line
+description, and [llms-full.txt](https://smartspectra.presagetech.com/llms-full.txt) is the whole
+corpus in one file. Assistants generally find these on their own; the URLs are here for when you
+want to hand one over directly.
 
 ## Use it
 

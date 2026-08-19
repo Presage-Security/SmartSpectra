@@ -1,5 +1,5 @@
 ---
-title: LLM Insights Error Handling & Troubleshooting
+title: Troubleshooting LLM Insights Errors
 description: The two LLM Insights error surfaces, common failure modes, retry guidance, and how to surface errors in your UI.
 ---
 

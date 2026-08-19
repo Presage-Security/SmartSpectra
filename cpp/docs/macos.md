@@ -1,6 +1,7 @@
 ---
 title: C++ on macOS
 description: Install the SmartSpectra C++ SDK and run the SwiftUI macOS sample app.
+sidebarTitle: macOS
 ---
 
 # SmartSpectra C++ Quickstart — macOS
@@ -20,7 +21,7 @@ specific need.
 
 ### Prerequisites
 
-- **Xcode** with Command Line Tools (provides a C++17 toolchain and the Swift compiler)
+- **Xcode** with Command Line Tools (provides a C++20 toolchain and the Swift compiler)
 - **Homebrew**
 - **API key** from [physiology.presagetech.com](https://physiology.presagetech.com/auth/login)
 - **Apple Development signing identity** — required for SDK startup on macOS

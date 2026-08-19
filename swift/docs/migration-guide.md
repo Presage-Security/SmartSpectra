@@ -1,12 +1,48 @@
 ---
-title: Migration Guide
-description: Migration notes for SmartSpectra Swift SDK upgrades.
+title: Swift Migration Guide
+description: "Release-by-release migration notes for the SmartSpectra Swift SDK: breaking API changes, renamed symbols, and what each upgrade requires."
+sidebarTitle: Migration Guide
 ---
 
 # SmartSpectra Swift SDK Migration Guide
 
 > Applies to SmartSpectra Swift SDK v3.x.
 > Migrating from a v3.0 release-candidate prior to rc.13, or from v2.x.
+
+## Swift SDK v3.3.1 Migration
+
+### Stricter `PresageService-Info.plist` validation
+
+The SDK now validates the OAuth plist once, when the SDK loads, and surfaces
+problems as a non-retryable `configurationFailed` error instead of a generic
+auth-readiness failure at `start()`.
+
+What still works without changes:
+
+- No `PresageService-Info.plist` → API-key authentication, as before.
+- `IS_OAUTH_ENABLED` set to `false` (or legacy integer `0`) → API-key
+  authentication, as before.
+- An older plist revision **missing** `IS_OAUTH_ENABLED` → treated as
+  OAuth-off (API-key authentication), with a log message suggesting a
+  re-download from the portal.
+- An OAuth plist **missing** `BUNDLE_ID` (older revisions) → the local
+  bundle-identifier pre-check is skipped; the server still verifies your
+  app's bundle identifier during authentication.
+
+What now fails fast (previously fell back silently or failed later with a
+generic error):
+
+- `IS_OAUTH_ENABLED` present with a non-boolean value (e.g. the string
+  `"true"`) → `configurationFailed`; the API key, if any, is ignored.
+- OAuth enabled with a missing, blank, or wrong-typed `CLIENT_ID` or `SUB`
+  → `configurationFailed`.
+- `BUNDLE_ID` present with a blank or non-string value, or not matching the
+  running app target's Bundle Identifier → `configurationFailed`.
+
+If you hit any of these after upgrading, re-download the current
+`PresageService-Info.plist` for your app from
+[physiology.presagetech.com](https://physiology.presagetech.com) — error
+messages name the offending plist key but never echo its value.
 
 ## Swift SDK v3.3.0 Migration
 
@@ -235,8 +271,14 @@ if let validationStatus = sdk.validationStatus {
     case .ok:
         break
     case .noFaceFound, .multipleFacesFound, .faceNotCentered,
-        .faceSizeOutOfRange, .tooDark, .tooBright,
-        .chestNotVisible, .cameraTuning:
+        .tooDark, .tooBright, .chestNotVisible, .cameraTuning,
+        .frameRateTooLow, .excessiveMotion,
+        .faceTooClose, .faceTooFar, .faceTooHigh, .faceTooLow,
+        .faceNotForward:
+        break
+    default:
+        // .faceSizeOutOfRange is deprecated in favour of
+        // .faceTooClose / .faceTooFar, and new codes may be added.
         break
     }
 }

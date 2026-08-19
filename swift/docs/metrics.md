@@ -1,6 +1,7 @@
 ---
-title: Configuring Metrics
-description: Request and read SmartSpectra metrics from the Swift SDK.
+title: Configuring Metrics on Swift
+description: Request pulse, breathing, HRV and EDA metric groups from the SmartSpectra Swift SDK, and read the samples its observable state publishes.
+sidebarTitle: Configuring Metrics
 ---
 
 # Configuring iOS Metrics
@@ -36,6 +37,8 @@ if let metrics = sdk.metrics {
 ```
 
 Set `requestedMetrics = nil` to return to the default breathing-only set. Cardio fields are empty unless you request a cardio metric such as `.pulseRate`.
+
+Requested metrics are validated against your subscription during SDK startup. If a metric is not authorized it is omitted from the output — the field is simply empty, with no error — so treat a persistently empty metric as a possible authorization gap rather than a signal-quality problem. If the authorization request itself fails, startup reports an error.
 
 ## Metric Update Patterns
 
@@ -140,6 +143,7 @@ Hrv {
     baevsky: Double
     timestamp: Int64
     confidence: Float
+    stable: Bool
 }
 
 Eda {

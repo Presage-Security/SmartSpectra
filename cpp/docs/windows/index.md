@@ -1,6 +1,7 @@
 ---
 title: C++ on Windows
-description: Install and build the SmartSpectra C++ SDK on Windows.
+description: Install the SmartSpectra C++ SDK on Windows with NuGet or CMake, then build and run the sample app in Visual Studio.
+sidebarTitle: Overview
 ---
 
 # SmartSpectra C++ Quickstart — Windows
@@ -90,7 +91,7 @@ files inside it.
 ```cmake
 cmake_minimum_required(VERSION 3.22.1)
 project(HelloVitals CXX)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(SMARTSPECTRA_SDK_DIR "$ENV{SMARTSPECTRA_SDK_PATH}")

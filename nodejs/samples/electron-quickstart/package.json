@@ -17,9 +17,12 @@
     "chart.js": "^4.5.0"
   },
   "devDependencies": {
-    "electron": "^39.0.0",
+    "electron": "43.2.0",
     "electron-builder": "^26.6.0",
     "esbuild": "^0.25.0"
+  },
+  "overrides": {
+    "js-yaml": "4.3.1"
   },
   "build": {
     "appId": "com.presagetech.smartspectra-electron-quickstart",

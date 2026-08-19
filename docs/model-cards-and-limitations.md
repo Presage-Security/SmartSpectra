@@ -48,7 +48,7 @@ These conditions may produce inaccurate measurements with high confidence and sh
 - Mean NN: Average NN interval in milliseconds.
 - RMSSD: Root mean square of successive NN differences in milliseconds.
 - SDNN: Standard deviation of NN intervals in milliseconds.
-- Baevsky Stress Index: Measure of autonomic balance in arbitrary units.
+- Baevsky Stress Index: A measure of autonomic balance derived from the NN interval distribution, computed as AMo / (2 × Mo × MxDMn). Interpret it relative to a subject's own baseline rather than as an absolute score.
 
 **Range:** Valid when pulse rate is 40-110 BPM.
 
