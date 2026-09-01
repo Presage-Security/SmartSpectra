@@ -30,9 +30,15 @@ struct CheckupView: View {
     let isFaceMeshEnabled: Bool = true
 
     init() {
-        // (Required) Authentication with API key or OAuth
-        let apiKey = ProcessInfo.processInfo.environment["SMARTSPECTRA_API_KEY"] ?? "YOUR_API_KEY_HERE"
-        sdk.config.apiKey = apiKey
+        // (Required) Authentication with API key or OAuth.
+        // Only configure the key if one isn't already set: this view is a SwiftUI
+        // struct, so `init()` runs again on every re-render, and it must not
+        // overwrite a key an embedding host already configured (an integration test
+        // supplying a real key would otherwise be reset to the placeholder below).
+        if sdk.config.apiKey?.isEmpty ?? true {
+            let apiKey = ProcessInfo.processInfo.environment["SMARTSPECTRA_API_KEY"] ?? "YOUR_API_KEY_HERE"
+            sdk.config.apiKey = apiKey
+        }
 
         // (Optional) Camera and metrics configuration via sdk.config
         sdk.config.cameraPosition = cameraPosition

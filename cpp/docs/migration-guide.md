@@ -8,6 +8,21 @@ sidebarTitle: Migration Guide
 
 > Applies to SmartSpectra C++ SDK v3.x.
 
+## C++ SDK v3.4.0 Migration
+
+### Usage failures now report specific errors
+
+Usage entitlement checking continues throughout a measurement as before. What
+changes in v3.4.0 is how a terminal usage failure is reported. Handle the
+specific errors in `SetOnError()`:
+
+- `kAuthenticationFailed` for rejected credentials
+- `kCreditExhausted` for an explicit quota denial
+- `kNetworkError` when entitlement cannot be refreshed in time
+
+The SDK also includes short measurements and the final partial interval before
+`Stop()` in usage reporting. No public API changes are required.
+
 ## C++ SDK v3.3.0 Migration
 
 ### Default log verbosity is now warnings and errors only

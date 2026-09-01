@@ -463,8 +463,9 @@ int main(int argc, char** argv) {
         }
     }
 
-    // Stop() can return successfully after a terminal error lands during its
-    // unlocked teardown, so inspect the final state before choosing the exit code.
+    // An error may race with a user-requested exit and settle while Stop() is
+    // waiting for SDK workers, so inspect the final state before choosing the
+    // process exit code.
     session_failed =
         session_failed || smart_spectra.GetStatus() == spectra::ProcessingStatus::kError;
 

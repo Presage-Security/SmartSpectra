@@ -9,6 +9,21 @@ sidebarTitle: Migration Guide
 > Applies to SmartSpectra Swift SDK v3.x.
 > Migrating from a v3.0 release-candidate prior to rc.13, or from v2.x.
 
+## Swift SDK v3.4.0 Migration
+
+### Usage failures now report specific errors
+
+Usage entitlement checking continues throughout a measurement as before. What
+changes in v3.4.0 is how a terminal usage failure is reported. Observe
+`sdk.error` and handle:
+
+- `.authenticationFailed` for rejected credentials
+- `.creditExhausted` for an explicit quota denial
+- `.networkError` when entitlement cannot be refreshed in time
+
+The SDK also includes short measurements and the final partial interval before
+`stop()` in usage reporting. No public API changes are required.
+
 ## Swift SDK v3.3.1 Migration
 
 ### Stricter `PresageService-Info.plist` validation

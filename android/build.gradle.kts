@@ -52,16 +52,27 @@ allprojects {
     // scoped to the unified-test-platform* configurations so it can never reach the SDK's own
     // runtime classpath if someone adds netty (or gRPC) to the SDK later.
     //
-    // KNOWN FUTURE FAILURE: when Google finally ships UTP on a netty newer than 4.1.136.Final,
-    // useVersion() will silently DOWNGRADE it to 4.1.136.Final. That fails loudly rather than
-    // quietly — any advisory against 4.1.136 blocks every MR again, exactly as GHSA-93wv-jw9v-4972
-    // did — but the fix at that point is to delete this block, not to raise the number. Removal
-    // check: delete the block, regenerate the lockfiles (the --write-locks command above), and run
-    // `bash ci/scripts/run_dependency_policy.sh`. If it passes, upstream is patched and this is dead
-    // code. Also prune the netty entries it re-baselines in ci/security/dependency-policy.json.
+    // WHEN THIS BLOCKS AN MR AGAIN, there are two different causes — check which before acting:
+    //
+    //   (a) A NEW ADVISORY LANDS AGAINST THE PINNED VERSION while UTP still resolves older netty.
+    //       Then RAISE the pin to the newest 4.1.x that clears it. This happened with
+    //       GHSA-8c42-7qj2-3j46 / CVE-2026-59903 against 4.1.136.Final (CU-868kw2jer): deleting
+    //       the block was tested and is strictly WORSE — netty falls back to 4.1.93/4.1.110 and
+    //       the gate reports 225 findings (that advisory covers 4.1.110 too). 4.1.136 -> 4.1.137
+    //       returned the gate to PASS with no new baseline entries.
+    //
+    //   (b) GOOGLE FINALLY SHIPS UTP ON A NETTY NEWER THAN THE PIN. Then useVersion() silently
+    //       DOWNGRADES it, so DELETE this block rather than raising the number.
+    //
+    // The check that distinguishes them: delete the block, regenerate the lockfiles (the
+    // --write-locks command above), and run `bash ci/scripts/run_dependency_policy.sh`. If it
+    // PASSES, upstream is patched — case (b), leave the block deleted and prune the netty entries
+    // it re-baselines in ci/security/dependency-policy.json. If it FAILS with netty findings on
+    // versions OLDER than the pin, upstream still lags — case (a), restore the block and raise the
+    // version instead. Respect the supply-chain cooldown (no release newer than 7 days).
     configurations.matching { it.name.startsWith("unified-test-platform") }.configureEach {
         resolutionStrategy.eachDependency {
-            if (requested.group == "io.netty") useVersion("4.1.136.Final")
+            if (requested.group == "io.netty") useVersion("4.1.137.Final")
         }
     }
 

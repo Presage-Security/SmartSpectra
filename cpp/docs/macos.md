@@ -35,8 +35,12 @@ xcode-select --install
 ### Add the SDK
 
 The Homebrew formula installs the SmartSpectra SDK and exposes its CMake
-package metadata. The SDK is self-contained — you do not need to install
-OpenCV or any other libraries separately.
+package metadata. The SDK is self-contained — linking your own app against it
+needs no other libraries, and the `hello_vitals` example below builds with
+nothing else installed. The repository samples are separate: several of them
+use OpenCV for video capture and display and need Homebrew's `opencv` package,
+which `./scripts/check-requirements.sh --fix` below installs for you (or run
+`brew install opencv` yourself).
 
 ```bash
 brew tap presage/smartspectra https://github.com/Presage-Security/homebrew-smartspectra

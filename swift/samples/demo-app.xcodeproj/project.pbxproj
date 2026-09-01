@@ -7,19 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		45BA5C652F86600100000003 /* VideoInputIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45BA5C662F86600100000004 /* VideoInputIntegrationTests.swift */; };
-		45BA5C632F86600000000001 /* SmartSpectra in Frameworks */ = {isa = PBXBuildFile; productRef = 45BA5C642F86600000000002 /* SmartSpectra */; };
 		81566E422D01102C002C5A9C /* SmartSpectra in Frameworks */ = {isa = PBXBuildFile; productRef = 81566E412D01102C002C5A9C /* SmartSpectra */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		45BA5C5C2F865BED0092A689 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 210E0AB72BC0B94F00C48003 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 210E0ABE2BC0B94F00C48003;
-			remoteInfo = "demo-app";
-		};
 		81D901282E48C76100D9B7F4 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 210E0AB72BC0B94F00C48003 /* Project object */;
@@ -31,8 +22,6 @@
 
 /* Begin PBXFileReference section */
 		210E0ABF2BC0B94F00C48003 /* demo-app.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "demo-app.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		45BA5C582F865BED0092A689 /* demo-appDeviceTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "demo-appDeviceTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		45BA5C662F86600100000004 /* VideoInputIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoInputIntegrationTests.swift; sourceTree = "<group>"; };
 		81D901222E48C76100D9B7F4 /* demo-app-UITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "demo-app-UITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -61,14 +50,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		45BA5C552F865BED0092A689 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				45BA5C632F86600000000001 /* SmartSpectra in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		81D9011F2E48C76100D9B7F4 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -84,7 +65,6 @@
 			children = (
 				81566DCE2D00F094002C5A9C /* demo-app */,
 				81D901232E48C76100D9B7F4 /* demo-app-UITests */,
-				45BA5C592F865BED0092A689 /* demo-appDeviceTests */,
 				81566E402D01102C002C5A9C /* Frameworks */,
 			);
 			sourceTree = "<group>";
@@ -94,17 +74,8 @@
 			children = (
 				210E0ABF2BC0B94F00C48003 /* demo-app.app */,
 				81D901222E48C76100D9B7F4 /* demo-app-UITests.xctest */,
-				45BA5C582F865BED0092A689 /* demo-appDeviceTests.xctest */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		45BA5C592F865BED0092A689 /* demo-appDeviceTests */ = {
-			isa = PBXGroup;
-			children = (
-				45BA5C662F86600100000004 /* VideoInputIntegrationTests.swift */,
-			);
-			path = "demo-appDeviceTests";
 			sourceTree = "<group>";
 		};
 		81566E402D01102C002C5A9C /* Frameworks */ = {
@@ -139,27 +110,6 @@
 			productName = "Demo App";
 			productReference = 210E0ABF2BC0B94F00C48003 /* demo-app.app */;
 			productType = "com.apple.product-type.application";
-		};
-		45BA5C572F865BED0092A689 /* demo-appDeviceTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 45BA5C602F865BED0092A689 /* Build configuration list for PBXNativeTarget "demo-appDeviceTests" */;
-			buildPhases = (
-				45BA5C542F865BED0092A689 /* Sources */,
-				45BA5C552F865BED0092A689 /* Frameworks */,
-				45BA5C562F865BED0092A689 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				45BA5C5D2F865BED0092A689 /* PBXTargetDependency */,
-			);
-			name = "demo-appDeviceTests";
-			packageProductDependencies = (
-				45BA5C642F86600000000002 /* SmartSpectra */,
-			);
-			productName = "demo-appDeviceTests";
-			productReference = 45BA5C582F865BED0092A689 /* demo-appDeviceTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
 		};
 		81D901212E48C76100D9B7F4 /* demo-app-UITests */ = {
 			isa = PBXNativeTarget;
@@ -197,10 +147,6 @@
 					210E0ABE2BC0B94F00C48003 = {
 						CreatedOnToolsVersion = 15.3;
 					};
-					45BA5C572F865BED0092A689 = {
-						CreatedOnToolsVersion = 26.4;
-						TestTargetID = 210E0ABE2BC0B94F00C48003;
-					};
 					81D901212E48C76100D9B7F4 = {
 						CreatedOnToolsVersion = 16.4;
 						TestTargetID = 210E0ABE2BC0B94F00C48003;
@@ -225,20 +171,12 @@
 			targets = (
 				210E0ABE2BC0B94F00C48003 /* demo-app */,
 				81D901212E48C76100D9B7F4 /* demo-app-UITests */,
-				45BA5C572F865BED0092A689 /* demo-appDeviceTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		210E0ABD2BC0B94F00C48003 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		45BA5C562F865BED0092A689 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -262,14 +200,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		45BA5C542F865BED0092A689 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				45BA5C652F86600100000003 /* VideoInputIntegrationTests.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		81D9011E2E48C76100D9B7F4 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -280,11 +210,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		45BA5C5D2F865BED0092A689 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 210E0ABE2BC0B94F00C48003 /* demo-app */;
-			targetProxy = 45BA5C5C2F865BED0092A689 /* PBXContainerItemProxy */;
-		};
 		81D901292E48C76100D9B7F4 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 210E0ABE2BC0B94F00C48003 /* demo-app */;
@@ -490,48 +415,6 @@
 			};
 			name = Release;
 		};
-		45BA5C5E2F865BED0092A689 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.presagetech.demo-appDeviceTests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/demo-app.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/demo-app";
-			};
-			name = Debug;
-		};
-		45BA5C5F2F865BED0092A689 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.presagetech.demo-appDeviceTests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/demo-app.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/demo-app";
-			};
-			name = Release;
-		};
 		81D9012A2E48C76100D9B7F4 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -587,15 +470,6 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		45BA5C602F865BED0092A689 /* Build configuration list for PBXNativeTarget "demo-appDeviceTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				45BA5C5E2F865BED0092A689 /* Debug */,
-				45BA5C5F2F865BED0092A689 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		81D9012C2E48C76100D9B7F4 /* Build configuration list for PBXNativeTarget "demo-app-UITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -613,16 +487,12 @@
 			repositoryURL = "https://github.com/Presage-Security/SmartSpectra-Swift";
 			requirement = {
 				kind = exactVersion;
-				version = 3.4.0-rc.2;
+				version = 3.4.0-rc.3;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		45BA5C642F86600000000002 /* SmartSpectra */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = SmartSpectra;
-		};
 		81566E412D01102C002C5A9C /* SmartSpectra */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = A1B2C3D4E5F6789012345678 /* XCRemoteSwiftPackageReference "SmartSpectra-Swift" */;

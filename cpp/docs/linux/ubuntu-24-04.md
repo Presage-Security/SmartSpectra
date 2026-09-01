@@ -342,9 +342,15 @@ than env exports, so the SDK subprocess does not inherit the bus address.)
 
 The SDK package does not install the sample source code. To build the repository
 samples against the installed SDK, clone the SmartSpectra repository after
-installing `libsmartspectra-dev`:
+installing `libsmartspectra-dev`.
+
+Several of the samples use OpenCV for video capture and display, and CMake
+configures every sample in the tree even when you build a single target, so
+install the OpenCV development package first. The `hello_vitals` quickstart
+earlier on this page is a standalone project and does not need it.
 
 ```bash
+sudo apt install libopencv-dev
 git clone https://github.com/Presage-Security/SmartSpectra.git
 cd SmartSpectra/cpp/samples
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
