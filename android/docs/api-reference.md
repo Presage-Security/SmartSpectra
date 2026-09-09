@@ -10,19 +10,41 @@ sidebarTitle: API Reference
 
 Entry point for the SmartSpectra SDK. Most apps use the shared singleton initialized by AndroidX Startup, or call [initialize] with a custom [SmartSpectraConfig] before accessing [shared].
 
+```kotlin
+class SmartSpectraSdk
+```
+
 ### Methods
 
 - ```kotlin
   public suspend fun start()
   ```
 
-  Begin processing frames from the device camera.
+  Begin processing the selected input. In custom mode, await this call before submitting frames. Camera capture is the default until [useCustomInput] is called.
 
 - ```kotlin
   public suspend fun stop()
   ```
 
   Stop processing. Call [start] again to resume.
+
+- ```kotlin
+  public fun useCustomInput(frameTransform: FrameTransform = FrameTransform.NONE): CustomInput
+  ```
+
+  Select caller-supplied frames while stopped. No camera discovery, capture, or camera permission is required. Replacing the source invalidates older handles. Throws [SmartSpectraException] with INVALID_STATE during processing or startup.
+
+- ```kotlin
+  public fun useCamera()
+  ```
+
+  Select SDK camera capture while stopped, using the existing camera configuration.
+
+- ```kotlin
+  public suspend fun reset()
+  ```
+
+  Stop processing and clear measurement output, retaining the selected input, transform, configuration, and custom-input handle. Call [start] to begin again. Safe to call while stopped; teardown runs off the caller's thread.
 
 - ```kotlin
   public fun requestInsight(text: String): Int
@@ -34,13 +56,13 @@ Entry point for the SmartSpectra SDK. Most apps use the shared singleton initial
   @SmartSpectraTestingApi public fun setVideoInputEnabled(enabled: Boolean)
   ```
 
-  Enables or disables video-frame input mode for automated testing. While enabled, the SDK does not open the device camera (so no camera hardware or `CAMERA` permission is needed) and expects the caller to supply frames through [addVideoFrame]. Call before [start]; toggle back to `false` to return to normal camera capture.
+  Enables or disables video-frame input mode for automated testing. While enabled, the SDK does not open the device camera (so no camera hardware or `CAMERA` permission is needed) and expects the caller to supply frames through [addVideoFrame]. Select only while stopped; after stopping, toggle back to `false` to return to normal camera capture. Throws [SmartSpectraException] with INVALID_STATE if processing or startup is active. New integrations should use [useCustomInput], which requires no testing opt-in.
 
 - ```kotlin
   @SmartSpectraTestingApi public fun addVideoFrame(frame: Bitmap, timestampUs: Long)
   ```
 
-  Feeds one decoded video frame into the measurement pipeline while video-frame input mode is active (see [setVideoInputEnabled]). Call after [start] has completed. Decode your recorded clip however you like (for example `MediaMetadataRetriever` or `MediaCodec`) and deliver frames in playback order.
+  Feeds one decoded video frame into the measurement pipeline while video-frame input mode is active (see [setVideoInputEnabled]). Call after [start] has completed. Decode your recorded clip however you like (for example `MediaMetadataRetriever` or `MediaCodec`) and deliver frames in playback order. Throws [SmartSpectraException] when video input has not been selected or the frame is rejected. Use [CustomInput.sendFrame] for typed per-frame return values.
 
 - ```kotlin
   @JvmStatic @JvmOverloads fun initialize( context: Context, config: SmartSpectraConfig = SmartSpectraConfig(), ): SmartSpectraSdk
@@ -102,6 +124,10 @@ Entry point for the SmartSpectra SDK. Most apps use the shared singleton initial
 
 Configuration for [SmartSpectraSdk]. Most apps access configuration through [SmartSpectraSdk.config], or pass a prebuilt config to [SmartSpectraSdk.initialize] before using [SmartSpectraSdk.shared].
 
+```kotlin
+public class SmartSpectraConfig()
+```
+
 ### Properties
 
 - ```kotlin
@@ -162,13 +188,58 @@ Configuration for [SmartSpectraSdk]. Most apps access configuration through [Sma
   public val edaMetrics: List<MetricType> = listOf( MetricType.EDA_TRACE, )
   ```
 
-  Electrodermal activity (EDA) trace metric bundle.
+  EDA Proxy (electrodermal activity) trace metric bundle.
 
 ## CameraPosition
 
 - `public fun fromLensFacing(@CameraSelector.LensFacing lensFacing: Int): CameraPosition = when (lensFacing)`
 - `FRONT`
 - `BACK`
+
+## CustomInput
+
+Caller-supplied frame input, obtained from [SmartSpectraSdk.useCustomInput]. The handle survives stop/start and reset; selecting another source invalidates it. Submit after start completes, from a worker thread, in timestamp order.
+
+```kotlin
+public fun sendFrame(frame: VideoFrame, timestampUs: Long): FrameSubmissionResult
+```
+
+Consumes the borrowed pixels before returning. Timestamps are strictly increasing microseconds on one monotonic timeline per run. Gaps greater than two seconds are rejected; stop and start the SDK to begin a fresh timeline after an interruption. Calls are serialized; no queue of caller-owned buffers is retained.
+
+```kotlin
+public fun sendFrame(frame: Bitmap, timestampUs: Long): FrameSubmissionResult
+```
+
+Copies a bitmap for submission. The caller retains ownership of the bitmap.
+
+```kotlin
+public fun sendFrame(frame: ImageProxy): FrameSubmissionResult
+```
+
+Submits a full YUV_420_888 image, applying its clockwise rotationDegrees metadata before the selected session transform. Uses its capture timestamp converted from nanoseconds to microseconds. The caller must close the image after this returns. Unrotated images borrow the planes directly; rotated images require a pixel copy. Cropped images are rejected. Plane buffer positions and limits are preserved.
+
+## FrameTransform
+
+Spatial transform applied to every frame in a custom-input session.
+
+- `NONE`
+- `ROTATE_90_CW`
+- `ROTATE_90_CCW`
+- `ROTATE_180`
+- `MIRROR_HORIZONTAL`
+- `MIRROR_VERTICAL`
+
+## PixelFormat
+
+Pixel layout of a [VideoFrame.Packed] buffer.
+
+- `RGB`
+- `BGR`
+- `RGBA`
+- `BGRA`
+- `NV12`
+- `NV21`
+- `YUYV`
 
 ## ProcessingStatus
 
@@ -179,6 +250,10 @@ Configuration for [SmartSpectraSdk]. Most apps access configuration through [Sma
 - `ERROR`
 
 ## ValidationStatus
+
+```kotlin
+public data class ValidationStatus( val code: ValidationCode, val hint: String, )
+```
 
 ### Properties
 
@@ -193,26 +268,30 @@ Configuration for [SmartSpectraSdk]. Most apps access configuration through [Sma
 ## ValidationCode
 
 - `val wireValue: Int`
-- `OK(0)`
-- `NO_FACE_FOUND(1)`
-- `MULTIPLE_FACES_FOUND(2)`
-- `FACE_NOT_CENTERED(3)`
-- `FACE_SIZE_OUT_OF_RANGE(4)`
-- `TOO_DARK(5)`
-- `TOO_BRIGHT(6)`
-- `CHEST_NOT_VISIBLE(7)`
-- `CAMERA_TUNING(10)`
-- `FRAME_RATE_TOO_LOW(11)`
-- `EXCESSIVE_MOTION(12)`
-- `FACE_TOO_CLOSE(13)`
-- `FACE_TOO_FAR(14)`
-- `FACE_TOO_HIGH(15)`
-- `FACE_TOO_LOW(16)`
-- `FACE_NOT_FORWARD(17)`
+- `OK`
+- `NO_FACE_FOUND`
+- `MULTIPLE_FACES_FOUND`
+- `FACE_NOT_CENTERED`
+- `FACE_SIZE_OUT_OF_RANGE`
+- `TOO_DARK`
+- `TOO_BRIGHT`
+- `CHEST_NOT_VISIBLE`
+- `CAMERA_TUNING`
+- `FRAME_RATE_TOO_LOW`
+- `EXCESSIVE_MOTION`
+- `FACE_TOO_CLOSE`
+- `FACE_TOO_FAR`
+- `FACE_TOO_HIGH`
+- `FACE_TOO_LOW`
+- `FACE_NOT_FORWARD`
 
 ## SmartSpectraError
 
 A typed error from the SmartSpectra SDK. Lifecycle methods throw [SmartSpectraException] wrapping this type, and async pipeline failures are published on [SmartSpectraSdk.error].
+
+```kotlin
+public data class SmartSpectraError( val code: Code, val message: String, val retryable: Boolean = false, )
+```
 
 ### Properties
 
@@ -232,19 +311,23 @@ A typed error from the SmartSpectra SDK. Lifecycle methods throw [SmartSpectraEx
 
 SDK error codes. Raw values are stable across SDK versions and match the C++/Swift wire values.
 
-- `INVALID_STATE(1)`
-- `AUTHENTICATION_FAILED(2)`
-- `CONFIGURATION_FAILED(3)`
-- `CREDIT_EXHAUSTED(4)`
-- `NETWORK_ERROR(5)`
-- `SERVER_ERROR(6)`
-- `INPUT_UNAVAILABLE(7)`
-- `PROCESSING_FAILED(8)`
-- `FRAME_CONVERSION_FAILED(9)`
-- `NON_MONOTONIC_TIMESTAMP(10)`
-- `TIMESTAMP_GAP(11)`
+- `INVALID_STATE`
+- `AUTHENTICATION_FAILED`
+- `CONFIGURATION_FAILED`
+- `CREDIT_EXHAUSTED`
+- `NETWORK_ERROR`
+- `SERVER_ERROR`
+- `INPUT_UNAVAILABLE`
+- `PROCESSING_FAILED`
+- `FRAME_CONVERSION_FAILED`
+- `NON_MONOTONIC_TIMESTAMP`
+- `TIMESTAMP_GAP`
 
 ## SmartSpectraException
+
+```kotlin
+public class SmartSpectraException( public val error: SmartSpectraError, ) : RuntimeException(error.message)
+```
 
 ### Properties
 
@@ -256,8 +339,116 @@ SDK error codes. Raw values are stable across SDK versions and match the C++/Swi
 
 Verbosity of SDK logging, set via [SmartSpectraConfig.logLevel]. Levels are cumulative: a level shows its own messages plus everything more severe. The setting covers both the SDK logging and the native engine. [DEBUG] cannot restore debug-only statements that were compiled out of the release engine binary. Wire values are stable across SDK versions and match the C++ `SmartSpectraLogLevel` values.
 
-- `DEBUG(0, Log.DEBUG)`
-- `INFO(1, Log.INFO)`
-- `WARNING(2, Log.WARN)`
-- `ERROR(3, Log.ERROR)`
-- `NONE(4, Log.ASSERT + 1)`
+- `DEBUG`
+- `INFO`
+- `WARNING`
+- `ERROR`
+- `NONE`
+
+## FramePlane
+
+A borrowed direct buffer with row and pixel strides in bytes.
+
+```kotlin
+public data class FramePlane( val buffer: ByteBuffer, val rowStride: Int, val pixelStride: Int, )
+```
+
+### Properties
+
+- ```kotlin
+  val buffer: ByteBuffer
+  ```
+
+- ```kotlin
+  val rowStride: Int
+  ```
+
+- ```kotlin
+  val pixelStride: Int
+  ```
+
+## VideoFrame
+
+Caller-owned pixels. Buffers must be direct; only bytes between position and limit are used. Submission leaves those positions and limits unchanged. Keep the buffers alive and unchanged until [CustomInput.sendFrame] returns, then reuse them freely.
+
+## VideoFrame.Packed
+
+A single buffer. NV12/NV21 require even dimensions and row stride, with the UV/VU plane immediately after rowStride * height bytes, using the same stride. YUYV requires an even width. Include padding after the final row.
+
+```kotlin
+public data class VideoFrame.Packed( val buffer: ByteBuffer, val width: Int, val height: Int, val rowStride: Int, val pixelFormat: PixelFormat, ) : VideoFrame
+```
+
+### Properties
+
+- ```kotlin
+  val buffer: ByteBuffer
+  ```
+
+- ```kotlin
+  val width: Int
+  ```
+
+- ```kotlin
+  val height: Int
+  ```
+
+- ```kotlin
+  val rowStride: Int
+  ```
+
+- ```kotlin
+  val pixelFormat: PixelFormat
+  ```
+
+## VideoFrame.Yuv420
+
+Flexible YUV 4:2:0 planes. Y pixel stride must be 1; U and V must share pixel stride 1 or 2. Chroma dimensions round up for odd image dimensions. Padding after a plane's final sample is optional.
+
+```kotlin
+public data class VideoFrame.Yuv420( val width: Int, val height: Int, val y: FramePlane, val u: FramePlane, val v: FramePlane, ) : VideoFrame
+```
+
+### Properties
+
+- ```kotlin
+  val width: Int
+  ```
+
+- ```kotlin
+  val height: Int
+  ```
+
+- ```kotlin
+  val y: FramePlane
+  ```
+
+- ```kotlin
+  val u: FramePlane
+  ```
+
+- ```kotlin
+  val v: FramePlane
+  ```
+
+## FrameSubmissionResult
+
+Result of a frame submission; acceptance does not mean processing has finished.
+
+## FrameSubmissionResult.Accepted
+
+```kotlin
+public data object FrameSubmissionResult.Accepted : FrameSubmissionResult
+```
+
+## FrameSubmissionResult.Rejected
+
+```kotlin
+public data class FrameSubmissionResult.Rejected(val error: SmartSpectraError) : FrameSubmissionResult
+```
+
+### Properties
+
+- ```kotlin
+  val error: SmartSpectraError
+  ```

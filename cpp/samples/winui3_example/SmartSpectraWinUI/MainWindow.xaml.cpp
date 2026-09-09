@@ -235,7 +235,7 @@ namespace winrt::SmartSpectraWinUI::implementation
                         }
                         if (eda_latest) {
                             wchar_t buf[64];
-                            swprintf_s(buf, L"EDA  %+.3f", *eda_latest);
+                            swprintf_s(buf, L"EDA Proxy  %+.3f", *eda_latest);
                             self->EdaText().Text(buf);
                         }
                     }
@@ -347,7 +347,7 @@ namespace winrt::SmartSpectraWinUI::implementation
         HeartRateText().Text(L"-- bpm");
         HrvText().Text(L"");
         BreathingRateText().Text(L"Breathing Rate");
-        EdaText().Text(L"EDA");
+        EdaText().Text(L"EDA Proxy");
         ExpressionEmoji().Text(L"");
         ExpressionText().Text(L"");
         InsightText().Text(L"Tap Ask AI to get an analysis of your vitals.");

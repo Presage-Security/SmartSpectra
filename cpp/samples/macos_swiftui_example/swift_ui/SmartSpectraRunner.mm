@@ -1,15 +1,14 @@
 #import "SmartSpectraRunner.h"
 
+#include "PreviewImage.h"
+
 #include <iomanip>
 #include <atomic>
-#include <cstring>
 #include <memory>
 #include <mutex>
 #include <sstream>
 #include <string>
 #include <vector>
-
-#include <opencv2/imgproc.hpp>
 
 #include <smartspectra/smartspectra.h>
 #include <smartspectra/version.hpp>
@@ -150,7 +149,7 @@ std::vector<std::string> BuildMetricLines(const ss::Metrics& metrics) {
         const auto& eda = metrics.eda();
         AddLatestMeasurementLine(
             lines,
-            "EDA level",
+            "EDA Proxy level",
             eda.trace_size(),
             [&eda](int index) -> const auto& { return eda.trace(index); },
             "",
@@ -158,110 +157,6 @@ std::vector<std::string> BuildMetricLines(const ss::Metrics& metrics) {
     }
 
     return lines;
-}
-
-bool CopyFrameToBgr(const ss::FrameBuffer& frame, cv::Mat& output_bgr) {
-    if (frame.data == nullptr || frame.width <= 0 || frame.height <= 0 || frame.stride_bytes <= 0) {
-        return false;
-    }
-
-    switch (frame.format) {
-        case ss::PixelFormat::kBGR:
-            output_bgr = cv::Mat(frame.height, frame.width, CV_8UC3,
-                                 const_cast<uint8_t*>(frame.data),
-                                 frame.stride_bytes).clone();
-            return true;
-        case ss::PixelFormat::kRGB: {
-            cv::Mat rgb(frame.height, frame.width, CV_8UC3,
-                        const_cast<uint8_t*>(frame.data),
-                        frame.stride_bytes);
-            cv::cvtColor(rgb, output_bgr, cv::COLOR_RGB2BGR);
-            return true;
-        }
-        case ss::PixelFormat::kBGRA: {
-            cv::Mat bgra(frame.height, frame.width, CV_8UC4,
-                         const_cast<uint8_t*>(frame.data),
-                         frame.stride_bytes);
-            cv::cvtColor(bgra, output_bgr, cv::COLOR_BGRA2BGR);
-            return true;
-        }
-        case ss::PixelFormat::kRGBA: {
-            cv::Mat rgba(frame.height, frame.width, CV_8UC4,
-                         const_cast<uint8_t*>(frame.data),
-                         frame.stride_bytes);
-            cv::cvtColor(rgba, output_bgr, cv::COLOR_RGBA2BGR);
-            return true;
-        }
-        case ss::PixelFormat::kYUYV: {
-            cv::Mat yuyv(frame.height, frame.width, CV_8UC2,
-                         const_cast<uint8_t*>(frame.data),
-                         frame.stride_bytes);
-            cv::cvtColor(yuyv, output_bgr, cv::COLOR_YUV2BGR_YUY2);
-            return true;
-        }
-        case ss::PixelFormat::kNV12:
-        case ss::PixelFormat::kNV21: {
-            cv::Mat yuv(frame.height + frame.height / 2, frame.width, CV_8UC1);
-            for (int row = 0; row < frame.height; ++row) {
-                std::memcpy(yuv.ptr(row),
-                            frame.data + row * frame.stride_bytes,
-                            static_cast<size_t>(frame.width));
-            }
-            const uint8_t* chroma = frame.data + frame.stride_bytes * frame.height;
-            for (int row = 0; row < frame.height / 2; ++row) {
-                std::memcpy(yuv.ptr(frame.height + row),
-                            chroma + row * frame.stride_bytes,
-                            static_cast<size_t>(frame.width));
-            }
-
-            cv::cvtColor(yuv, output_bgr,
-                         frame.format == ss::PixelFormat::kNV12
-                             ? cv::COLOR_YUV2BGR_NV12
-                             : cv::COLOR_YUV2BGR_NV21);
-            return true;
-        }
-    }
-
-    return false;
-}
-
-NSImage *ImageFromBgrMat(const cv::Mat& bgr) {
-    if (bgr.empty()) {
-        return nil;
-    }
-
-    cv::Mat rgba;
-    cv::cvtColor(bgr, rgba, cv::COLOR_BGR2RGBA);
-
-    NSData *data = [NSData dataWithBytes:rgba.data
-                                  length:rgba.total() * rgba.elemSize()];
-    CGDataProviderRef provider = CGDataProviderCreateWithCFData((__bridge CFDataRef)data);
-    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-    CGImageRef cgImage = CGImageCreate(
-        rgba.cols,
-        rgba.rows,
-        8,
-        32,
-        rgba.step[0],
-        colorSpace,
-        kCGImageAlphaLast | kCGBitmapByteOrderDefault,
-        provider,
-        nullptr,
-        false,
-        kCGRenderingIntentDefault);
-
-    NSImage *image = nil;
-    if (cgImage != nullptr) {
-        image = [[NSImage alloc] initWithCGImage:cgImage
-                                            size:NSMakeSize(rgba.cols, rgba.rows)];
-    }
-
-    if (cgImage != nullptr) {
-        CGImageRelease(cgImage);
-    }
-    CGColorSpaceRelease(colorSpace);
-    CGDataProviderRelease(provider);
-    return image;
 }
 
 void DispatchFailure(__weak SmartSpectraRunner *weakRunner, NSString *message) {
@@ -364,12 +259,13 @@ void DispatchDiagnostics(__weak SmartSpectraRunner *weakRunner, NSString *diagno
             return;
         }
 
-        cv::Mat bgr;
-        if (!CopyFrameToBgr(frame, bgr)) {
+        CGImageRef preview = CreatePreviewImage(frame);
+        if (preview == nullptr) {
             return;
         }
-
-        NSImage *image = ImageFromBgrMat(bgr);
+        NSImage *image = [[NSImage alloc] initWithCGImage:preview
+                                                   size:NSMakeSize(frame.width, frame.height)];
+        CGImageRelease(preview);
         if (image == nil) {
             return;
         }

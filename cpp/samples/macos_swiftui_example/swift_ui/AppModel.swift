@@ -100,7 +100,7 @@ final class AppModel: NSObject, ObservableObject, SmartSpectraRunnerDelegate {
         }
 
         updateVitalDisplays(from: metrics)
-        let tilePrefixes = ["Pulse rate:", "Breathing rate:", "EDA level:"]
+        let tilePrefixes = ["Pulse rate:", "Breathing rate:", "EDA Proxy level:"]
         self.metrics = metrics.filter { line in
             !tilePrefixes.contains(where: line.hasPrefix)
         }
@@ -135,7 +135,7 @@ final class AppModel: NSObject, ObservableObject, SmartSpectraRunnerDelegate {
                 )
             } else if metric.hasPrefix("Breathing rate:") {
                 updateRate(metric, value: \.breathingRateText, confidence: \.breathingConfidenceText)
-            } else if metric.hasPrefix("EDA level:") {
+            } else if metric.hasPrefix("EDA Proxy level:") {
                 updateEdaLevel(metric)
             }
         }

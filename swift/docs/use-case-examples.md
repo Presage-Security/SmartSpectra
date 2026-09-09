@@ -1,6 +1,6 @@
 ---
 title: Use Case Examples
-description: Example SmartSpectra Swift integration patterns for common app use cases.
+description: SmartSpectra Swift examples for metrics, face landmarks, custom camera and decoded video input, data export, and iOS UI state.
 sidebarTitle: Use Case Examples
 ---
 
@@ -183,7 +183,8 @@ struct MonitoringView: View {
 
 ## Camera Handling
 
-Set the camera on the shared config before calling `try await sdk.start()`.
+For SDK-owned capture, set the camera on the shared config before calling
+`try await sdk.start()`.
 
 ```swift
 let sdk = SmartSpectraSDK.shared
@@ -200,3 +201,17 @@ func switchToBackCamera() {
     sdk.config.cameraPosition = .back
 }
 ```
+
+## Your Own Camera or Video Decoder
+
+If your app already captures video, select `try sdk.useCustomInput()` while
+stopped, await `sdk.start()`, and pass each uncompressed sample to
+`input.sendFrame(sampleBuffer)`. Handle `.rejected(let error)` and observe
+metrics as above. Your app keeps ownership of its camera and buffers.
+
+The [AVFoundation example](headless-mode.md#use-your-own-camera-or-video-source)
+shows capture delegation and buffer requirements. The demo app's
+[Video Testing sample](https://github.com/Presage-Security/SmartSpectra/blob/main/swift/samples/demo-app/VideoInput/VideoTestingView.swift)
+uses `AVAssetReader` to decode a clip and submit its frames through the public
+API, including cancellation, frame rejection, and cleanup. Both paths require
+normal SDK authentication.

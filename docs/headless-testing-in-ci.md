@@ -22,16 +22,16 @@ What you can automate depends on how the platform accepts input:
 | --- | --- | --- |
 | C++ (Linux/macOS/Windows) | Video-fed measurement | A recorded video file you supply |
 | Node.js | Video-fed measurement | A recorded video file you supply |
-| Android | Video-fed measurement (testing-only opt-in API) | A recorded video file you supply |
-| iOS | Video-fed measurement (testing-only opt-in API) | A recorded video file you supply |
+| Android | Video-fed measurement (public custom-input API) | Decoded frames from a recorded video you supply |
+| iOS | Video-fed measurement (public custom input or testing-only file API) | Decoded frames or a recorded video file you supply |
 
 - **Video-fed measurement** — every SDK can run a full measurement from a
   recorded video in place of a live camera, so CI can assert that readings
   came out. No camera or display is needed. On desktop (C++, Node.js) the
-  file input is regular public API; on mobile (iOS, Android) it is a
-  **testing-only API behind an explicit opt-in** (`@_spi(Testing)` on iOS,
-  `@OptIn(SmartSpectraTestingApi::class)` on Android) so it can't leak into
-  production code.
+  file input is regular public API. Android and iOS also accept caller-decoded
+  frames through public `useCustomInput()`. The mobile testing helpers require
+  explicit opt-in: `@_spi(Testing)` on iOS and
+  `@OptIn(SmartSpectraTestingApi::class)` on Android.
 - **Build-integration smoke** — the lighter fallback on any platform when you
   don't have a recorded clip: prove the SDK builds, links, launches headless,
   initializes, and surfaces the expected permission/error states.
@@ -116,15 +116,15 @@ steps for its platform (see the sidebar):
 - **[Node.js](../nodejs/docs/headless-testing-in-ci.md)** — headless sample
   that plays a recorded video through the SDK.
 - **[Android](../android/docs/headless-testing-in-ci.md)** — video-fed
-  measurement as an instrumented test on an emulator, via the opt-in
-  `SmartSpectraTestingApi` frame-feed.
+  measurement as an instrumented test on an emulator, via the public
+  `CustomInput` frame handle.
 - **[iOS](../swift/docs/headless-testing-in-ci.md)** — video-fed measurement
-  as an XCTest on the iOS Simulator, via the `@_spi(Testing)` video input.
+  as an XCTest on the iOS Simulator, via public custom input or testing-only
+  `@_spi(Testing)` file playback.
 
 ## Limitations
 
 - **No offline mode.** A measurement authenticates against the SmartSpectra
   service; the CI runner needs network access.
-- **Mobile video input is testing-only.** The Android and iOS video APIs sit
-  behind explicit opt-ins; keep them out of production code paths. In
-  production, mobile measures from the live device camera.
+- **iOS file playback is testing-only.** Use public custom input for production
+  Android and iOS capture integrations. Keep mobile testing helpers out of production paths.

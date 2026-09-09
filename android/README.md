@@ -1,6 +1,6 @@
 ---
 title: Android Quick Start
-description: Measure pulse and breathing from the Android camera with the SmartSpectra Android SDK. Kotlin, minSdk 28; install, authenticate, and run.
+description: Measure pulse and breathing from the Android camera or caller-supplied frames with the SmartSpectra Android SDK. Kotlin, minSdk 28; install, authenticate, and run.
 sidebarTitle: Quick Start
 ---
 
@@ -46,6 +46,10 @@ Use [Option 1: API Key](docs/option-1-api-key.md) for the fastest manual setup.
 Use [Option 2: OAuth](docs/option-2-oauth.md) if you need OAuth.
 
 Either way, an AI assistant connected to the [SmartSpectra MCP Server](../docs/mcp-server.md) can do the account side for you — fetch your API key, or register your package name and signing certificate fingerprint and download `presage_services.xml`.
+
+If your app already captures video, use the
+[custom-input guide](docs/headless-mode.md#caller-owned-camera-and-custom-input)
+to submit buffers, Bitmaps, or CameraX images while retaining camera ownership.
 
 ## LLM Insights
 

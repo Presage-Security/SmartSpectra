@@ -52,7 +52,8 @@ Every SmartSpectra binding follows the same sequence:
    - **validation status** — human-readable guidance when the input isn't good enough yet
      (face out of frame, poor lighting, frame rate too low, …).
    - **errors** — typed failures (invalid key, camera unavailable, network failure, …).
-4. **Choose an input source** — camera or file (see [Input](#input-camera-or-file) below).
+4. **Choose an input source** — camera, file, or caller-supplied frames
+   (see [Input](#input-camera-file-or-custom-frames) below).
 5. **`start()`** begins capture and processing. **`stop()`** ends the session cleanly.
    **`reset()`** tears down and rebuilds the SDK's internal pipeline — use it to recover
    after the SDK reports an unrecoverable error state, since it's more expensive than `start()`.
@@ -72,7 +73,7 @@ payload your metrics subscription receives. The groups and what each carries:
 - **`breathing`** — its own group, not nested under cardio: breathing rate, chest/abdomen
   movement traces, amplitude, and apnea detection.
 - **`face`** — landmarks, blinking, talking, and facial-expression detections.
-- **`eda`** — electrodermal activity trace (skin conductance).
+- **`eda`** — EDA Proxy trace (electrodermal activity / skin conductance).
 
 The group names are the vocabulary you request; the field descriptions above are conceptual, not
 literal accessors. The numeric fields — the rates and traces — arrive as a **repeated time-series
@@ -86,14 +87,20 @@ payload rather than raising an error. That's distinct from the authorization *re
 failing (for example, the network call that validates your key doesn't succeed) — that surfaces
 as a `start()` error, not a silent omission.
 
-## Input: camera or file
+## Input: camera, file, or custom frames
 
 - **Camera** — the default and the real-world use case: a live webcam or front camera. A user
   sits in frame, well-lit and reasonably still.
 - **Video file** — for automation, scripted demos, or headless runs: point the SDK at a recorded
-  video instead of a live camera. Desktop tier only (C++/Node); mobile input is the live camera.
+  video instead of a live camera. Direct file playback is public on desktop (C++/Node);
+  iOS file playback is testing-only.
+- **Custom frames on iOS** — select `try sdk.useCustomInput()` while stopped, await
+  `sdk.start()`, then submit app-owned `CVPixelBuffer` or `CMSampleBuffer` frames.
+  Handle typed frame rejections. The app owns capture or decoding, buffer lifetime,
+  orientation, and increasing timestamps. Handles survive stop/start/reset; selecting
+  another source invalidates them. See the Swift `headless-mode` guide for the contract.
 
-Both sources feed the same metrics/validation/error subscriptions above — swapping the source
+All sources feed the same metrics/validation/error subscriptions above — swapping the source
 doesn't change how you consume output.
 
 ## Reference: read the live docs for specifics

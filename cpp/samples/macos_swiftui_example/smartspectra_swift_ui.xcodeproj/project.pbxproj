@@ -11,6 +11,7 @@
 		100000000000000000000102 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000202 /* ContentView.swift */; };
 		100000000000000000000103 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000203 /* AppModel.swift */; };
 		100000000000000000000104 /* SmartSpectraRunner.mm in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000204 /* SmartSpectraRunner.mm */; };
+		100000000000000000000105 /* PreviewImage.cc in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000214 /* PreviewImage.cc */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -24,6 +25,8 @@
 		100000000000000000000208 /* smartspectra_swift_ui.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = smartspectra_swift_ui.entitlements; sourceTree = SOURCE_ROOT; };
 		100000000000000000000212 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = SOURCE_ROOT; };
 		100000000000000000000213 /* smartspectra_swift_ui.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = smartspectra_swift_ui.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		100000000000000000000214 /* PreviewImage.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = PreviewImage.cc; sourceTree = "<group>"; };
+		100000000000000000000215 /* PreviewImage.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PreviewImage.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -54,6 +57,8 @@
 				100000000000000000000202 /* ContentView.swift */,
 				100000000000000000000203 /* AppModel.swift */,
 				100000000000000000000204 /* SmartSpectraRunner.mm */,
+				100000000000000000000214 /* PreviewImage.cc */,
+				100000000000000000000215 /* PreviewImage.h */,
 				100000000000000000000205 /* SmartSpectraRunner.h */,
 				100000000000000000000206 /* SmartSpectraSwiftBridge.h */,
 				100000000000000000000207 /* Info.plist */,
@@ -140,7 +145,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/bash;
-			shellScript = "set -euo pipefail\n\nfail() {\n  echo \"error: $1\" >&2\n  exit 1\n}\n\nsdk_root=\"${SMARTSPECTRA_SDK_ROOT:-}\"\nif [[ -z \"$sdk_root\" ]]; then\n  fail \"SmartSpectra SDK not found: SMARTSPECTRA_SDK_ROOT is empty. Set it to the Homebrew prefix that contains SmartSpectra, or to a local SDK install prefix.\"\nfi\n\nif [[ ! -d \"$sdk_root\" ]]; then\n  fail \"SmartSpectra SDK not found: SMARTSPECTRA_SDK_ROOT does not exist: $sdk_root\"\nfi\n\nif [[ ! -f \"$sdk_root/include/smartspectra/smartspectra.h\" ]]; then\n  fail \"SmartSpectra SDK not found at SMARTSPECTRA_SDK_ROOT=$sdk_root. Expected SDK header at $sdk_root/include/smartspectra/smartspectra.h.\"\nfi\n\nif [[ ! -d \"$sdk_root/include/smartspectra/interface\" ]]; then\n  fail \"SmartSpectra SDK not found at SMARTSPECTRA_SDK_ROOT=$sdk_root. Expected SDK interface headers at $sdk_root/include/smartspectra/interface.\"\nfi\n\nif [[ ! -f \"$sdk_root/lib/libsmartspectra.dylib\" ]]; then\n  fail \"SmartSpectra SDK not found at SMARTSPECTRA_SDK_ROOT=$sdk_root. Expected SDK library at $sdk_root/lib/libsmartspectra.dylib.\"\nfi\n\nopencv_include=\"${OPENCV_INCLUDE_DIR:-}\"\nif [[ -z \"$opencv_include\" || ! -f \"$opencv_include/opencv2/opencv.hpp\" ]]; then\n  fail \"Missing OpenCV headers under OPENCV_INCLUDE_DIR=$opencv_include. Install OpenCV with Homebrew or set HOMEBREW_PREFIX to the prefix that contains it.\"\nfi\n";
+			shellScript = "set -euo pipefail\n\nfail() {\n  echo \"error: $1\" >&2\n  exit 1\n}\n\nsdk_root=\"${SMARTSPECTRA_SDK_ROOT:-}\"\nif [[ -z \"$sdk_root\" ]]; then\n  fail \"SmartSpectra SDK not found: SMARTSPECTRA_SDK_ROOT is empty. Set it to the Homebrew prefix that contains SmartSpectra, or to a local SDK install prefix.\"\nfi\n\nif [[ ! -d \"$sdk_root\" ]]; then\n  fail \"SmartSpectra SDK not found: SMARTSPECTRA_SDK_ROOT does not exist: $sdk_root\"\nfi\n\nif [[ ! -f \"$sdk_root/include/smartspectra/smartspectra.h\" ]]; then\n  fail \"SmartSpectra SDK not found at SMARTSPECTRA_SDK_ROOT=$sdk_root. Expected SDK header at $sdk_root/include/smartspectra/smartspectra.h.\"\nfi\n\nif [[ ! -d \"$sdk_root/include/smartspectra/interface\" ]]; then\n  fail \"SmartSpectra SDK not found at SMARTSPECTRA_SDK_ROOT=$sdk_root. Expected SDK interface headers at $sdk_root/include/smartspectra/interface.\"\nfi\n\nif [[ ! -f \"$sdk_root/lib/libsmartspectra.dylib\" ]]; then\n  fail \"SmartSpectra SDK not found at SMARTSPECTRA_SDK_ROOT=$sdk_root. Expected SDK library at $sdk_root/lib/libsmartspectra.dylib.\"\nfi\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -152,6 +157,7 @@
 				100000000000000000000103 /* AppModel.swift in Sources */,
 				100000000000000000000102 /* ContentView.swift in Sources */,
 				100000000000000000000104 /* SmartSpectraRunner.mm in Sources */,
+				100000000000000000000105 /* PreviewImage.cc in Sources */,
 				100000000000000000000101 /* SmartSpectraSwiftApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -211,7 +217,6 @@
 					swift_ui,
 					"$(SMARTSPECTRA_INTERFACE_INCLUDE_DIR)",
 					"$(SMARTSPECTRA_INCLUDE_DIR)",
-					"$(OPENCV_INCLUDE_DIR)",
 				);
 				HOMEBREW_PREFIX = /opt/homebrew;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -223,22 +228,18 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SMARTSPECTRA_LIB_DIR)",
-					"$(OPENCV_LIB_DIR)",
 					"$(HOMEBREW_PREFIX)/lib",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				OPENCV_INCLUDE_DIR = "$(HOMEBREW_PREFIX)/opt/opencv/include/opencv4";
-				OPENCV_LIB_DIR = "$(HOMEBREW_PREFIX)/opt/opencv/lib";
 				PROTOBUF_LIB_DIR = "$(HOMEBREW_PREFIX)/opt/protobuf/lib";
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-framework",
 					AppKit,
-					"$(OPENCV_LIB_DIR)/libopencv_highgui.dylib",
-					"$(OPENCV_LIB_DIR)/libopencv_videoio.dylib",
-					"$(OPENCV_LIB_DIR)/libopencv_imgcodecs.dylib",
-					"$(OPENCV_LIB_DIR)/libopencv_imgproc.dylib",
-					"$(OPENCV_LIB_DIR)/libopencv_core.dylib",
+					"-framework",
+					Accelerate,
+					"-framework",
+					CoreGraphics,
 					"$(SMARTSPECTRA_LIB_DIR)/libsmartspectra.dylib",
 					"$(PROTOBUF_LIB_DIR)/libprotobuf.dylib",
 				);
@@ -273,7 +274,6 @@
 					swift_ui,
 					"$(SMARTSPECTRA_INTERFACE_INCLUDE_DIR)",
 					"$(SMARTSPECTRA_INCLUDE_DIR)",
-					"$(OPENCV_INCLUDE_DIR)",
 				);
 				HOMEBREW_PREFIX = /opt/homebrew;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -285,22 +285,18 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SMARTSPECTRA_LIB_DIR)",
-					"$(OPENCV_LIB_DIR)",
 					"$(HOMEBREW_PREFIX)/lib",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				OPENCV_INCLUDE_DIR = "$(HOMEBREW_PREFIX)/opt/opencv/include/opencv4";
-				OPENCV_LIB_DIR = "$(HOMEBREW_PREFIX)/opt/opencv/lib";
 				PROTOBUF_LIB_DIR = "$(HOMEBREW_PREFIX)/opt/protobuf/lib";
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-framework",
 					AppKit,
-					"$(OPENCV_LIB_DIR)/libopencv_highgui.dylib",
-					"$(OPENCV_LIB_DIR)/libopencv_videoio.dylib",
-					"$(OPENCV_LIB_DIR)/libopencv_imgcodecs.dylib",
-					"$(OPENCV_LIB_DIR)/libopencv_imgproc.dylib",
-					"$(OPENCV_LIB_DIR)/libopencv_core.dylib",
+					"-framework",
+					Accelerate,
+					"-framework",
+					CoreGraphics,
 					"$(SMARTSPECTRA_LIB_DIR)/libsmartspectra.dylib",
 					"$(PROTOBUF_LIB_DIR)/libprotobuf.dylib",
 				);

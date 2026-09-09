@@ -6,20 +6,16 @@
 import SwiftUI
 import UniformTypeIdentifiers
 import PhotosUI
-@_spi(Testing) import SmartSpectra
 
 /// Control panel for picking video and timestamp files for video input testing.
 ///
-/// The parent view is responsible for enabling/disabling video input mode
-/// via `sdk.setVideoInputEnabled(_:)`. This panel only handles file selection.
+/// The parent view owns decoding and submission. This panel only selects files.
 struct VideoInputControlPanel: View {
-    private let sdk = SmartSpectraSDK.shared
-
     @Binding var selectedVideoPath: String
+    @Binding var selectedTimestampPath: String
     @State private var showVideoFilePicker: Bool = false
     @State private var showVideoLibraryPicker: Bool = false
     @State private var showTimestampPicker: Bool = false
-    @State private var selectedTimestampPath: String = ""
 
     var body: some View {
         Group {
@@ -43,19 +39,16 @@ struct VideoInputControlPanel: View {
         .sheet(isPresented: $showVideoFilePicker) {
             DocumentPicker(contentTypes: [.movie, .mpeg4Movie, .quickTimeMovie]) { url in
                 selectedVideoPath = url.path
-                sdk.setVideoInput(path: selectedVideoPath)
             }
         }
         .sheet(isPresented: $showVideoLibraryPicker) {
             LibraryVideoPicker { url in
                 selectedVideoPath = url.path
-                sdk.setVideoInput(path: selectedVideoPath)
             }
         }
         .sheet(isPresented: $showTimestampPicker) {
             DocumentPicker(contentTypes: [.plainText]) { url in
                 selectedTimestampPath = url.path
-                sdk.setVideoTimestampInput(path: selectedTimestampPath)
             }
         }
     }

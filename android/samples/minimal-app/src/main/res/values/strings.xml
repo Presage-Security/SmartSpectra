@@ -7,8 +7,8 @@
     <string name="breathing_rate_placeholder">Breathing Rate</string>
     <string name="breathing_rate_value_format">Breathing Rate  %1$d brpm</string>
     <string name="arterial_pressure_title">Arterial Pressure Trace</string>
-    <string name="eda_placeholder">EDA</string>
-    <string name="eda_value_format">EDA  %1$+.3f</string>
+    <string name="eda_placeholder">EDA Proxy</string>
+    <string name="eda_value_format">EDA Proxy  %1$+.3f</string>
     <string name="insight_title">AI Insight</string>
     <string name="insight_button">Ask AI</string>
     <string name="insight_loading">Thinking…</string>

@@ -53,6 +53,10 @@ Presage also hosts an MCP (Model Context Protocol) server at `https://mcp.presag
 - **Camera Selection**  
   Front or rear facing camera selection on iOS or Android and specification of camera input for applications using the C++ SDK.
 
+- **Caller-owned iOS Video**
+  Submit frames from your own camera or decoder with the Swift SDK's
+  [custom-input API](swift/docs/headless-mode.md#use-your-own-camera-or-video-source).
+
 - **LLM Insights**  
   Turn the vitals the SDK computes on-device into natural-language analysis from a large language model, on request. See the [LLM Insights overview](docs/llm-insights/index.md).
 
@@ -109,6 +113,8 @@ For C++ integration on Windows, macOS, and Linux, refer to the [C++ README](cpp/
 
 - Supported systems and architectures.
 - Installation via the prebuilt ZIP (Windows), Homebrew (macOS), or apt (Linux).
+  Debian 13 / Trixie supports both `amd64` and `arm64`; follow the
+  [Debian installation and quickstart guide](cpp/docs/linux/debian-13.md).
 - Build instructions and example applications.
 - A Linux redistribution path for bundling the published SDK tarball into your
   own `.deb`: [Redistribute SmartSpectra on Linux](docs/redistribute_smartspectra_on_linux.md).

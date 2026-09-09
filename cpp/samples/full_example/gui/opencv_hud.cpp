@@ -111,7 +111,7 @@ OpenCvHud::OpenCvHud(
             this->eda_group = std::make_unique<MetricsGroup>(MetricsGroup::Create(
                 this->hud_area.x, row_y(3), trace_width, single_trace_height,
                 OpenCvHud::indicator_width, OpenCvHud::label_width,
-                "EDA (Electrodermal)",
+                "EDA Proxy (Electrodermal)",
                 std::move(eda_color), cv::Scalar(0, 0, 255),
                 this->max_trace_points,
                 /*display_rate=*/false

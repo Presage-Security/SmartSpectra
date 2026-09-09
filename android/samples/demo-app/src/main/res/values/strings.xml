@@ -28,9 +28,9 @@
     <string name="demo_cardio_subtitle">Pulse rate, arterial pressure trace, and HRV.</string>
     <string name="demo_face_metrics">Face Metrics</string>
     <string name="demo_face_metrics_subtitle">Enables facial expression detection.</string>
-    <string name="demo_eda_measurements">EDA Measurements</string>
-    <string name="demo_eda_subtitle">Electrodermal activity (EDA) trace.</string>
-    <string name="demo_eda">EDA</string>
+    <string name="demo_eda_measurements">EDA Proxy Measurements</string>
+    <string name="demo_eda_subtitle">EDA Proxy (electrodermal activity) trace.</string>
+    <string name="demo_eda">EDA Proxy</string>
     <string name="demo_edge_arterial_pressure">Arterial Pressure Trace</string>
     <string name="demo_edge_pulse_rate">Edge Pulse Rate</string>
     <string name="demo_edge_pulse_rate_confidence">Edge Pulse Rate Confidence</string>
@@ -96,7 +96,7 @@
     <string name="navigation_hint_start">Tap to advance</string>
     <string name="navigation_hint_end">Tap to dismiss</string>
     <string name="screening_pulse_rate">Pulse Rate</string>
-    <string name="screening_eda">EDA</string>
+    <string name="screening_eda">EDA Proxy</string>
 
     <!-- Expression detection -->
     <string name="expression_label">Facial Expression</string>

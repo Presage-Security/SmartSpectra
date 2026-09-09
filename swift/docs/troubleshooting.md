@@ -1,6 +1,6 @@
 ---
 title: Swift Troubleshooting
-description: Solutions to common build, runtime, and integration issues with the SmartSpectra Swift SDK.
+description: Troubleshoot SmartSpectra Swift setup, camera permissions, custom input frame rejections, timestamps, and iOS Simulator measurements.
 sidebarTitle: Troubleshooting
 ---
 
@@ -21,8 +21,9 @@ If you pasted a subdirectory URL such as `/tree/main/swift/sdk`, replace it with
 The simulator has no camera, so camera-driven measurement needs a physical device.
 Select a real device target in Xcode for normal development.
 
-The simulator *is* supported for automated testing, where frames come from a video
-file rather than a camera — see
+The simulator supports supplied video frames through public
+[`useCustomInput()`](headless-mode.md#use-your-own-camera-or-video-source),
+or the testing-only file-playback API — see
 [Headless testing in CI](headless-testing-in-ci.md), which runs a full measurement on
 the iOS Simulator.
 
@@ -32,6 +33,10 @@ the iOS Simulator.
 
 ### `NSCameraUsageDescription` missing
 
+This key is required when your app opens a camera, including SDK-owned capture.
+Custom input does not check or request camera access; a decoder-only integration
+does not need camera permission. Your own camera capture still needs it.
+
 In Xcode:
 
 1. Select your app target.
@@ -39,7 +44,7 @@ In Xcode:
 3. Add a new row for `Privacy - Camera Usage Description`.
 4. Set the value to `This app needs camera access to measure vitals.`
 
-The SDK fails gracefully with a clear runtime error if this key is absent or empty.
+With SDK-owned capture, the SDK fails gracefully if this key is absent or empty.
 
 Or add the entry directly to your `Info.plist`:
 
@@ -52,7 +57,10 @@ Or add the entry directly to your `Info.plist`:
 
 ### Camera permission denied at runtime
 
-If the user previously denied camera access, the SDK surfaces an action to open iOS Settings. Ensure your `Info.plist` description string clearly explains why camera access is needed — iOS shows this string in the permission prompt, and a vague description increases denial rates.
+For SDK-owned capture, the reference sample offers an action to open iOS Settings
+when camera permission is denied. With custom input, your app handles permission
+for its own capture source. Ensure your `Info.plist` description explains why
+your app needs camera access.
 
 ---
 
@@ -145,6 +153,29 @@ Field mapping:
 ---
 
 ## Headless Mode
+
+### Custom input stays in `.starting`
+
+Await `sdk.start()`, then begin submitting frames. Do not wait for
+`processingStatus == .running` before sending the first frame. An accepted
+frame is not a completed measurement; continue observing `sdk.metrics`,
+`sdk.validationStatus`, and `sdk.error`.
+
+### Custom frames are rejected
+
+Inspect the `SmartSpectraError` in `FrameSubmissionResult.rejected`:
+
+| Code | What to check |
+| --- | --- |
+| `.invalidState` | Await start before sending. Stop before selecting a source. A replaced input handle cannot be reused. |
+| `.frameConversionFailed` | Supply BGRA or 8-bit bi-planar NV12 with even dimensions for NV12. Sample buffers must contain ready, uncompressed pixels. |
+| `.nonMonotonicTimestamp` | Use finite, nonnegative, strictly increasing microsecond timestamps below `Int64.max - 2`. Sample buffers use their presentation timestamps. |
+| `.timestampGap` | Stop and start after a gap over two seconds; do not rewrite live capture timestamps to conceal an interruption. |
+
+Keep pixels alive and unchanged until submission returns. Supply upright pixels
+or select a fixed `FrameTransform`; the SDK does not infer sample orientation
+from metadata. See [custom input](headless-mode.md#use-your-own-camera-or-video-source)
+for supported layouts and lifecycle details.
 
 ### `processingStatus` cases don't match
 

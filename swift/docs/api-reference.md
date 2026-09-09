@@ -36,13 +36,31 @@ Tests and advanced integrations can create an isolated instance via ``init(confi
   public func start () async throws
   ```
 
-  Begin processing frames from the device camera.
+  Begin processing the selected input (device camera by default). In custom mode, await this call before submitting frames.
 
 - ```swift
   public func stop () async throws
   ```
 
   Stop processing. Call ``start()`` again to resume.
+
+- ```swift
+  public func useCustomInput (frameTransform: FrameTransform = .none) throws -> CustomInput
+  ```
+
+  Select caller-owned video input while stopped. No SDK camera discovery, capture, or camera permission is required. Selecting a source invalidates older custom-input handles. Throws `.invalidState` during startup or processing.
+
+- ```swift
+  public func useCamera () throws
+  ```
+
+  Select SDK-owned camera capture while stopped, using the configured camera position.
+
+- ```swift
+  public func reset () async throws
+  ```
+
+  Stop processing and clear measurement output, retaining configuration, the selected source, transform, and custom-input handle. Safe while idle; await before restarting.
 
 - ```swift
   @discardableResult public func requestInsight (_ text: String) throws -> Int32
@@ -78,7 +96,7 @@ Tests and advanced integrations can create an isolated instance via ``init(confi
   public func setVideoInputEnabled (_ enabled: Bool)
   ```
 
-  Enables or disables video file input mode. Toggleable at runtime. When enabled, camera input is disabled.
+  Selects testing file input or camera input while stopped. An active-session selection is rejected and reported through `error`.
 
 ### Properties
 
@@ -264,7 +282,42 @@ Standalone construction is available for tests and advanced integrations that pa
   public nonisolated static let edaMetrics : [MetricType]
   ```
 
-  Electrodermal activity (EDA) trace metric bundle.
+  EDA Proxy (electrodermal activity) trace metric bundle.
+
+## CustomInput
+
+Caller-owned video input obtained from ``SmartSpectraSDK/useCustomInput(frameTransform:)``.
+
+The handle survives stop/start and reset. Selecting another source invalidates it. Await `sdk.start()` before submitting frames from a serial worker queue. Keep each buffer alive and unchanged until submission returns; the SDK retains no borrowed pixels. Calls are serialized with native teardown. This type is safe to share across threads; callers remain responsible for ordering timestamps and synchronizing buffer mutations.
+
+### Methods
+
+- ```swift
+  public func sendFrame (_ pixelBuffer: CVPixelBuffer, timestampUs: Int64) -> FrameSubmissionResult
+  ```
+
+  Submits BGRA or 8-bit bi-planar NV12 (video or full range) pixels.
+
+  Timestamps are nonnegative, strictly increasing microseconds on one monotonic timeline per run, below `Int64.max - 2`. Gaps greater than two seconds are rejected; stop and start again after an interruption. Row padding and separate NV12 planes are supported. NV12 is converted to BGRA before submission. Unsupported formats return `.rejected` with `.frameConversionFailed`.
+
+  Pixels must already have the desired orientation, or select a session transform. Camera position and preview mirroring do not transform caller-owned frames.
+
+- ```swift
+  public func sendFrame (_ sampleBuffer: CMSampleBuffer) -> FrameSubmissionResult
+  ```
+
+  Submits the image and presentation timestamp of an uncompressed video sample. The timestamp is converted to microseconds; invalid, indefinite, infinite, negative, or out-of-range timestamps are rejected. Orientation is not inferred from metadata.
+
+## FrameTransform
+
+Spatial transform applied to every frame in a custom-input session.
+
+- `case none = 0`
+- `case rotate90CW = 1`
+- `case rotate90CCW = 2`
+- `case rotate180 = 3`
+- `case mirrorHorizontal = 4`
+- `case mirrorVertical = 5`
 
 ## ProcessingStatus
 
@@ -364,6 +417,13 @@ Raw values are stable across SDK versions and match the C++/Android wire values.
 - `case frameConversionFailed = 9`
 - `case nonMonotonicTimestamp = 10`
 - `case timestampGap = 11`
+
+## FrameSubmissionResult
+
+Acceptance means the pixels were consumed, not that measurement processing has finished.
+
+- `case accepted`
+- `case rejected(SmartSpectraError)`
 
 ## SmartSpectraLogLevel
 

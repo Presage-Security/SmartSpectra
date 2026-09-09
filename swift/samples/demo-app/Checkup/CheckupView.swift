@@ -105,8 +105,8 @@ struct CheckupView: View {
 
                 Toggle(isOn: $edaMeasurementsEnabled) {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("EDA Measurements")
-                        Text("Electrodermal activity (EDA) trace.")
+                        Text("EDA Proxy Measurements")
+                        Text("EDA Proxy (electrodermal activity) trace.")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }

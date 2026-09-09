@@ -87,11 +87,14 @@ If the `R` class stops resolving in the linter, Sync Project with Gradle Files t
 
 ### Camera permission denied / measurement won't start
 
-The host app is responsible for requesting Android's runtime camera permission
-before calling `sdk.start()`. The SDK does not show the permission dialog itself.
+When using SDK-owned camera capture, the host app requests Android's runtime
+camera permission before calling `sdk.start()`. The SDK does not show the
+permission dialog itself. Custom input does not require camera permission from
+the SDK; your capture source may require it separately.
 Common causes:
 
-- Testing on an emulator — a physical device with a working camera is required.
+- Testing measurements on an emulator — use [recorded frames](headless-testing-in-ci.md);
+  the simulated camera feed is not suitable for measuring a person's vitals.
 - Permission was previously denied — guide the user to re-enable camera access in system Settings.
 - `start()` was called before permission was granted — observe `sdk.error` for `SmartSpectraError(code = INPUT_UNAVAILABLE, retryable = true)`.
 
@@ -143,7 +146,7 @@ private fun startMeasurement() {
 }
 ```
 
-If `start()` is called without permission, the SDK publishes a
+With SDK-owned camera capture, if `start()` is called without permission, the SDK publishes a
 `SmartSpectraError(code = INPUT_UNAVAILABLE, retryable = true)` to `sdk.error`.
 Observe that error to surface recovery UI and retry after the user grants access.
 

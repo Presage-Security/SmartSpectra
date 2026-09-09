@@ -118,7 +118,7 @@ struct ContentView: View {
                 }
 
                 VitalTile(
-                    title: "EDA",
+                    title: "EDA Proxy",
                     value: model.edaLevelText,
                     unit: "",
                     confidence: "",

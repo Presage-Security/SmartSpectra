@@ -9,6 +9,29 @@ sidebarTitle: Migration Guide
 > Applies to SmartSpectra Swift SDK v3.x.
 > Migrating from a v3.0 release-candidate prior to rc.13, or from v2.x.
 
+## Custom Video Input
+
+Camera capture remains the default. Existing camera integrations need no changes.
+Use `try sdk.useCustomInput()` to obtain a public frame-submission handle for
+your own camera or decoder. Await `sdk.start()` before submitting
+`CVPixelBuffer` or `CMSampleBuffer` frames. See the
+[custom camera example](headless-mode.md#use-your-own-camera-or-video-source).
+
+`try await sdk.reset()` stops processing and clears measurement output, retaining
+configuration and the custom-input handle. `try sdk.useCamera()` switches back
+to SDK capture while stopped. Replacing an input invalidates older handles.
+
+The testing SPI `setVideoInputEnabled(_:)` now selects a source only while
+stopped. Calls during an active session leave the source unchanged and publish
+`.invalidState` on `sdk.error`. Move these calls after `stop()` or `reset()`.
+File playback remains testing-only; caller-owned frame input is public.
+
+The demo app's Video Testing tab now decodes clips in the app and calls
+`CustomInput.sendFrame` directly, with no testing SPI import. Optional timestamp
+sidecars still contain one integer millisecond value per decoded frame; the app
+converts these to microseconds. Decoding uses the formats supported by
+AVFoundation on the selected device or simulator.
+
 ## Swift SDK v3.4.0 Migration
 
 ### Usage failures now report specific errors
@@ -677,7 +700,7 @@ sdk.config.requestedMetrics =
     SmartSpectraConfig.breathingMetrics + SmartSpectraConfig.cardioMetrics
 ```
 
-Current releases also expose an EDA bundle:
+Current releases also expose an EDA Proxy bundle:
 
 ```swift
 sdk.config.requestedMetrics =

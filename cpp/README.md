@@ -1,6 +1,6 @@
 ---
 title: Get Started with the SmartSpectra C++ SDK
-description: Measure pulse and breathing from a camera or video file with the SmartSpectra C++ SDK on Linux, macOS, and Windows. C++17 and CMake.
+description: Measure pulse and breathing from a camera or video file with the SmartSpectra C++ SDK on Linux, macOS, and Windows. C++20 and CMake.
 sidebarTitle: Overview
 ---
 
@@ -21,6 +21,8 @@ with optional preview frames; runs on Linux, macOS, and Windows.
 | macOS Apple Silicon (14.0+) | Supported | Homebrew package available |
 | Windows 10 / 11 (x64) | Experimental | ZIP distribution available |
 | macOS Intel | Not supported | — |
+| Debian 13 / Trixie (amd64) | Experimental | Debian package available |
+| Debian 13 / Trixie (arm64) | Experimental | Debian package available |
 | Debian 12 | Not supported | — |
 | RHEL 9 / Fedora 41 | Not supported | — |
 
@@ -49,7 +51,7 @@ Each guide is self-contained: prerequisites → install → first running build.
 > platform below. Each guide includes a complete `hello_vitals.cpp` and
 > `CMakeLists.txt`.
 
-- [**Linux Quickstart (Ubuntu/Mint)**](docs/linux/index.md) — apt-based install for Ubuntu 22.04 / Mint 21 and Ubuntu 24.04 / Mint 22 (`amd64` + `arm64`)
+- [**Linux Quickstart (Debian/Ubuntu/Mint)**](docs/linux/index.md) — apt-based install for Debian 13 / Trixie, Ubuntu 22.04 / Mint 21, and Ubuntu 24.04 / Mint 22 (`amd64` + `arm64`)
 - [**macOS Quickstart**](docs/macos.md) — Homebrew formula, Apple Silicon
 - [**Windows Quickstart**](docs/windows/index.md) — prebuilt ZIP from GitHub Releases
 

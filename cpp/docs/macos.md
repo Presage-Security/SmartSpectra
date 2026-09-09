@@ -38,9 +38,9 @@ The Homebrew formula installs the SmartSpectra SDK and exposes its CMake
 package metadata. The SDK is self-contained — linking your own app against it
 needs no other libraries, and the `hello_vitals` example below builds with
 nothing else installed. The repository samples are separate: several of them
-use OpenCV for video capture and display and need Homebrew's `opencv` package,
-which `./scripts/check-requirements.sh --fix` below installs for you (or run
-`brew install opencv` yourself).
+use OpenCV for video capture and display and need `brew install opencv`.
+The SwiftUI sample below uses native macOS image frameworks and does not
+require OpenCV.
 
 ```bash
 brew tap presage/smartspectra https://github.com/Presage-Security/homebrew-smartspectra
@@ -215,8 +215,8 @@ SMARTSPECTRA_SDK_ROOT = $(HOMEBREW_PREFIX)
 ```
 
 The project derives include and library paths from those two variables. The
-`Validate Setup` build phase checks the SDK header, library, interface
-headers, and OpenCV headers before compilation, so a wrong prefix surfaces
+`Validate Setup` build phase checks the SDK header, library, and interface
+headers before compilation, so a wrong prefix surfaces
 early.
 
 ## Additional Details
@@ -362,6 +362,9 @@ Consumer code includes SmartSpectra headers as:
 When linking from your own CMake project:
 
 ```cmake
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 find_package(SmartSpectra CONFIG REQUIRED)
 target_link_libraries(my_app PRIVATE SmartSpectra::SDK)
 ```

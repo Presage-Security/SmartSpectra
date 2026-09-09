@@ -1,6 +1,6 @@
 ---
 title: Headless Testing in CI on iOS
-description: Run a full SmartSpectra measurement on the iOS Simulator in CI by feeding a recorded video, or smoke-test that the SDK builds and initializes.
+description: Test SmartSpectra on the iOS Simulator with public custom input, decoded CVPixelBuffer or CMSampleBuffer frames, or testing-only video playback.
 sidebarTitle: Headless Testing in CI
 ---
 
@@ -11,6 +11,11 @@ cross-platform overview of what's automatable and why. This page covers the
 iOS specifics.
 
 ## What's different on iOS
+
+For a caller-owned decoder or capture pipeline, use the public
+[`useCustomInput()` API](headless-mode.md#use-your-own-camera-or-video-source).
+It accepts decoded `CVPixelBuffer` and `CMSampleBuffer` frames without a testing
+opt-in or SDK camera access. The file-playback helper below remains testing-only.
 
 The SDK normally measures from the live camera, but it also ships a
 **testing-only video-input API**: point it at a recorded video file and it
@@ -27,7 +32,7 @@ accident: it is only visible to targets that opt in with
 
 sdk.setVideoInput(path: path)        // .mov, .mp4, .qt
 sdk.setVideoTimestampInput(path: ts) // optional: one ms value per line
-sdk.setVideoInputEnabled(true)       // camera off, video in; toggleable
+sdk.setVideoInputEnabled(true)       // select file input while stopped
 ```
 
 While video input is enabled the SDK does not open the camera, so the test
@@ -41,6 +46,34 @@ Two levels of CI coverage, pick per test:
    clip needed; proves the SDK builds, launches, and initializes.
 
 ## Option 1: The video-fed test
+
+### Public custom input
+
+Your test can decode its own clip and submit frames with no SPI import. Use
+`import SmartSpectra`, select `try sdk.useCustomInput()` while stopped, and
+await `sdk.start()` before the first frame. In your decoder's serial loop:
+
+```swift
+switch input.sendFrame(sampleBuffer) {
+case .accepted:
+    break
+case .rejected(let error):
+    XCTFail("Frame rejected: \(error.code): \(error.message)")
+    throw error
+}
+```
+
+Use the sample's presentation timestamp and pace decoding to the clip's timing.
+For a pixel buffer, call `input.sendFrame(pixelBuffer, timestampUs: timestampUs)`.
+Assert that requested metrics appear, not merely that frames were accepted.
+Stop submission before awaiting `sdk.reset()`, then call `try sdk.useCamera()`
+to restore the shared SDK for later tests. Perform cleanup on failure as well
+as success. See the [custom-input contract](headless-mode.md#use-your-own-camera-or-video-source)
+and the [app-owned decoder sample](https://github.com/Presage-Security/SmartSpectra/blob/main/swift/samples/demo-app/VideoInput/VideoTestingView.swift).
+Choose a decoder and codec supported by your test device or simulator; the SDK
+accepts uncompressed frames and does not decode files through this public API.
+
+### Testing-only file playback
 
 Drive `SmartSpectraSDK.shared` directly, the same way you would for any
 [headless integration](headless-mode.md), from an XCTest hosted by your app
@@ -70,30 +103,36 @@ final class VideoMeasurementTests: XCTestCase {
         )
         sdk.setVideoInput(path: videoURL.path)
         sdk.setVideoInputEnabled(true)
-        defer { sdk.setVideoInputEnabled(false) }
+        do {
+            try await sdk.start()
 
-        try await sdk.start()
-
-        var sawPulse = false
-        var sawBreathing = false
-        let deadline = Date().addingTimeInterval(120)
-        while Date() < deadline, !(sawPulse && sawBreathing) {
-            if let metrics = sdk.metrics {
-                if metrics.hasCardio,
-                   metrics.cardio.pulseRate.contains(where: { $0.value > 0 }) {
-                    sawPulse = true
+            var sawPulse = false
+            var sawBreathing = false
+            let deadline = Date().addingTimeInterval(120)
+            while Date() < deadline, !(sawPulse && sawBreathing) {
+                if let metrics = sdk.metrics {
+                    if metrics.hasCardio,
+                       metrics.cardio.pulseRate.contains(where: { $0.value > 0 }) {
+                        sawPulse = true
+                    }
+                    if metrics.hasBreathing,
+                       metrics.breathing.rate.contains(where: { $0.value > 0 }) {
+                        sawBreathing = true
+                    }
                 }
-                if metrics.hasBreathing,
-                   metrics.breathing.rate.contains(where: { $0.value > 0 }) {
-                    sawBreathing = true
-                }
+                try await Task.sleep(for: .milliseconds(250))
             }
-            try await Task.sleep(for: .milliseconds(250))
-        }
-        try await sdk.stop()
+            try await sdk.stop()
 
-        XCTAssertTrue(sawPulse, "no pulse reading came out of the recorded clip")
-        XCTAssertTrue(sawBreathing, "no breathing reading came out of the recorded clip")
+            XCTAssertTrue(sawPulse, "no pulse reading came out of the recorded clip")
+            XCTAssertTrue(sawBreathing, "no breathing reading came out of the recorded clip")
+        } catch {
+            try await sdk.reset()
+            try sdk.useCamera()
+            throw error
+        }
+        try await sdk.reset()
+        try sdk.useCamera()
     }
 }
 ```

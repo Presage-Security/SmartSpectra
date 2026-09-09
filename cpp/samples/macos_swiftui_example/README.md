@@ -72,12 +72,10 @@ Enter `SMARTSPECTRA_API_KEY` in the app and press Start. On first launch, allow 
 
 - macOS with Xcode installed.
 - SmartSpectra SDK installed through Homebrew.
-- Homebrew dependencies used by this SDK build:
-  - OpenCV
 - Apple Development signing in Xcode.
 - A SmartSpectra API key.
 
-This SDK build requires macOS 14.0 or newer at runtime.
+This SDK build requires macOS 14.0 or newer at runtime. The sample uses macOS image frameworks for its preview and requires no separate OpenCV installation.
 
 The app must be signed with an Apple Development identity because SmartSpectra stores SDK state in Keychain. An ad-hoc signed app can launch, but Keychain writes fail with `-34018`.
 
@@ -111,11 +109,9 @@ The project derives these paths from those values:
 SMARTSPECTRA_LIB_DIR = $(SMARTSPECTRA_SDK_ROOT)/lib
 SMARTSPECTRA_INCLUDE_DIR = $(SMARTSPECTRA_SDK_ROOT)/include
 SMARTSPECTRA_INTERFACE_INCLUDE_DIR = $(SMARTSPECTRA_SDK_ROOT)/include/smartspectra/interface
-OPENCV_INCLUDE_DIR = $(HOMEBREW_PREFIX)/opt/opencv/include/opencv4
-OPENCV_LIB_DIR = $(HOMEBREW_PREFIX)/opt/opencv/lib
 ```
 
-The `Validate Setup` build phase checks the SDK header, SDK library, interface headers, and OpenCV headers before compilation. If Xcode reports that SmartSpectra cannot be found, fix `HOMEBREW_PREFIX` first.
+The `Validate Setup` build phase checks the SDK header, SDK library, and interface headers before compilation. If Xcode reports that SmartSpectra cannot be found, fix `HOMEBREW_PREFIX` first.
 
 ### Signing
 
@@ -167,10 +163,7 @@ The helper script checks the Homebrew SDK, required model files, SDK graph asset
 ./scripts/check-requirements.sh
 ```
 
-`--fix` can:
-
-- install missing `opencv`
-- create `$(HOMEBREW_PREFIX)/share/smartspectra/graph` as a symlink to the SDK graph assets
+`--fix` can create `$(HOMEBREW_PREFIX)/share/smartspectra/graph` as a symlink to the SDK graph assets.
 
 The graph symlink is needed because `libsmartspectra.dylib` looks for model files under:
 

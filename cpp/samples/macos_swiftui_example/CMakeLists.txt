@@ -14,7 +14,6 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(SMARTSPECTRA_SDK_ROOT "" CACHE PATH "SmartSpectra SDK install prefix.")
 set(SMARTSPECTRA_DEVELOPMENT_TEAM "" CACHE STRING "Apple Developer Team ID used by Xcode signing.")
 set(SMARTSPECTRA_BUNDLE_IDENTIFIER "com.example.smartspectra-swift-ui" CACHE STRING "macOS app bundle identifier.")
-set(SMARTSPECTRA_HOMEBREW_PREFIX "/opt/homebrew" CACHE PATH "Homebrew prefix used for OpenCV runtime libraries.")
 option(SMARTSPECTRA_REQUIRE_SIGNING "Require Apple Development signing at configure time." ON)
 
 if(NOT APPLE)
@@ -46,12 +45,7 @@ if(SMARTSPECTRA_SDK_ROOT)
         CACHE PATH "Directory of the Physiology inference models." FORCE)
 endif()
 
-if(EXISTS "${SMARTSPECTRA_HOMEBREW_PREFIX}")
-    list(PREPEND CMAKE_PREFIX_PATH "${SMARTSPECTRA_HOMEBREW_PREFIX}")
-endif()
-
 find_package(SmartSpectra CONFIG REQUIRED)
-find_package(OpenCV REQUIRED COMPONENTS core imgproc)
 
 foreach(_required_file IN ITEMS
     "${SMARTSPECTRA_SDK_ROOT}/lib/libsmartspectra.dylib"
@@ -85,21 +79,22 @@ if(APPLE)
         swift_ui/AppModel.swift
         swift_ui/SmartSpectraRunner.h
         swift_ui/SmartSpectraRunner.mm
+        swift_ui/PreviewImage.cc
     )
 
     target_include_directories(smartspectra_swift_ui PRIVATE
         "${CMAKE_CURRENT_SOURCE_DIR}/swift_ui"
         "${SMARTSPECTRA_SDK_ROOT}/include/smartspectra/interface"
-        ${OpenCV_INCLUDE_DIRS}
     )
     target_link_libraries(smartspectra_swift_ui PRIVATE
         SmartSpectra::SDK
-        ${OpenCV_LIBS}
+        "-framework Accelerate"
+        "-framework CoreGraphics"
         "-framework AppKit"
     )
 
     set_target_properties(smartspectra_swift_ui PROPERTIES
-        BUILD_RPATH "${SMARTSPECTRA_SDK_ROOT}/lib;${SMARTSPECTRA_HOMEBREW_PREFIX}/lib"
+        BUILD_RPATH "${SMARTSPECTRA_SDK_ROOT}/lib"
         MACOSX_BUNDLE_BUNDLE_NAME "SmartSpectraSwiftUI"
         MACOSX_BUNDLE_BUNDLE_VERSION "1.0"
         MACOSX_BUNDLE_COPYRIGHT ""

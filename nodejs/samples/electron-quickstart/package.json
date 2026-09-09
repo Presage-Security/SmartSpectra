@@ -22,7 +22,9 @@
     "esbuild": "^0.25.0"
   },
   "overrides": {
-    "js-yaml": "4.3.1"
+    "js-yaml": "4.3.1",
+    "fast-uri": "3.1.6",
+    "@xmldom/xmldom": "0.8.15"
   },
   "build": {
     "appId": "com.presagetech.smartspectra-electron-quickstart",

@@ -249,7 +249,7 @@ class ViewController: UIViewController {
         bloodPressureGraphView.append(contentsOf: metrics.cardio.arterialPressureTrace.map(\.value))
 
         if let latest = metrics.eda.trace.last {
-            edaLabel.text = String(format: "EDA  %+.3f", latest.value)
+            edaLabel.text = String(format: "EDA Proxy  %+.3f", latest.value)
         }
         edaGraphView.append(contentsOf: metrics.eda.trace.map(\.value))
     }
@@ -317,7 +317,7 @@ class ViewController: UIViewController {
                     heartRateLabel.text = "-- bpm"
                     heartRateLabel.textColor = coralColor
                     breathingRateLabel.text = "-- brpm"
-                    edaLabel.text = "EDA"
+                    edaLabel.text = "EDA Proxy"
                     insightLabel.text = "Tap Ask AI to get an analysis of your vitals."
                     breathingGraphView.reset()
                     bloodPressureGraphView.reset()

@@ -12,30 +12,39 @@ Android specifics.
 
 ## What's different on Android
 
-The SDK normally measures from the live camera, but it also ships a
-**testing-only video-input API**: your test decodes a recorded clip and feeds
-the frames into the same pipeline a live camera would drive. An emulator's
-simulated camera has no real face in it — with video input, that no longer
-matters, so CI can run a **full video-fed measurement** as an instrumented
-test.
-
-The API is gated behind a Kotlin opt-in annotation so it can't leak into
-production code by accident: it is an error to call it without
-`@OptIn(SmartSpectraTestingApi::class)`.
+The SDK normally measures from the live camera. Its public custom-input
+API also accepts frames decoded by your app or test. An emulator can run
+a recorded-video measurement without camera hardware or `CAMERA`
+permission:
 
 ```kotlin
-@OptIn(SmartSpectraTestingApi::class)
-
-sdk.setVideoInputEnabled(true)          // camera off, frames in; toggleable
-sdk.addVideoFrame(bitmap, timestampUs)  // one decoded frame per call
+val input = sdk.useCustomInput() // Select while stopped.
+sdk.start()
+val result = input.sendFrame(bitmap, timestampUs)
 ```
 
-While video input is enabled the SDK does not open the camera, so the test
-needs no camera hardware and no `CAMERA` permission. Unlike the iOS SDK,
-the Android SDK does not decode the file itself — your test supplies decoded
-frames (for example via `MediaMetadataRetriever`, as below, or `MediaCodec`)
-with **microsecond timestamps, strictly increasing**, taken from the clip's
-own timing.
+Unlike the iOS SDK, the Android SDK does not decode the file itself. Your
+test supplies decoded frames (for example via `MediaMetadataRetriever`,
+as below, or `MediaCodec`) with strictly increasing microsecond timestamps
+from the clip. See [custom input](headless-mode.md#caller-owned-camera-and-custom-input)
+for lifecycle, frame ownership, orientation, and timing requirements.
+
+The earlier `setVideoInputEnabled` / `addVideoFrame` helpers remain
+testing-only and require `@OptIn(SmartSpectraTestingApi::class)`. The
+public `useCustomInput()` API requires no opt-in.
+
+To update an existing test to the public API:
+
+| Testing helper | Public custom-input API |
+| --- | --- |
+| `sdk.setVideoInputEnabled(true)` | `val input = sdk.useCustomInput()` while stopped |
+| `sdk.addVideoFrame(bitmap, timestampUs)` | `input.sendFrame(bitmap, timestampUs)`; handle the returned result |
+| `sdk.setVideoInputEnabled(false)` | Stop, then call `sdk.useCamera()` |
+
+If you retain the testing helpers, enable video input while stopped and await
+`start()` before submitting frames. The helpers now throw `SmartSpectraException`
+on invalid source selection or a rejected frame; they no longer silently discard
+these errors. The public handle returns `FrameSubmissionResult.Rejected` instead.
 
 Two levels of CI coverage, pick per test:
 
@@ -58,7 +67,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.presagetech.smartspectra.SmartSpectraConfig
 import com.presagetech.smartspectra.SmartSpectraSdk
-import com.presagetech.smartspectra.SmartSpectraTestingApi
+import com.presagetech.smartspectra.FrameSubmissionResult
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -66,7 +75,6 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class VideoMeasurementTest {
-    @OptIn(SmartSpectraTestingApi::class)
     @Test
     fun measuresFromRecordedVideo() = runBlocking {
         val sdk = SmartSpectraSdk.shared
@@ -77,13 +85,13 @@ class VideoMeasurementTest {
         sdk.config.requestedMetrics =
             SmartSpectraConfig.breathingMetrics + SmartSpectraConfig.cardioMetrics
 
-        sdk.setVideoInputEnabled(true)
+        val input = sdk.useCustomInput()
+        val retriever = MediaMetadataRetriever()
         try {
             sdk.start()
 
             // A short clip of a well-lit, mostly still face, bundled in the
             // test APK's assets (assets are not compressed for .mp4).
-            val retriever = MediaMetadataRetriever()
             InstrumentationRegistry.getInstrumentation().context.assets
                 .openFd("face.mp4").use { afd ->
                     retriever.setDataSource(afd.fileDescriptor, afd.startOffset, afd.declaredLength)
@@ -98,7 +106,12 @@ class VideoMeasurementTest {
             var sawBreathing = false
             for (index in 0 until frameCount) {
                 val frame = retriever.getFrameAtIndex(index) ?: break
-                sdk.addVideoFrame(frame, index * frameIntervalUs)
+                val result = try {
+                    input.sendFrame(frame, index * frameIntervalUs)
+                } finally {
+                    frame.recycle()
+                }
+                assertTrue("frame rejected: $result", result is FrameSubmissionResult.Accepted)
                 sdk.metrics.value?.let { m ->
                     if (!sawPulse) sawPulse = m.cardio.pulseRateList.any { it.value > 0f }
                     if (!sawBreathing) sawBreathing = m.breathing.rateList.any { it.value > 0f }
@@ -114,13 +127,16 @@ class VideoMeasurementTest {
                 // FRAME_RATE_TOO_LOW.
                 Thread.sleep(100)
             }
-            retriever.release()
-            sdk.stop()
-
             assertTrue("no pulse reading came out of the recorded clip", sawPulse)
             assertTrue("no breathing reading came out of the recorded clip", sawBreathing)
         } finally {
-            sdk.setVideoInputEnabled(false)
+            try {
+                retriever.release()
+            } finally {
+                // reset() is safe even if start() failed, and preserves custom input.
+                sdk.reset()
+                sdk.useCamera()
+            }
         }
     }
 }
@@ -252,13 +268,10 @@ jobs:
 
 ## Limitations
 
-- **Testing only.** The video-input API is opt-in-gated for a reason: keep
-  `@OptIn(SmartSpectraTestingApi::class)` out of production code. The API
-  may change without a migration path.
 - **No offline mode.** Like every SmartSpectra SDK, a measurement
   authenticates against the SmartSpectra service, so the runner needs
   network access.
 - **Don't mix inputs.** Within one session, feed frames exclusively via
-  `addVideoFrame` — don't toggle back to the camera mid-measurement.
+  the custom-input handle. Stop before selecting the camera again.
 - **Smoke, not accuracy.** A recorded-clip run confirms the integration and
   model pipeline end to end; it is not an accuracy benchmark.

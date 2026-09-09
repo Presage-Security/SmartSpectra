@@ -33,7 +33,7 @@ cmake --build build --target full_example
 ./build/samples/full_example/full_example --camera_device_index=0 --api_key=YOUR_API_KEY_HERE --video_output_directory=/path/to/recordings
 ```
 
-Adding `eda` to `--requested_metrics` (e.g. `--requested_metrics=pulse_rate,arterial_pressure_trace,chest_trace,abdomen_trace,breathing_rate,eda`) surfaces the streaming EDA trace as a fourth HUD row beneath the breathing rows.
+Adding `eda` to `--requested_metrics` (e.g. `--requested_metrics=pulse_rate,arterial_pressure_trace,chest_trace,abdomen_trace,breathing_rate,eda`) surfaces the streaming EDA Proxy trace as a fourth HUD row beneath the breathing rows.
 
 ## macOS Signing
 

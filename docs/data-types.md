@@ -62,7 +62,7 @@ enum FeatureType {
 > Some wire values are intentionally omitted from this view; the gaps in the numeric sequence preserve compatibility with the underlying proto. Use the listed names — do not renumber.
 
 - `BREATHING` -- Breathing measurements (chest and abdomen)
-- `EDA` -- Electrodermal activity (EDA) measurement
+- `EDA` -- EDA Proxy (electrodermal activity) measurement
 - `FACE` -- Facial tracking and analysis
 - `CARDIO` -- Cardiovascular metrics (pulse, HRV, blood pressure)
 
@@ -96,7 +96,7 @@ enum MetricType {
 - `CHEST_BREATHING` -- Breathing upper (chest) metrics
 - `ABDOMEN_BREATHING` -- Breathing lower (abdomen) metrics
 - `BREATHING_RATE` -- Breathing aggregate metrics
-- `EDA_TRACE` -- EDA metrics
+- `EDA_TRACE` -- EDA Proxy metrics
 - `FACE_LANDMARKS` -- Face metrics
 - `PULSE_RATE` -- Cardio metrics
 
@@ -362,7 +362,7 @@ message Face {
 
 ## Eda
 
-Electrodermal Activity (EDA) measurements. Tracks skin conductance changes related to autonomic nervous system activity.
+EDA Proxy (electrodermal activity) measurements. Tracks skin conductance changes related to autonomic nervous system activity.
 
 ### Properties
 
@@ -372,7 +372,7 @@ message Eda {
 }
 ```
 
-- `repeated` [`Measurement`](#measurement) `trace` -- EDA trace measurements over time
+- `repeated` [`Measurement`](#measurement) `trace` -- EDA Proxy trace measurements over time
 
 ## Cardio
 
@@ -406,7 +406,7 @@ message Metrics {
 ```
 
 - [`Breathing`](#breathing) `breathing` -- Breathing and respiratory analysis results
-- [`Eda`](#eda) `eda` -- Electrodermal activity measurements. Note: processing needs to run for over 35 seconds to generate the first EDA result.
+- [`Eda`](#eda) `eda` -- EDA Proxy (electrodermal activity) measurements. Note: processing needs to run for over 35 seconds to generate the first EDA Proxy result.
 - [`Face`](#face) `face` -- Facial analysis results
 - [`Cardio`](#cardio) `cardio` -- Cardiovascular measurements (pulse rate, arterial pressure, HRV)
 

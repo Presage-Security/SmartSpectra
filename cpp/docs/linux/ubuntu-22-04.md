@@ -305,38 +305,13 @@ If the console output does not match the target state, check these first:
 - `libsmartspectra-dev` did not finish installing before CMake was run
 - the API key argument or `SMARTSPECTRA_API_KEY` environment variable is missing
 - another app is already using the camera
-- the host has no desktop keyring session; see [Running headless](#running-headless-docker-ci-no-desktop)
 - the binary is an older build from before the latest source change
 
 ## Running headless (Docker, CI, no desktop)
 
-A desktop Ubuntu or Mint session provides D-Bus and a Secret Service backend
-(gnome-keyring) automatically. Without one — in a Docker container, on a CI
-runner, or in an SSH session with no desktop — the SDK cannot persist its
-device identity and aborts at initialization with:
-
-```text
-Load secret 'key_id' failed: D-Bus Secret Service is not reachable
-```
-
-Install a D-Bus launcher and a Secret Service backend, then start a session
-bus and unlock a fresh keyring before running your binary:
-
-```bash
-sudo apt install -y dbus-x11 gnome-keyring
-eval "$(dbus-launch --sh-syntax)"
-echo "" | gnome-keyring-daemon --unlock --components=secrets >/dev/null 2>&1
-./build/hello_vitals
-```
-
-`dbus-launch --sh-syntax` writes `export DBUS_SESSION_BUS_ADDRESS=…;` to
-stdout so the `eval` exports the address into the current shell's
-environment, and `gnome-keyring-daemon --unlock --components=secrets` opens
-the secrets backend with an empty passphrase so libsecret reads and writes
-keys unattended. The same three commands also satisfy the SDK on a stock
-Ubuntu Server install. (Without `--sh-syntax`, `dbus-launch` prints bare
-`KEY=value` lines that `eval` treats as shell-local assignments rather
-than env exports, so the SDK subprocess does not inherit the bus address.)
+Current SDK releases run without a desktop session in Docker, CI, and SSH-only
+environments. No alternate SDK package or additional system-service setup is
+required.
 
 ## Build the Provided Samples
 
@@ -438,11 +413,6 @@ API reference available at [C++ API Reference](../api-reference.md).
 ## Troubleshooting
 
 If you are upgrading an older C++ integration, start with the [C++ Migration Guide](../migration-guide.md).
-
-If your binary fails at startup with `Load secret 'key_id' failed: D-Bus
-Secret Service is not reachable`, you are on a host without a desktop session
-— see [Running headless](#running-headless-docker-ci-no-desktop) for the
-D-Bus and keyring bootstrap.
 
 ### Debian `Signed-By` conflict
 

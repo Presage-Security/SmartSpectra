@@ -9,7 +9,7 @@ The sample shows how to:
 - Drive `presage::smartspectra::SmartSpectra` from a WinUI 3 window
 - Receive preview frames via `SetOnVideoOutput` and render them with a `WriteableBitmap`
 - Marshal SDK callbacks (metrics, validation, status, insight, error) onto the UI thread with `DispatcherQueue::TryEnqueue`
-- Render trace plots (breathing, arterial pressure, EDA) on a XAML `Canvas` using `Polyline` shapes
+- Render trace plots (breathing, arterial pressure, EDA Proxy) on a XAML `Canvas` using `Polyline` shapes
 - Read facial expression scores out of `Metrics::face().expression()` and surface the dominant one as an emoji + label
 - Trigger an on-demand insight (`RequestInsight`) and display the LLM analysis
 
@@ -18,7 +18,7 @@ The sample shows how to:
 - **Native WinUI 3 / Fluent UI** — full-window camera preview with a translucent gradient panel overlay, validation pill, accent button, and dark theme
 - **C++/WinRT code-behind** — XAML markup with the SDK called directly from `MainWindow.xaml.cpp`, no marshaling layer
 - **Self-contained Windows App SDK** — runtime is bundled into the build output, so no separate installer is required to run the sample
-- **Live trace graphs** — breathing, arterial pressure, and EDA rendered as glow + main-stroke polylines
+- **Live trace graphs** — breathing, arterial pressure, and EDA Proxy rendered as glow + main-stroke polylines
 - **Facial expressions** — Happy / Sad / Angry / Surprised / Fearful / Disgusted / Contempt / Neutral with confidence
 
 ## Prerequisites
@@ -116,7 +116,7 @@ setx SMARTSPECTRA_API_KEY "your-key-here"
 Other knobs you may want to change:
 
 - **Camera selection / resolution** — edit the `m_spectra->UseCamera()` call in `MainWindow::MainWindow()` (e.g., `UseCamera(1).SetResolution(1920, 1080).SetFps(60)`).
-- **Requested metrics** — adjust the `cfg.AddMetrics(...)` calls. The default enables breathing, cardio, face, and EDA metric groups.
+- **Requested metrics** — adjust the `cfg.AddMetrics(...)` calls. The default enables breathing, cardio, face, and EDA Proxy metric groups.
 - **Windows SDK version** — the project pins `WindowsTargetPlatformVersion=10.0.26100.0`. If your machine has a different Windows 10 SDK installed, change it in the `<PropertyGroup Label="Globals">` of `SmartSpectraWinUI.vcxproj`.
 
 ## Running
@@ -127,7 +127,7 @@ Launch the produced executable directly from the build output:
 bin\x64\Release\SmartSpectraWinUI.exe
 ```
 
-Click **Start** to begin live capture. Validation hints (e.g., "Center your face") appear as a pill above the preview. Once vitals stabilize, the bottom panel shows pulse rate, breathing rate, the latest EDA level, and the dominant facial expression alongside live breathing, arterial-pressure, and EDA traces. Click **Ask AI** during a session to send the buffered metrics to the insights endpoint and display the response.
+Click **Start** to begin live capture. Validation hints (e.g., "Center your face") appear as a pill above the preview. Once vitals stabilize, the bottom panel shows pulse rate, breathing rate, the latest EDA Proxy level, and the dominant facial expression alongside live breathing, arterial-pressure, and EDA Proxy traces. Click **Ask AI** during a session to send the buffered metrics to the insights endpoint and display the response.
 
 ## Project Layout
 

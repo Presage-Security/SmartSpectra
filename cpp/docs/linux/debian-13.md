@@ -1,26 +1,28 @@
 ---
-title: Ubuntu 24.04 / Mint 22
-description: Install the SmartSpectra C++ SDK on Ubuntu 24.04 or Linux Mint 22 (noble) for amd64 and arm64.
+title: Debian 13 (Trixie)
+description: Install the SmartSpectra C++ SDK on Debian 13 (Trixie) for amd64 and arm64.
 ---
 
-# SmartSpectra C++ Quickstart — Ubuntu 24.04 / Mint 22
+# SmartSpectra C++ Quickstart — Debian 13 (Trixie)
 
+> **Important:** SDK metrics are offered for general wellness and informational purposes only. SDK metrics have not been cleared by the FDA and may not be used for medical diagnosis or treatment.
+>
 > **Warning — Experimental platform:** Linux support for the SmartSpectra C++
 > SDK is experimental. If you have any issues running SmartSpectra,
 > [contact Presage support](mailto:support@presagetech.com) for assistance.
 
-This guide covers the `noble` apt suite, which supports both `amd64` and
-`arm64`. If you are on Ubuntu 22.04 / Mint 21, follow the
-[Ubuntu 22.04 / Mint 21 guide](ubuntu-22-04.md) instead.
+This guide covers the `trixie` apt suite, which supports both `amd64` and
+`arm64`. For Ubuntu and Linux Mint, choose the matching
+[Linux installation guide](index.md).
 
 ## Installation
 
 ### Prerequisites
 
-- **CMake 3.22.1 or later** (the version shipped with Ubuntu 24.04 / Mint 22 is sufficient)
+- **CMake 3.22.1 or later** (the version shipped with Debian 13 (Trixie) is sufficient)
 - **C++20 compiler** such as GCC or Clang
 - **Vulkan-capable graphics driver** — Linux builds use Vulkan inference by default. The SDK package installs the Vulkan loader dependency through apt, but the host must provide a working Vulkan driver.
-- **`cmake`, `curl`, `gpg`, and `pkg-config`** — used by the build, install, and verify steps below. Install with `sudo apt install cmake curl gpg pkg-config` if they are not already present.
+- **`build-essential`, `cmake`, `curl`, `gpg`, `git`, and `pkg-config`** — used by the build, install, and verify steps below. Install with `sudo apt update && sudo apt install build-essential cmake curl gpg git pkg-config` if they are not already present.
 - **API key** from [physiology.presagetech.com](https://physiology.presagetech.com/auth/login)
 
 ### Add the SDK
@@ -34,23 +36,15 @@ curl -fsSL https://packages.presagetech.com/KEY.gpg \
 sudo chmod 644 /etc/apt/keyrings/presage-archive-keyring.gpg
 ```
 
-Add the `noble` apt source:
+Add the `trixie` apt source:
 
 ```bash
-echo "deb [signed-by=/etc/apt/keyrings/presage-archive-keyring.gpg] https://packages.presagetech.com/apt/ubuntu noble main" \
+echo "deb [signed-by=/etc/apt/keyrings/presage-archive-keyring.gpg] https://packages.presagetech.com/apt/debian trixie main" \
   | sudo tee /etc/apt/sources.list.d/presage-technologies.list
 ```
 
-> **Installing an RC build?** Keep the same signing-key setup, but use the
-> `noble-rc` apt source instead of `noble`:
->
-> ```bash
-> echo "deb [signed-by=/etc/apt/keyrings/presage-archive-keyring.gpg] https://packages.presagetech.com/apt/ubuntu noble-rc main" \
->   | sudo tee /etc/apt/sources.list.d/presage-technologies.list
-> ```
->
-> Then run the same `sudo apt update` and
-> `sudo apt install libsmartspectra-dev` commands below.
+> **Installing an RC build?** Keep the stable source configured and follow the
+> [release-candidate channel](#release-candidate-channel) steps below.
 
 Install the SDK:
 
@@ -74,8 +68,7 @@ pkg-config --modversion SmartSpectra
 
 The command prints the installed SDK version (for example, `3.3.0`). If it
 prints nothing or reports that the package is missing, reinstall
-`libsmartspectra-dev` and confirm you are on a supported Ubuntu 24.04 /
-Mint 22 (`amd64` or `arm64`) host.
+`libsmartspectra-dev` and confirm you are on a supported Debian 13 (Trixie) (`amd64` or `arm64`) host.
 
 ## Example
 
@@ -301,7 +294,7 @@ app and that your shell did not include extra quotes or whitespace.
 
 If the console output does not match the target state, check these first:
 
-- the Presage apt source was added for the wrong Ubuntu or Mint suite
+- the Presage apt source was added for the wrong distribution or suite
 - `libsmartspectra-dev` did not finish installing before CMake was run
 - the API key argument or `SMARTSPECTRA_API_KEY` environment variable is missing
 - another app is already using the camera
@@ -343,7 +336,7 @@ To run headlessly against a recording instead of the default camera, add
 
 ## Advanced apt workflows
 
-Most users only need the stable `noble` repository above. Use these when you
+Most users only need the stable `trixie` repository above. Use these when you
 intentionally need release-candidate packages, version pinning, or repository
 removal.
 
@@ -364,24 +357,24 @@ sudo apt-mark unhold libsmartspectra-dev
 
 ### Release-candidate channel
 
-Release-candidate builds are published to the parallel `noble-rc` apt suite
+Release-candidate builds are published to the parallel `trixie-rc` apt suite
 signed by the same Presage key:
 
 ```bash
-echo "deb [signed-by=/etc/apt/keyrings/presage-archive-keyring.gpg] https://packages.presagetech.com/apt/ubuntu noble-rc main" \
+echo "deb [signed-by=/etc/apt/keyrings/presage-archive-keyring.gpg] https://packages.presagetech.com/apt/debian trixie-rc main" \
   | sudo tee /etc/apt/sources.list.d/presage-technologies-rc.list
 
-sudo apt update && sudo apt -t noble-rc install libsmartspectra-dev
+sudo apt update && sudo apt -t trixie-rc install libsmartspectra-dev
 ```
 
-Keep the stable `noble` source configured alongside `noble-rc`; the RC channel
+Keep the stable `trixie` source configured alongside `trixie-rc`; the RC channel
 does not republish stable releases.
 
 ### Returning from RC to stable
 
 ```bash
 sudo apt update
-sudo apt install --reinstall -t noble libsmartspectra-dev=$(apt-cache madison libsmartspectra-dev | awk '/noble\/main/ {print $3; exit}')
+sudo apt install --allow-downgrades --reinstall -t trixie libsmartspectra-dev=$(apt-cache madison libsmartspectra-dev | awk '/trixie\/main/ {print $3; exit}')
 sudo rm -f /etc/apt/sources.list.d/presage-technologies-rc.list
 sudo rm -f /etc/apt/preferences.d/presage-rc
 sudo apt update
@@ -414,15 +407,16 @@ API reference available at [C++ API Reference](../api-reference.md).
 
 If you are upgrading an older C++ integration, start with the [C++ Migration Guide](../migration-guide.md).
 
-### Debian `Signed-By` conflict
+### APT cannot find the package
 
-Older Debian instructions installed the Presage key in
-`/etc/apt/trusted.gpg.d/` and used a source line without `signed-by=`. If
-`apt update` reports `E: Conflicting values set for option Signed-By regarding source https://packages.presagetech.com/apt/ubuntu/ noble`, remove the legacy key copy and run `apt update` again:
+Confirm that the host runs Debian 13 (`trixie`) and that
+`dpkg --print-architecture` prints `amd64` or `arm64`. Check that the Presage
+source uses `/apt/debian trixie main`, then rerun `sudo apt update`.
+Use the distribution-specific package; do not configure an Ubuntu suite on Debian.
 
-```bash
-sudo rm -f /etc/apt/trusted.gpg.d/presage-technologies.gpg
-sudo apt update
-```
+## Getting Help
 
-For support: contact [support@presagetech.com](mailto:support@presagetech.com) or [submit a GitHub issue](https://github.com/Presage-Security/SmartSpectra/issues).
+- Email: [support@presagetech.com](mailto:support@presagetech.com)
+- [Submit a GitHub issue](https://github.com/Presage-Security/SmartSpectra/issues)
+- [Docs and FAQ](https://smartspectra.presagetech.com)
+- [Developer Admin Portal](https://physiology.presagetech.com/auth/login)

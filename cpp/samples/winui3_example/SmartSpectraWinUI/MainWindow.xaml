@@ -86,7 +86,7 @@
                             SizeChanged="OnGraphCanvasSizeChanged"/>
                 </Grid>
                 <Grid Grid.Column="4">
-                    <TextBlock x:Name="EdaText" Text="EDA" Foreground="#80FFFFFF" FontSize="11"
+                    <TextBlock x:Name="EdaText" Text="EDA Proxy" Foreground="#80FFFFFF" FontSize="11"
                                VerticalAlignment="Top"/>
                     <Canvas x:Name="EdaCanvas" Margin="0,18,0,0"
                             SizeChanged="OnGraphCanvasSizeChanged"/>

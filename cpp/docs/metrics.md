@@ -155,7 +155,7 @@ spectra.SetOnMetrics([](const presage::smartspectra::Metrics& metrics, int64_t) 
 
     if (metrics.has_eda() && metrics.eda().trace_size() > 0) {
         const auto& eda = metrics.eda().trace(metrics.eda().trace_size() - 1);
-        LOG(INFO) << "EDA trace: " << eda.value();
+        LOG(INFO) << "EDA Proxy trace: " << eda.value();
     }
 
     if (metrics.has_face() && metrics.face().landmarks_size() > 0) {
@@ -218,13 +218,13 @@ Face {
 }
 ```
 
-EDA may take longer to produce its first sample than breathing or cardio outputs. See [Data Types](../../docs/data-types.md) for the complete protobuf schema.
+EDA Proxy may take longer to produce its first sample than breathing or cardio outputs. See [Data Types](../../docs/data-types.md) for the complete protobuf schema.
 
 ## Timing and Stability
 
 All measurement samples use `timestamp` values in microseconds. Trace metrics
 are produced at frame cadence when the underlying signal is available; lower
-rate outputs such as EDA may arrive less frequently.
+rate outputs such as EDA Proxy may arrive less frequently.
 
 Measurement types expose a `stable()` flag. Check it before using a sample for
 critical decisions or user-facing summaries:
