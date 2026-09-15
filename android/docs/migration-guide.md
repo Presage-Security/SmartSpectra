@@ -11,6 +11,16 @@ sidebarTitle: Migration Guide
 
 ## Android SDK v3.4.0 Migration
 
+### Check custom-input timestamp rejections in the submission result
+
+`CustomInput.sendFrame()` returns `FrameSubmissionResult.Rejected` with
+`NON_MONOTONIC_TIMESTAMP` or `TIMESTAMP_GAP` when it rejects a timestamp.
+These rejections leave the session active and do not publish a global
+`sdk.error`. Check each submission result even if you also observe `sdk.error`.
+
+A rejected timestamp does not advance the accepted timeline. Correct the next
+timestamp, or stop and start the SDK to begin a fresh timeline after an interruption.
+
 ### Usage failures now report specific errors
 
 Usage entitlement checking continues throughout a measurement as before. What

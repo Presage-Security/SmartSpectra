@@ -68,7 +68,7 @@ Tests and advanced integrations can create an isolated instance via ``init(confi
 
   Dispatch an on-demand insight request alongside the vitals samples buffered since the last send.
 
-  The provided `text` is sent as the current turn's prompt; prior calls' text is not retained or re-sent by the SDK. The delivered `Insight` always has `type == .vitals` today (`.speech` and `.combined` are reserved and not emitted). Vitals snapshots auto-fire approximately every 15 seconds with no prompt and are published through ``SmartSpectraSDK/insight`` alongside on-demand replies, so match a reply to its prompt with `requestId`, not `type`.
+  The provided `text` is sent as the current turn's prompt; prior calls' text is not retained or re-sent by the SDK. The delivered `Insight` always has `type == .vitals` today (`.speech` and `.combined` are reserved and not emitted). Vitals snapshots auto-fire — one as each of pulse rate, breathing rate, and HRV first stabilises, then one every 60 seconds — carrying a fixed SDK-supplied prompt rather than caller text, and are published through ``SmartSpectraSDK/insight`` alongside on-demand replies, so match a reply to its prompt with `requestID`, not `type`.
 
 - ```swift
   @_spi(Testing)

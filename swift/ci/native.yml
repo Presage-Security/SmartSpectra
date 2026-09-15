@@ -1,0 +1,115 @@
+build_smartspectra_swift_binary:
+  tags:
+    - macos
+  stage: build_binary
+  interruptible: true  # artifact-only build (xcframework, generated protobufs); no S3/registry push
+  variables:
+    VENV_DIR: ".venv"
+  allow_failure:
+    exit_codes:
+      - 2
+  before_script:
+    - bash ci/scripts/set_ci_remote_cache.sh
+  # Always build current-commit binaries when the Swift child is selected.
+  rules:
+    - !reference [.rules:cd, rules]
+    - if: $CI_MERGE_REQUEST_ID
+    - if: $CI_COMMIT_BRANCH =~ /^(dev|test|main)$/
+  script:
+    - pushd edge/
+    - brew update || true
+    - brew install bazelisk || true
+    - curl -LsSf https://astral.sh/uv/install.sh | sh
+    - export PATH="$HOME/.local/bin:$PATH"
+    - uv venv --python 3.11 --seed $VENV_DIR
+    - source $VENV_DIR/bin/activate
+    - uv pip install -r requirements_lock.txt
+    - bash ./setup_opencv.sh --ci
+    - ./build_scripts/objective_c/build_objective_c.sh
+    # Verify the Swift xcframework built by build_objective_c.sh
+    - mkdir -p ../.build/xcframework
+    - cp bazel-bin/bindings/swift/SmartSpectra.xcframework.zip ../.build/xcframework/
+    - command -v task >/dev/null 2>&1 || brew install go-task
+    - popd
+    - task ios:xcframework:verify
+    - |
+      if [ -n "$CI_MERGE_REQUEST_ID" ] && { [ "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME" = "test" ] || [ "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME" = "main" ]; }; then
+          echo "Checking for uncommitted changes in SmartSpectra Swift directory for merge request to test..."
+          # Detect any change (staged, unstaged, or untracked) under smartspectra/swift/
+          if [ -n "$(git status --porcelain -- smartspectra/swift/)" ]; then
+              echo "Error: Build process modified files in smartspectra/swift/ directory. This means binaries were not updated before merge to test."
+              echo "Modified files in SmartSpectra Swift directory:"
+              git status --porcelain -- smartspectra/swift/
+              echo "Please either:"
+              echo "1. Update the binaries manually and open a MR to dev"
+              echo "2. Download the artifacts from this job and paste them in the right folders, then commit them and open a MR to dev"
+              exit 2
+          fi
+          echo "No uncommitted changes found in SmartSpectra Swift directory. Skipping upload for merge request."
+      fi
+  # Only source-build/test inputs travel through the CI artifact upload. The
+  # unified distribution archive is built in publishers to avoid a combined 413.
+  artifacts:
+    when: always
+    paths:
+      - smartspectra/swift/sdk/Sources/PresagePreprocessingInternal/include/
+      - smartspectra/swift/sdk/Sources/Frameworks/
+      - smartspectra/swift/sdk/Sources/SmartSpectra/Generated/Protobuf/*.pb.swift
+    expire_in: 2 days
+
+build_smartspectra_swift_native_sbom:
+  allow_failure: false
+  tags:
+    - macos
+  stage: sbom
+  interruptible: false  # publishes immutable SBOM and Grype report to S3
+  variables:
+    VENV_DIR: ".venv"
+  before_script:
+    - bash ci/scripts/set_ci_remote_cache.sh
+  rules:
+    # Optional MR validation and vulnerability scan; publishing remains dry-run on MRs.
+    - if: $CI_MERGE_REQUEST_IID && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "dev"
+      when: manual
+      allow_failure: true
+      interruptible: true
+      changes:
+        paths:
+          !reference [.swift_changes, changes]
+    - if: $CI_COMMIT_BRANCH == "dev"
+      changes:
+        paths:
+          !reference [.swift_changes, changes]
+        compare_to: $LAST_SUCCESSFUL_DEV_PIPELINE
+    - if: $CI_COMMIT_BRANCH == "test"
+      changes:
+        paths:
+          !reference [.swift_changes, changes]
+        compare_to: $LAST_SUCCESSFUL_TEST_PIPELINE
+    - if: $CI_COMMIT_BRANCH == "main"
+      changes:
+        paths:
+          !reference [.swift_changes, changes]
+        compare_to: $LAST_SUCCESSFUL_MAIN_PIPELINE
+  script:
+    - pushd edge/
+    - brew update || true
+    - brew install awscli bazelisk || true
+    - curl -LsSf https://astral.sh/uv/install.sh | sh
+    - export PATH="$HOME/.local/bin:$PATH"
+    - uv venv --python 3.11 --seed $VENV_DIR
+    - source $VENV_DIR/bin/activate
+    - uv pip install -r requirements_lock.txt
+    - bash ./setup_opencv.sh --ci
+    - popd
+    # Derive native membership from the same release configuration without rebuilding.
+    - ci/scripts/generate-native-sbom.sh --config smartspectra/swift/ci/config/objective_c_binding_sbom_config.json --compilation-mode opt --validate --publish
+    - uv run --script ci/scripts/validate-third-party-notices.py --sbom ios=edge/edge_objective_c_sbom.csv
+  artifacts:
+    paths:
+      - edge/edge_objective_c_sbom.csv
+      - edge/edge_objective_c_sbom.json
+      - edge/edge_objective_c_bazel_sbom.csv
+    expire_in: 30 days
+    reports:
+      cyclonedx: edge/edge_objective_c_sbom.json

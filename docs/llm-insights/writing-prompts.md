@@ -65,10 +65,11 @@ add is sent off-device to the Presage gateway — see the
 ## Keep in mind
 
 - **Wait for warm-up.** A request made before the metrics buffer has filled is
-  sent **prompt-only**, with no physiology to ground it. Allow about
+  sent **prompt-only**, with no physiology to ground it. Allow at least
   **15 seconds** of measurement (see
   [Required metrics configuration](index.md#required-metrics-configuration))
-  before expecting a data-grounded answer.
+  before expecting a data-grounded answer, and up to about **60 seconds** for
+  HRV to be part of it.
 - **Keep prompts under the size limit.** A prompt is capped at **2048 bytes**
   (counted in bytes, so a non-ASCII character can use more than one). A prompt
   over the limit is rejected on-device, before the request is sent — shorten it,

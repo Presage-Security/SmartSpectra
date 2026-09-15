@@ -50,7 +50,7 @@ class SmartSpectraSdk
   public fun requestInsight(text: String): Int
   ```
 
-  Dispatch an on-demand insight request alongside the vitals samples buffered since the last send.
+  Dispatch an on-demand insight request alongside the vitals samples buffered since the last send. Requires an active measurement: the engine owns the insight session for the duration of a session, so call this after [start].
 
 - ```kotlin
   @SmartSpectraTestingApi public fun setVideoInputEnabled(enabled: Boolean)
@@ -204,7 +204,7 @@ Caller-supplied frame input, obtained from [SmartSpectraSdk.useCustomInput]. The
 public fun sendFrame(frame: VideoFrame, timestampUs: Long): FrameSubmissionResult
 ```
 
-Consumes the borrowed pixels before returning. Timestamps are strictly increasing microseconds on one monotonic timeline per run. Gaps greater than two seconds are rejected; stop and start the SDK to begin a fresh timeline after an interruption. Calls are serialized; no queue of caller-owned buffers is retained.
+Consumes the borrowed pixels before returning. Timestamps are strictly increasing microseconds on one monotonic timeline per run. Gaps greater than two seconds are rejected; stop and start the SDK to begin a fresh timeline after an interruption. Inspect the returned result: timestamp rejections do not end the session or publish a global SDK error. A later frame on the accepted timeline can still be sent. Calls are serialized; no queue of caller-owned buffers is retained.
 
 ```kotlin
 public fun sendFrame(frame: Bitmap, timestampUs: Long): FrameSubmissionResult

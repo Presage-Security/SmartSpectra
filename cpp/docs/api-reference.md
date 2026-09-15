@@ -82,7 +82,7 @@ Thread safety: all public methods are thread-safe and may be called from any thr
   void SetOnInsight(OnInsightFn cb)
   ```
 
-  Receives insight responses — both the auto-fired periodic VITALS (every 15 s of processing) and on-demand responses to RequestInsight(). Insight::type() is always INSIGHT_TYPE_VITALS today (SPEECH and COMBINED are reserved and not emitted), so correlate on-demand replies with Insight::request_id(), not type().
+  Receives insight responses — both the auto-fired VITALS snapshots (one as each of pulse rate, breathing rate and HRV first stabilises, then one every 60 s) and on-demand responses to RequestInsight(). Insight::type() is always INSIGHT_TYPE_VITALS today (SPEECH and COMBINED are reserved and not emitted), so correlate on-demand replies with Insight::request_id(), not type().
 
 - ```cpp
   [[nodiscard]] SmartSpectraError Start()
@@ -311,7 +311,7 @@ Thread safety: all public methods are thread-safe and may be called from any thr
   virtual SmartSpectraError Send(const FrameBuffer& frame, int64_t timestamp_us) = 0
   ```
 
-  Submits a frame for processing. The frame is consumed synchronously — its pixels are copied before Send() returns — so you only need to keep `frame` and its backing memory valid for the duration of the call; nothing is retained afterward. (Callers passing borrowed plane pointers, e.g. an Android ImageProxy, rely on this.)
+  Submits a frame for processing. The frame is consumed synchronously — its pixels are copied before Send() returns — so you only need to keep `frame` and its backing memory valid for the duration of the call; nothing is retained afterward. (Callers passing borrowed plane pointers, e.g. an Android ImageProxy, rely on this.) Inspect the returned error: kNonMonotonicTimestamp and kTimestampGap reject only this frame, leave the session active, and do not invoke SetOnError. Rejected timestamps do not advance the timeline; stop and start to begin a fresh timeline.
 
 ## FrameBuffer
 

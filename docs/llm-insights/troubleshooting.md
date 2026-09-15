@@ -111,7 +111,7 @@ transient and retry with backoff.
 | Network unavailable / server unreachable (after dispatch) | 2 | `error` with a transport message | Retry with backoff |
 | Request timed out | 2 | `error` (times out after ~30 s) | Retry with backoff |
 | Server returned an error status | 2 | `error` including an HTTP status | Look it up in [Response error status codes](#response-error-status-codes) |
-| Empty / insufficient metrics buffer | neither | On-demand request is sent prompt-only; auto-fired vitals are skipped | Allow ~15 s of measurement to warm up the buffer |
+| Empty / insufficient metrics buffer | neither | On-demand request is sent prompt-only; auto-fired vitals wait for the first stable reading | Allow ~15 s of measurement to warm up the buffer |
 | Nothing to analyze | neither | Sink is never called | Use a UI timeout (below); don't block indefinitely |
 
 ## Retry patterns and best practices
@@ -211,8 +211,9 @@ reporting the server returned no analysis are transient — retry with backoff.
 ### No insight ever arrives
 
 Three benign causes, in order of likelihood: (1) the metrics buffer hasn't
-warmed up yet — wait ~15 seconds after `Start()`; (2) no response sink was
-registered, so replies have nowhere to go — register it before starting; (3) the
+warmed up yet — the first auto-fired insight waits for a stable pulse rate,
+typically ~15 seconds after `Start()`; (2) no response sink was registered, so
+replies have nowhere to go — register it before starting; (3) the
 server had nothing to analyze and returned no result, so the sink was
 deliberately not called. Because (3) is silent, always back a pending request
 with a UI timeout.

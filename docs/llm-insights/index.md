@@ -22,8 +22,12 @@ LLM Insights follow a request/response model. There are two ways a request is
 dispatched, and both deliver their response through the same sink:
 
 - **Auto-fired vitals** — once a session is running, the SDK automatically
-  dispatches a vitals snapshot of the accumulated metrics buffer every
-  **15 seconds of processing** (no prompt).
+  dispatches vitals snapshots of the accumulated metrics buffer: one the first
+  time pulse rate has a stable reading, one when breathing rate does, one when
+  HRV does, and then one every **60 seconds** for as long as the session runs.
+  You supply no prompt for these; the SDK sends a fixed one of its own —
+  *"Provide a concise vitals check-in based on the latest measurements."* The service may return no analysis for a given snapshot,
+  in which case no insight is delivered for it.
 - **On-demand** — you request an insight with a prompt. If the metrics buffer
   already holds vitals at dispatch time, the request is **combined** (your
   prompt plus the latest metrics); if the buffer is still empty, it is
@@ -85,10 +89,11 @@ Insights are only meaningful when the metrics they summarize are being computed:
   on-screen pulse waveform and is part of the cardio metrics.
 - **Allow warm-up time before insights are meaningful.** The metrics buffer
   starts empty and fills as valid measurement accumulates. The first auto-fired
-  vitals insight is dispatched about **15 seconds** after the session starts,
-  and an on-demand request made before the buffer has filled is sent prompt-only
-  (no metrics). Wait for at least that long before expecting analysis grounded
-  in the user's physiology.
+  vitals snapshot goes out when pulse rate first has a stable reading, typically
+  about **15 seconds** in; breathing rate and HRV join in their own snapshots as
+  their analysis windows fill (about 30 and 60 seconds; see the warm-up section
+  of the measurement-quality guide). An on-demand request made before the
+  buffer has filled is sent prompt-only (no metrics).
 
 ## Privacy & data notice
 

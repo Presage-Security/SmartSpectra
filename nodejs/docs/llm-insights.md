@@ -75,8 +75,10 @@ and `error` are a `result` oneof (exactly one is set), with `requestId`,
 `type` == `INSIGHT_TYPE_VITALS`, so correlate on-demand replies via `requestId`,
 not `type`.
 
-The first auto-fired insight arrives about 15 seconds after processing starts;
-allow that much valid measurement before an on-demand request can be grounded in
+The first auto-fired insight arrives once pulse rate has a stable reading,
+typically about 15 seconds after processing starts; further snapshots follow as
+breathing rate and HRV stabilise, then every 60 seconds. Allow at least
+15 seconds of valid measurement before an on-demand request can be grounded in
 the user's physiology. Note that the service may return no insight for a given
 request (for example when nothing new is worth surfacing), in which case the
 callback does not fire.
