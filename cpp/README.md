@@ -30,6 +30,15 @@ For platforms marked "Not supported" or anything not listed above, contact
 [support@presagetech.com](mailto:support@presagetech.com) if you have a
 specific need.
 
+## Camera selection
+
+On Linux, macOS, and Windows, discover cameras with `SmartSpectra::AvailableCameras(cameras)` and
+choose one with `spectra.UseCamera(CameraSelection::ById(camera.id)).Build()`.
+`Default()`, `Front()`, and `Back()` express a camera preference or requirement.
+Discovery also exists in the native C++ API on iOS. See the
+[camera selection migration notes](docs/migration-guide.md#upcoming-release-explicit-camera-selection)
+for platform support, errors, and a complete example.
+
 ## Common Prerequisites
 
 All platforms need:

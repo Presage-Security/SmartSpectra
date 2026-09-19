@@ -17,6 +17,10 @@ namespace winrt::SmartSpectraWinUI::implementation
 
         void OnToggleClick(::winrt::Windows::Foundation::IInspectable const&,
                            ::winrt::Microsoft::UI::Xaml::RoutedEventArgs const&);
+        void OnRefreshCamerasClick(::winrt::Windows::Foundation::IInspectable const&,
+                                   ::winrt::Microsoft::UI::Xaml::RoutedEventArgs const&);
+        void OnCameraSelectionChanged(::winrt::Windows::Foundation::IInspectable const&,
+                                      ::winrt::Microsoft::UI::Xaml::Controls::SelectionChangedEventArgs const&);
         void OnInsightClick(::winrt::Windows::Foundation::IInspectable const&,
                             ::winrt::Microsoft::UI::Xaml::RoutedEventArgs const&);
         void OnGraphCanvasSizeChanged(::winrt::Windows::Foundation::IInspectable const&,
@@ -41,6 +45,11 @@ namespace winrt::SmartSpectraWinUI::implementation
         LineGraph m_bp_trace;
         LineGraph m_eda_trace;
         bool m_running = false;
+        bool m_lifecycle_busy = false;
+        presage::smartspectra::ProcessingStatus m_status =
+            presage::smartspectra::ProcessingStatus::kUninitialized;
+        std::vector<presage::smartspectra::CameraInfo> m_cameras;
+        std::string m_selected_camera_id;
         std::thread m_lifecycle_thread;
         std::mutex m_lifecycle_mutex;
         ::winrt::Microsoft::UI::Dispatching::DispatcherQueue m_ui_queue{ nullptr };
@@ -53,8 +62,11 @@ namespace winrt::SmartSpectraWinUI::implementation
                          LineGraph const& trace,
                          ::winrt::Windows::UI::Color const& line_color);
         void RebuildPreview(int w, int h);
+        void RefreshCameras();
+        void UpdateControls();
         void RunLifecycleAsync(
-            std::function<void(presage::smartspectra::SmartSpectra&)> operation);
+            std::function<presage::smartspectra::SmartSpectraError(
+                presage::smartspectra::SmartSpectra&)> operation);
     };
 }
 

@@ -1,5 +1,17 @@
 <resources>
     <string name="app_name">SmartSpectra Minimal</string>
+    <string name="camera_select">Select camera</string>
+    <string name="camera_default">Default</string>
+    <string name="camera_refresh">Refresh</string>
+    <string name="camera_loading">Finding cameras…</string>
+    <string name="camera_empty">No cameras found. Check camera permission, connect a camera, then refresh.</string>
+    <string name="camera_front">Front</string>
+    <string name="camera_back">Back</string>
+    <string name="camera_unknown">Unknown facing</string>
+    <string name="camera_unnamed">Camera</string>
+    <string name="camera_label">%1$s · %2$s · %4$s\nID: %3$s</string>
+    <string name="camera_selected">Camera selected: %1$s</string>
+    <string name="camera_failed">Unable to select a camera. Reopen the camera list and try again.</string>
     <string name="preview_content_description">SmartSpectra preview output</string>
     <string name="heart_rate_title">Heart Rate</string>
     <string name="heart_rate_placeholder">-- bpm</string>
@@ -26,4 +38,8 @@
     <string name="toggle_starting">Starting…</string>
     <string name="toggle_stop">Stop</string>
     <string name="toggle_stopping">Stopping…</string>
+    <string name="camera_wide_angle">Wide-angle</string>
+    <string name="camera_ultra_wide">Ultra-wide</string>
+    <string name="camera_telephoto">Telephoto</string>
+    <string name="camera_unknown_lens">Unknown lens</string>
 </resources>

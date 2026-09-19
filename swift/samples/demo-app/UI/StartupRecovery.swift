@@ -15,7 +15,7 @@ enum StartupRecovery {
     }
 
     static func canEnterScreeningFlow(sdk: SmartSpectraSDK, videoInputEnabled: Bool) -> Bool {
-        let inputBlocked = sdk.error?.code == .inputUnavailable
+        let inputBlocked = sdk.processingStatus == .error && sdk.error?.code == .inputUnavailable
         return !inputBlocked || shouldShowOpenSettingsAction(sdk: sdk, videoInputEnabled: videoInputEnabled)
     }
 }

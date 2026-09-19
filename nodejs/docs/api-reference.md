@@ -23,6 +23,12 @@ await sdk.destroy();
 ### Methods
 
 - ```typescript
+  static availableCameras(): CameraInfo[]
+  ```
+
+  No SDK instance, authentication, or capture required. Throws when discovery is unsupported.
+
+- ```typescript
   constructor(options?: SmartSpectraOptions)
   ```
 
@@ -30,7 +36,7 @@ await sdk.destroy();
   start(): void
   ```
 
-  Initialize and begin a custom-input session.
+  Initialize and begin the input configured with useCamera, useCustomInput, or useFile.
 
 - ```typescript
   stop(): void
@@ -48,7 +54,7 @@ await sdk.destroy();
   reset(): void
   ```
 
-  Rebuild the processing pipeline after kError; source must be reconfigured before next start().
+  Rebuild after kError. Clears the source unless useCamera(selection, options) opted into retention. After typed selection, throws kInvalidState while stopAsync() is pending; await it before resetting.
 
 - ```typescript
   waitUntilComplete(timeoutMs?: number): boolean
@@ -75,10 +81,16 @@ await sdk.destroy();
   Select the custom frame-push input source (push frames via `sendFrame()` after `start()`). Returns `this` for chaining; call before `start()`.
 
 - ```typescript
+  useCamera(selection: CameraSelection, options?: Omit<CameraOptions, 'deviceIndex'>): this
+  ```
+
+  Select a live camera as the input source. The SDK opens the camera and pumps frames internally on `start()` — no `sendFrame()` needed. Returns `this` for chaining. Captures in THIS process — for Electron, prefer the renderer SDK's `useMediaStream()`. Select while stopped; explicit requests never fall back. Selection is resolved at startup and retained across stop/start/reset. Invalid or busy requests preserve the previous source. Pass CameraSelection.default for SDK selection.
+
+- ```typescript
   useCamera(options?: CameraOptions): this
   ```
 
-  Select a live camera as the input source. The SDK opens the camera and pumps frames internally on `start()` — no `sendFrame()` needed. Returns `this` for chaining. Captures in THIS process — for Electron, prefer the renderer SDK's `useMediaStream()`.
+  Select a camera by legacy index (default 0). Reset clears the source. @deprecated Pass an explicit CameraSelection and separate capture options instead.
 
 - ```typescript
   useFile(videoPath: string, options?: VideoFileOptions): this
@@ -210,13 +222,13 @@ Spatial transform applied to every frame.
 
 ## CameraOptions
 
-Camera capture options for useCamera().
+Capture settings, separate from camera selection.
 
 ```typescript
 deviceIndex?: number
 ```
 
-Camera device index; omit/0 = default device.
+@deprecated Use useCamera(CameraSelection.byId(id), options) instead.
 
 ```typescript
 width?: number
@@ -246,19 +258,19 @@ Spatial transform applied to every frame.
 
 Frame transform applied by the SDK to every pushed frame.
 
-- `readonly kNone:             0`
-- `readonly kRotate90CW:       1`
-- `readonly kRotate90CCW:      2`
-- `readonly kRotate180:        3`
+- `readonly kNone: 0`
+- `readonly kRotate90CW: 1`
+- `readonly kRotate90CCW: 2`
+- `readonly kRotate180: 3`
 - `readonly kMirrorHorizontal: 4`
-- `readonly kMirrorVertical:   5`
+- `readonly kMirrorVertical: 5`
 
 ## PixelFormat
 
 Pixel format of a raw frame buffer passed to sendFrame().
 
-- `readonly kRGB:  0`
-- `readonly kBGR:  1`
+- `readonly kRGB: 0`
+- `readonly kBGR: 1`
 - `readonly kRGBA: 2`
 - `readonly kBGRA: 3`
 - `readonly kNV12: 4`
@@ -280,39 +292,39 @@ Processing lifecycle status. Integer values are stable across SDK versions.
 
 Measurement-readiness codes delivered via the 'validationStatus' event.
 
-- `readonly kOk:                 0`
-- `readonly kNoFaceFound:        1`
+- `readonly kOk: 0`
+- `readonly kNoFaceFound: 1`
 - `readonly kMultipleFacesFound: 2`
-- `readonly kFaceNotCentered:    3`
+- `readonly kFaceNotCentered: 3`
 - `readonly kFaceSizeOutOfRange: 4`
-- `readonly kTooDark:            5`
-- `readonly kTooBright:          6`
-- `readonly kChestNotVisible:    7`
-- `readonly kCameraTuning:       10`
-- `readonly kFrameRateTooLow:    11`
-- `readonly kExcessiveMotion:    12`
-- `readonly kFaceTooClose:       13`
-- `readonly kFaceTooFar:         14`
-- `readonly kFaceTooHigh:        15`
-- `readonly kFaceTooLow:         16`
-- `readonly kFaceNotForward:       17`
+- `readonly kTooDark: 5`
+- `readonly kTooBright: 6`
+- `readonly kChestNotVisible: 7`
+- `readonly kCameraTuning: 10`
+- `readonly kFrameRateTooLow: 11`
+- `readonly kExcessiveMotion: 12`
+- `readonly kFaceTooClose: 13`
+- `readonly kFaceTooFar: 14`
+- `readonly kFaceTooHigh: 15`
+- `readonly kFaceTooLow: 16`
+- `readonly kFaceNotForward: 17`
 
 ## SmartSpectraErrorCode
 
 Error codes on errors thrown by lifecycle methods and delivered via the 'error' event.
 
-- `readonly kOk:                    0`
-- `readonly kInvalidState:          1`
-- `readonly kAuthenticationFailed:  2`
-- `readonly kConfigurationFailed:   3`
-- `readonly kCreditExhausted:       4`
-- `readonly kNetworkError:          5`
-- `readonly kServerError:           6`
-- `readonly kInputUnavailable:      7`
-- `readonly kProcessingFailed:      8`
+- `readonly kOk: 0`
+- `readonly kInvalidState: 1`
+- `readonly kAuthenticationFailed: 2`
+- `readonly kConfigurationFailed: 3`
+- `readonly kCreditExhausted: 4`
+- `readonly kNetworkError: 5`
+- `readonly kServerError: 6`
+- `readonly kInputUnavailable: 7`
+- `readonly kProcessingFailed: 8`
 - `readonly kFrameConversionFailed: 9`
 - `readonly kNonMonotonicTimestamp: 10`
-- `readonly kTimestampGap:          11`
+- `readonly kTimestampGap: 11`
 
 ## decodeMetrics()
 
@@ -326,12 +338,89 @@ Register a protobuf Metrics class exposing `deserializeBinary(buf)` (google-prot
 
 `export declare function setMetricsClass(cls: unknown): void`
 
+## CameraInfo
+
+Discovery snapshot. IDs are opaque and platform-local; rediscover before reuse.
+
+```typescript
+readonly id: string
+```
+
+```typescript
+readonly name: string | null
+```
+
+```typescript
+readonly facing: CameraFacing
+```
+
+```typescript
+readonly lensType: CameraLensType
+```
+
 ## SmartSpectraLogLevel
 
 Verbosity of SDK logging, set via the SmartSpectraSDK `logLevel` option. Levels are cumulative: a level shows its own messages plus everything more severe.
 
-- `readonly kDebug:   0`
-- `readonly kInfo:    1`
+- `readonly kDebug: 0`
+- `readonly kInfo: 1`
 - `readonly kWarning: 2`
-- `readonly kError:   3`
-- `readonly kNone:    4`
+- `readonly kError: 3`
+- `readonly kNone: 4`
+
+## CameraSelection
+
+- `readonly default: Readonly<{ kind: 'default' }>`
+- `readonly front: Readonly<{ kind: 'front' }>`
+- `readonly back: Readonly<{ kind: 'back' }>`
+- `readonly byId: (id: string) => Readonly<{ kind: 'byId'; id: string }>`
+
+## ProcessingStatusValue
+
+```typescript
+export type ProcessingStatusValue = typeof ProcessingStatus[keyof typeof ProcessingStatus];
+```
+
+## SmartSpectraLogLevelValue
+
+```typescript
+export type SmartSpectraLogLevelValue = typeof SmartSpectraLogLevel[keyof typeof SmartSpectraLogLevel];
+```
+
+## PixelFormatValue
+
+```typescript
+export type PixelFormatValue = typeof PixelFormat[keyof typeof PixelFormat];
+```
+
+## ValidationCodeValue
+
+```typescript
+export type ValidationCodeValue = typeof ValidationCode[keyof typeof ValidationCode];
+```
+
+## SmartSpectraErrorCodeValue
+
+```typescript
+export type SmartSpectraErrorCodeValue = typeof SmartSpectraErrorCode[keyof typeof SmartSpectraErrorCode];
+```
+
+## FrameTransformValue
+
+```typescript
+export type FrameTransformValue = typeof FrameTransform[keyof typeof FrameTransform];
+```
+
+## CameraFacing
+
+```typescript
+export type CameraFacing = 'front' | 'back' | 'unknown';
+```
+
+## CameraLensType
+
+Best-effort classification. Missing metadata and multi-lens cameras are unknown; independent of digital zoom.
+
+```typescript
+export type CameraLensType = 'unknown' | 'wideAngle' | 'ultraWide' | 'telephoto';
+```

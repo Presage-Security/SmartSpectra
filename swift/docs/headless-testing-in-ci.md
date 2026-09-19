@@ -66,7 +66,7 @@ case .rejected(let error):
 Use the sample's presentation timestamp and pace decoding to the clip's timing.
 For a pixel buffer, call `input.sendFrame(pixelBuffer, timestampUs: timestampUs)`.
 Assert that requested metrics appear, not merely that frames were accepted.
-Stop submission before awaiting `sdk.reset()`, then call `try sdk.useCamera()`
+Stop submission before awaiting `sdk.reset()`, then call `try sdk.useCamera(.default)`
 to restore the shared SDK for later tests. Perform cleanup on failure as well
 as success. See the [custom-input contract](headless-mode.md#use-your-own-camera-or-video-source)
 and the [app-owned decoder sample](https://github.com/Presage-Security/SmartSpectra/blob/main/swift/samples/demo-app/VideoInput/VideoTestingView.swift).
@@ -128,11 +128,11 @@ final class VideoMeasurementTests: XCTestCase {
             XCTAssertTrue(sawBreathing, "no breathing reading came out of the recorded clip")
         } catch {
             try await sdk.reset()
-            try sdk.useCamera()
+            try sdk.useCamera(.default)
             throw error
         }
         try await sdk.reset()
-        try sdk.useCamera()
+        try sdk.useCamera(.default)
     }
 }
 ```

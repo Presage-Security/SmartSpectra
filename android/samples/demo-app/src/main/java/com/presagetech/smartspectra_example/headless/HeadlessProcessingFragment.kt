@@ -22,7 +22,7 @@ import com.presagetech.smartspectra_example.ui.screening.ScreeningPlotView
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.switchmaterial.SwitchMaterial
-import com.presagetech.smartspectra.CameraPosition
+import com.presagetech.smartspectra_example.ui.CameraPickerDialogFragment
 import com.presagetech.smartspectra.SmartSpectraConfig
 import com.presagetech.smartspectra.ProcessingStatus
 import com.presagetech.smartspectra.SmartSpectraError
@@ -49,11 +49,7 @@ class HeadlessProcessingFragment : Fragment() {
     // ScreeningPlotView for rendering pulse, breathing, and arterial pressure plots during continuous measurements.
     private lateinit var vitalsView: ScreeningPlotView
 
-    // SmartSpectra SDK settings
-    // define front or back camera to use
-    private val sdk by lazy { SmartSpectraSdk.shared.apply {
-        config.cameraPosition = CameraPosition.FRONT
-    } }
+    private val sdk by lazy { SmartSpectraSdk.shared }
 
     private var isMonitoring = false
     private var latestProcessingStatus: ProcessingStatus = ProcessingStatus.IDLE
@@ -91,6 +87,12 @@ class HeadlessProcessingFragment : Fragment() {
         vitalsView.bindLifecycleOwner(viewLifecycleOwner)
         applySharedMetricSettingsToUi()
         statusHintText.visibility = View.GONE
+        val cameraButton = view.findViewById<MaterialButton>(R.id.button_select_camera)
+        cameraButton.isEnabled = CameraPickerDialogFragment.canOpen(sdk.processingStatus.value)
+        cameraButton.setOnClickListener { CameraPickerDialogFragment.show(childFragmentManager) }
+        sdk.processingStatus.observe(viewLifecycleOwner) { status ->
+            cameraButton.isEnabled = CameraPickerDialogFragment.canOpen(status)
+        }
         sdk.processingStatus.observe(viewLifecycleOwner) { updateProcessingStatus(it) }
         sdk.validationStatus.observe(viewLifecycleOwner) { status ->
             latestValidationStatus = status

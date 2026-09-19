@@ -183,22 +183,26 @@ struct MonitoringView: View {
 
 ## Camera Handling
 
-For SDK-owned capture, set the camera on the shared config before calling
+For SDK-owned capture, select the camera while stopped before calling
 `try await sdk.start()`.
 
 ```swift
 let sdk = SmartSpectraSDK.shared
 
 sdk.config.apiKey = "YOUR_API_KEY"
-sdk.config.cameraPosition = .front
+try sdk.useCamera(.front)
 ```
 
-If your app needs to use the other camera for a later session, update the shared config before starting again.
+To change cameras, stop, select the camera, and start again. Explicit selections
+never fall back to another camera.
 
 ```swift
-func switchToBackCamera() {
+@MainActor
+func switchToBackCamera() async throws {
     let sdk = SmartSpectraSDK.shared
-    sdk.config.cameraPosition = .back
+    try await sdk.stop()
+    try sdk.useCamera(.back)
+    try await sdk.start()
 }
 ```
 

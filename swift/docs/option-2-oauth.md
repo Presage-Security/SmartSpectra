@@ -159,7 +159,7 @@ struct ContentView: View {
     @State private var latestExpressionScores: [ExpressionScore] = []
 
     init() {
-        sdk.config.cameraPosition = .front
+        // The default camera selection prefers front when available.
         sdk.config.imageOutputEnabled = true
         sdk.config.requestedMetrics =
             SmartSpectraConfig.breathingMetrics +

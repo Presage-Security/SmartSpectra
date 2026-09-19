@@ -33,6 +33,7 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
             <TextBlock x:Name="StatusText" Grid.Row="0" Text="Idle"
@@ -98,12 +99,30 @@
                        Foreground="White" FontSize="13" TextWrapping="Wrap"
                        MaxLines="3" Margin="0,0,0,16"/>
 
-            <StackPanel Grid.Row="5" Orientation="Horizontal"
+            <Grid Grid.Row="5" Margin="0,0,0,12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Spacing="4" Margin="0,0,12,0">
+                    <ComboBox x:Name="CameraPicker" Header="Camera"
+                              PlaceholderText="Select a camera"
+                              HorizontalAlignment="Stretch" IsEnabled="False"
+                              SelectionChanged="OnCameraSelectionChanged"/>
+                    <TextBlock x:Name="CameraHintText" Foreground="#B0FFFFFF"
+                               FontSize="12" TextWrapping="Wrap"/>
+                </StackPanel>
+                <Button x:Name="RefreshCamerasButton" Grid.Column="1"
+                        Content="Refresh cameras" VerticalAlignment="Center"
+                        Click="OnRefreshCamerasClick" IsEnabled="False"/>
+            </Grid>
+
+            <StackPanel Grid.Row="6" Orientation="Horizontal"
                         HorizontalAlignment="Right" Spacing="12">
                 <Button x:Name="InsightButton" Content="Ask AI"
                         Click="OnInsightClick" MinWidth="120"/>
                 <Button x:Name="ToggleButton" Content="Start"
-                        Click="OnToggleClick" MinWidth="120"
+                        Click="OnToggleClick" MinWidth="120" IsEnabled="False"
                         Style="{ThemeResource AccentButtonStyle}"/>
             </StackPanel>
         </Grid>

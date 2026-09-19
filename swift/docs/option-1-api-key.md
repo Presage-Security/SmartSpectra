@@ -135,7 +135,7 @@ struct ContentView: View {
 
     init() {
         sdk.config.apiKey = "YOUR_API_KEY"
-        sdk.config.cameraPosition = .front
+        // The default camera selection prefers front when available.
         sdk.config.imageOutputEnabled = true
         sdk.config.requestedMetrics =
             SmartSpectraConfig.breathingMetrics +

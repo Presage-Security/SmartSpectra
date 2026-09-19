@@ -106,7 +106,7 @@ the missing package.
 - Electron desktop app: use `@smartspectra/node-sdk/main`,
   `@smartspectra/node-sdk/preload`, and `@smartspectra/node-sdk/renderer`.
 - Headless Node process with a local camera: use `@smartspectra/node-sdk`
-  directly with `useCamera()`.
+  directly with `useCamera(CameraSelection.default)`.
 - Headless or server-side Node process with host-provided frames: use
   `useCustomInput()` / `sendFrame()`.
 - Runnable reference app: [electron-quickstart](https://github.com/Presage-Security/SmartSpectra/tree/main/nodejs/samples/electron-quickstart)
@@ -118,7 +118,7 @@ the missing package.
 > wrap the `await` calls in an `async` function.
 
 ```ts
-import { SmartSpectraSDK, breathingMetrics, cardioMetrics, decodeMetrics } from '@smartspectra/node-sdk';
+import { SmartSpectraSDK, CameraSelection, breathingMetrics, cardioMetrics, decodeMetrics } from '@smartspectra/node-sdk';
 
 const sdk = new SmartSpectraSDK({
   apiKey: 'YOUR_API_KEY',
@@ -134,7 +134,7 @@ sdk.on('metrics', (buf, ts) => {
 sdk.on('error', (code, message, retryable) =>
   console.error('SmartSpectra error', code, message, 'retryable=', retryable));
 
-sdk.useCamera();
+sdk.useCamera(CameraSelection.default);
 sdk.start();
 
 console.log('Measuring from the default camera. Press Ctrl+C to stop.');
@@ -147,10 +147,28 @@ process.on('SIGINT', async () => {
 });
 ```
 
-`useCamera()` opens the default camera and sends frames after `start()`. Pass a
-device index or capture dimensions to select another camera; see the [API
-reference](docs/api-reference.md#cameraoptions). Use the custom-input path
-below only when your app already owns frame capture.
+`useCamera(CameraSelection.default)` selects the default camera while stopped; capture begins at
+`start()`. You can discover cameras without creating an SDK instance:
+
+```ts
+import { CameraSelection, SmartSpectraSDK } from '@smartspectra/node-sdk';
+
+const cameras = SmartSpectraSDK.availableCameras();
+if (cameras.length > 0) {
+  sdk.useCamera(CameraSelection.byId(cameras[0].id), { width: 1280, height: 720 });
+}
+```
+
+`CameraSelection.default`, `.front`, `.back`, and `.byId(id)` share the camera
+selection contract across SDKs. Explicit requests never fall back. Stop/start/reset
+retain the chosen input. Only macOS currently supports discovery and explicit
+selectors in native Node.js; Linux/Windows report `kConfigurationFailed` for those
+operations and continue to support default capture. See the
+[migration guide](docs/migration-guide.md) and [API reference](docs/api-reference.md#cameraoptions).
+
+Electron renderer capture uses browser-owned streams and `useMediaStream()`;
+browser device IDs cannot be used for native camera selection. Use the
+custom-input path below when your app already owns frame capture.
 
 ## Custom Input Quickstart
 

@@ -45,7 +45,7 @@ Use `./minimal_example --help=main` to print the flag list.
 2. Configures SmartSpectra with the requested metrics (or defaults) and your API key.
 3. Registers `SetOnMetrics` and `SetOnError` callbacks before starting.
 4. Builds an input source from `--input_video_path` when present, otherwise
-   from the default camera (`UseCamera()`).
+   from the platform's preferred camera (`UseCamera(CameraSelection::Default())`).
 5. Starts measurement and blocks on `WaitUntilComplete()`.
 6. Stops cleanly on Ctrl+C / EOF.
 

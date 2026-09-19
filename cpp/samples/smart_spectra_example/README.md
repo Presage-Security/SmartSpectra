@@ -19,7 +19,13 @@ cmake --build build --target smart_spectra_example
 # Camera input (default device)
 ./build/samples/smart_spectra_example/smart_spectra_example --api_key=YOUR_API_KEY_HERE
 
-# Specific camera device
+# Discover cameras without an API key (Linux, macOS, Windows)
+./build/samples/smart_spectra_example/smart_spectra_example --list_cameras
+
+# Select an exact ID from the listing
+./build/samples/smart_spectra_example/smart_spectra_example --api_key=YOUR_API_KEY_HERE --camera_id="ID"
+
+# Legacy camera device index
 ./build/samples/smart_spectra_example/smart_spectra_example --api_key=YOUR_API_KEY_HERE --camera_device_index=1
 
 # Video file input
@@ -28,13 +34,21 @@ cmake --build build --target smart_spectra_example
 
 ## Flags
 
-| Flag                      | Description                                       |
-|---------------------------|---------------------------------------------------|
-| `--api_key`               | API key for the Physiology service.               |
-| `--camera_device_index`   | The index of the camera device to use (default 0).|
-| `--input_video_path`      | Path to a video file (omit for camera input).     |
+| Flag | Description |
+| --- | --- |
+| `--api_key` | API key for the Physiology service. |
+| `--camera_device_index` | The index of the camera device to use (default 0). |
+| `--list_cameras` | Print IDs, names, facing, and lens type, then exit without authentication. |
+| `--camera_id` | Select an exact discovered ID; overrides `--camera_device_index`. |
+| `--input_video_path` | Path to a video file (omit for camera input). |
 
 Use `./smart_spectra_example --help=main` to print the full flag list.
+
+Camera discovery and ID selection work on Linux, macOS, and Windows.
+Treat IDs as opaque and quote them when passing them on the command line.
+`--camera_id` cannot be combined with `--input_video_path`; a missing camera
+fails instead of selecting another device. Without an ID, legacy index selection
+is preserved.
 
 ## See also
 

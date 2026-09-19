@@ -43,7 +43,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import com.presagetech.smartspectra.CameraPosition
+import com.presagetech.smartspectra.CameraSelection
 import com.presagetech.smartspectra.ProcessingStatus
 import com.presagetech.smartspectra.SmartSpectraError
 import com.presagetech.smartspectra.SmartSpectraSdk
@@ -53,7 +53,7 @@ class HeadlessFragment : Fragment() {
     private val sdk by lazy {
         SmartSpectraSdk.shared.apply {
             config.apiKey = "YOUR_API_KEY"
-            config.cameraPosition = CameraPosition.FRONT
+            useCamera(CameraSelection.Front)
             config.imageOutputEnabled = true
         }
     }
@@ -296,10 +296,10 @@ resuming submission. Do not rewrite live timestamps to hide the gap.
 
 ### Switching sources and reusing handles
 
-Call `useCustomInput()` and `useCamera()` only while stopped. Source
+Call `useCustomInput()` and `useCamera(selection)` only while stopped. Source
 selection during processing throws `SmartSpectraException`. To return to
-SDK-owned capture, stop, call `sdk.useCamera()`, then start; the SDK uses
-your existing camera configuration.
+SDK-owned capture, stop, call `sdk.useCamera(CameraSelection.Default)`, then
+start. To require a specific camera, pass its discovered ID instead.
 
 Handles survive stop/start and reset. Selecting another source—including
 another `useCustomInput()` call—invalidates them. Frames submitted while

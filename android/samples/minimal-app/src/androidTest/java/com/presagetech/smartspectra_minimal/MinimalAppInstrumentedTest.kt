@@ -11,10 +11,12 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.matcher.ViewMatchers.withId
+import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.android.material.button.MaterialButton
 import com.presagetech.smartspectra.ProcessingStatus
+import com.presagetech.smartspectra.CameraSelection
 import com.presagetech.smartspectra.SmartSpectraSdk
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -25,6 +27,42 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class MinimalAppInstrumentedTest {
+
+    @Test
+    fun cameraCanBeSelectedAfterStartFails() {
+        grantCameraPermission()
+        ActivityScenario.launch(MainActivity::class.java).use { scenario ->
+            waitForActivityWindowFocus(scenario)
+            scenario.onActivity {
+                // Cannot start even when CI supplies valid credentials. A local
+                // auth/configuration failure reaches the same public ERROR state.
+                SmartSpectraSdk.shared.useCamera(CameraSelection.ById("missing-camera-for-recovery-test"))
+            }
+            onView(withId(R.id.toggle_button)).perform(click())
+            waitForCondition("failed start to reach ERROR") {
+                SmartSpectraSdk.shared.processingStatus.value == ProcessingStatus.ERROR
+            }
+            scenario.onActivity { activity ->
+                assertTrue(activity.findViewById<MaterialButton>(R.id.camera_button).isEnabled)
+            }
+            onView(withId(R.id.camera_button)).perform(click())
+            waitForCondition("camera picker to recover the failed session") {
+                var pickerReady = false
+                scenario.onActivity { activity ->
+                    pickerReady = activity.findViewById<MaterialButton>(R.id.camera_button).isEnabled
+                }
+                pickerReady && SmartSpectraSdk.shared.processingStatus.value == ProcessingStatus.IDLE
+            }
+            onView(withText(targetString(R.string.camera_default))).perform(click())
+            scenario.onActivity { activity ->
+                assertEquals(
+                    activity.getString(R.string.camera_selected, activity.getString(R.string.camera_default)),
+                    activity.findViewById<TextView>(R.id.status_label).text.toString(),
+                )
+                assertTrue(activity.findViewById<MaterialButton>(R.id.camera_button).isEnabled)
+            }
+        }
+    }
 
     @Test
     fun minimalAppLaunches() {

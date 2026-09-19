@@ -5,11 +5,9 @@
 
 package com.presagetech.smartspectra_example.checkup
 
-import androidx.camera.core.CameraSelector
 import androidx.lifecycle.Observer
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import com.presagetech.smartspectra.CameraPosition
 import com.presagetech.smartspectra.ProcessingStatus
 import com.presagetech.smartspectra.SmartSpectraSdk
 import com.presagetech.smartspectra.proto.MetricsProto.Measurement
@@ -19,7 +17,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 
-private const val KEY_CAMERA_POSITION = "cameraPosition"
 private const val KEY_CARDIO_MEASUREMENTS_ENABLED = "cardioMeasurementsEnabled"
 private const val KEY_FACE_METRICS_ENABLED = "faceMetricsEnabled"
 private const val KEY_EDA_MEASUREMENTS_ENABLED = "edaMeasurementsEnabled"
@@ -41,11 +38,6 @@ class CheckupViewModel(
 ) : ViewModel() {
 
     private val smartSpectraSdk = SmartSpectraSdk.shared
-
-    // select camera (front or back, defaults to front when not set)
-    private val _cameraPosition =
-        MutableStateFlow(savedStateHandle[KEY_CAMERA_POSITION] ?: CameraSelector.LENS_FACING_FRONT)
-    val cameraPosition: StateFlow<Int> = _cameraPosition
 
     private val _cardioMeasurementsEnabled =
         MutableStateFlow(savedStateHandle[KEY_CARDIO_MEASUREMENTS_ENABLED] ?: false)
@@ -100,12 +92,6 @@ class CheckupViewModel(
         smartSpectraSdk.metrics.removeObserver(metricsObserver)
         smartSpectraSdk.processingStatus.removeObserver(processingStatusObserver)
         super.onCleared()
-    }
-
-    fun setCameraPosition(value: Int) {
-        smartSpectraSdk.config.cameraPosition = CameraPosition.fromLensFacing(value)
-        _cameraPosition.update { value }
-        savedStateHandle[KEY_CAMERA_POSITION] = value
     }
 
     fun setCardioMeasurementsEnabled(value: Boolean) {

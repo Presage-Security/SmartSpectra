@@ -35,10 +35,14 @@ class SmartSpectraSdk
   Select caller-supplied frames while stopped. No camera discovery, capture, or camera permission is required. Replacing the source invalidates older handles. Throws [SmartSpectraException] with INVALID_STATE during processing or startup.
 
 - ```kotlin
-  public fun useCamera()
+  public fun useCamera(selection: CameraSelection)
   ```
 
-  Select SDK camera capture while stopped, using the existing camera configuration.
+  Select SDK camera capture while stopped. Default prefers front, then the first discovered camera. Explicit selections never fall back. Resolution happens when capture starts; unavailable cameras report INPUT_UNAVAILABLE. Throws CONFIGURATION_FAILED for an empty ID and INVALID_STATE while busy. Rejected requests preserve the previous source. Stop/start/reset retain the chosen selection until another source is selected.
+
+- ```kotlin
+  @Deprecated("Pass an explicit CameraSelection, such as Default or ById(id).") public fun useCamera()
+  ```
 
 - ```kotlin
   public suspend fun reset()
@@ -63,6 +67,12 @@ class SmartSpectraSdk
   ```
 
   Feeds one decoded video frame into the measurement pipeline while video-frame input mode is active (see [setVideoInputEnabled]). Call after [start] has completed. Decode your recorded clip however you like (for example `MediaMetadataRetriever` or `MediaCodec`) and deliver frames in playback order. Throws [SmartSpectraException] when video input has not been selected or the frame is rejected. Use [CustomInput.sendFrame] for typed per-frame return values.
+
+- ```kotlin
+  public suspend fun availableCameras(context: Context): List<CameraInfo>
+  ```
+
+  Discover camera IDs, optional names, and facing without initializing SmartSpectra, authenticating, or starting capture. No permission prompt is shown. Visibility depends on platform permissions; a snapshot does not guarantee a later capture will succeed. Throws INPUT_UNAVAILABLE when discovery fails. Android currently provides no display names.
 
 - ```kotlin
   @JvmStatic @JvmOverloads fun initialize( context: Context, config: SmartSpectraConfig = SmartSpectraConfig(), ): SmartSpectraSdk
@@ -131,6 +141,12 @@ public class SmartSpectraConfig()
 ### Properties
 
 - ```kotlin
+  @Deprecated("Use sdk.useCamera(CameraSelection.Front), Back, or ById instead.") public var cameraPosition: CameraPosition
+  ```
+
+  Legacy facing preference; defaults to front and updates active capture. Deprecated: use [SmartSpectraSdk.useCamera] with an explicit [CameraSelection]. After typed selection, this preference applies again only after legacy `useCamera()`.
+
+- ```kotlin
   public var apiKey: String? = null
   ```
 
@@ -139,10 +155,6 @@ public class SmartSpectraConfig()
   ```
 
   Verbosity of SDK logging — both the SDK's own logging and the native engine. Set it before [SmartSpectraSdk.initialize] for full effect; later changes apply to the SDK's own logging immediately and to the engine when the next measurement session starts. Defaults to [SmartSpectraLogLevel.WARNING] (warnings and errors only).
-
-- ```kotlin
-  public var cameraPosition: CameraPosition
-  ```
 
 - ```kotlin
   public var imageOutputEnabled: Boolean = true
@@ -333,6 +345,87 @@ public class SmartSpectraException( public val error: SmartSpectraError, ) : Run
 
 - ```kotlin
   val error: SmartSpectraError
+  ```
+
+## CameraSelection
+
+Requested camera: `CameraSelection.Default`, `Front`, `Back`, or `CameraSelection.ById(id)` for an exact ID from [SmartSpectraSdk.availableCameras].
+
+## CameraSelection.Default
+
+Prefer front, otherwise use the first camera in discovery order.
+
+```kotlin
+public data object CameraSelection.Default : CameraSelection
+```
+
+## CameraSelection.Front
+
+```kotlin
+public data object CameraSelection.Front : CameraSelection
+```
+
+## CameraSelection.Back
+
+```kotlin
+public data object CameraSelection.Back : CameraSelection
+```
+
+## CameraSelection.ById
+
+An opaque, device-local camera ID. An unavailable ID fails without fallback.
+
+```kotlin
+public data class CameraSelection.ById(val id: String) : CameraSelection
+```
+
+### Properties
+
+- ```kotlin
+  val id: String
+  ```
+
+## CameraFacing
+
+Camera facing, including cameras that have no front/back position.
+
+- `FRONT`
+- `BACK`
+- `UNKNOWN`
+
+## CameraLensType
+
+Best-effort lens classification, independent of digital zoom. Android compares the nominal view with the default camera of the same facing. Missing metadata and logical cameras combining multiple lenses report [UNKNOWN].
+
+- `UNKNOWN`
+- `WIDE_ANGLE`
+- `ULTRA_WIDE`
+- `TELEPHOTO`
+
+## CameraInfo
+
+A discoverable camera; availability may change before capture starts.
+
+```kotlin
+public data class CameraInfo( val id: String, val name: String? = null, val facing: CameraFacing = CameraFacing.UNKNOWN, val lensType: CameraLensType = CameraLensType.UNKNOWN, )
+```
+
+### Properties
+
+- ```kotlin
+  val id: String
+  ```
+
+- ```kotlin
+  val name: String? = null
+  ```
+
+- ```kotlin
+  val facing: CameraFacing = CameraFacing.UNKNOWN
+  ```
+
+- ```kotlin
+  val lensType: CameraLensType = CameraLensType.UNKNOWN
   ```
 
 ## SmartSpectraLogLevel

@@ -11,14 +11,14 @@ sidebarTitle: Migration Guide
 
 ## Custom Video Input
 
-Camera capture remains the default. Existing camera integrations need no changes.
+Camera capture remains the default. For camera selection changes, see below.
 Use `try sdk.useCustomInput()` to obtain a public frame-submission handle for
 your own camera or decoder. Await `sdk.start()` before submitting
 `CVPixelBuffer` or `CMSampleBuffer` frames. See the
 [custom camera example](headless-mode.md#use-your-own-camera-or-video-source).
 
 `try await sdk.reset()` stops processing and clears measurement output, retaining
-configuration and the custom-input handle. `try sdk.useCamera()` switches back
+configuration and the custom-input handle. `try sdk.useCamera(.default)` switches back
 to SDK capture while stopped. Replacing an input invalidates older handles.
 
 The testing SPI `setVideoInputEnabled(_:)` now selects a source only while
@@ -33,6 +33,70 @@ converts these to microseconds. Decoding uses the formats supported by
 AVFoundation on the selected device or simulator.
 
 ## Swift SDK v3.4.0 Migration
+
+### Camera selection
+
+Camera selection is opt-in. Existing applications retain the front-camera default
+and the behavior of `sdk.config.cameraPosition`. That property and the original
+`try sdk.useCamera()` method remain available, with deprecation warnings.
+To adopt discovery and strict selection, call `try sdk.useCamera(selection)` while
+stopped:
+
+```swift
+// Discovery needs no SDK instance, authentication, or permission prompt.
+let cameras = try SmartSpectraSDK.availableCameras()
+
+let sdk = SmartSpectraSDK.shared
+try sdk.useCamera(.default)
+try sdk.useCamera(.front)
+try sdk.useCamera(.back)
+if let camera = cameras.first {
+    try sdk.useCamera(.byId(camera.id))
+}
+```
+
+Discovery returns `CameraInfo(id: name: facing: lensType:)`. IDs are opaque and device-local;
+names are optional. Facing is `.front`, `.back`, or `.unknown`, including external
+cameras whose direction is unknown. Visibility depends on platform permissions;
+discovery does not reserve a camera or guarantee a later capture will succeed.
+Discovery failures throw `SmartSpectraError` with `.inputUnavailable`.
+
+`lensType` reports `.wideAngle`, `.ultraWide`, `.telephoto`, or `.unknown`.
+Classification is best effort; missing metadata and cameras combining multiple
+lenses report `.unknown`. It does not describe digital zoom or change selection.
+Use it for picker labels and continue selecting by `id`.
+
+Explicit `.default` prefers front, then uses the first discovered camera. Explicit `.front`, `.back`, and `.byId` requests
+never fall back. Selection is resolved when capture starts; an unavailable
+camera fails `start()` with `.inputUnavailable`.
+
+`useCamera` throws `.configurationFailed` for an empty ID and `.invalidState`
+during startup, processing, stopping, or reset. A rejected request preserves
+the previous source. Stop/start/reset retain the selection until another source
+is selected. Once a typed selection is made, changes to the deprecated
+`cameraPosition` property do not override it. Calling the deprecated `useCamera()`
+returns to that property's selection behavior. To change cameras, await `stop()`, select, and start again:
+
+```swift
+try await sdk.stop()
+try sdk.useCamera(.back)
+try await sdk.start()
+```
+
+Choose the input from an explicit app action or initial setup while stopped.
+SwiftUI view initializers can run repeatedly, so avoid selecting an input there.
+
+The SwiftUI demo's checkup, headless, and capture screens and the UIKit sample
+provide **Select Camera** controls. The picker lists discovered cameras by name,
+facing, and opaque ID, with **Default** and **Refresh** actions. Selection is
+disabled during startup, processing, and stopping. After a failed Start, opening
+the picker awaits `reset()` before allowing a new selection; this also recovers
+failures that occurred before a processing session existed. Navigating between
+screens does not change the selected camera.
+
+The iOS Simulator may return no cameras. The picker displays an empty-state
+message and still offers Default and Refresh; selecting an actual camera ID
+requires a device with discoverable cameras.
 
 ### Usage failures now report specific errors
 
@@ -225,7 +289,7 @@ if let metrics = sdk.metrics {
 
 - authentication should be set through `sdk.config.apiKey`
 - metric selection should be set through `sdk.config.requestedMetrics`
-- camera selection should be set through `sdk.config.cameraPosition`
+- camera selection should be set through `try sdk.useCamera(selection)` while stopped
 - preview frame publishing should be controlled through `sdk.config.imageOutputEnabled`
 
 ### Removed
@@ -239,7 +303,7 @@ if let metrics = sdk.metrics {
 | Old | New |
 | --- | --- |
 | `sdk.setApiKey("...")` | `sdk.config.apiKey = "..."` |
-| `sdk.setCameraPosition(.front)` | `sdk.config.cameraPosition = .front` |
+| `sdk.setCameraPosition(.front)` | `try sdk.useCamera(.front)` |
 | `sdk.setImageOutputEnabled(true)` | `sdk.config.imageOutputEnabled = true` |
 | no public metric-selection API | `sdk.config.requestedMetrics = [...]` |
 
@@ -256,7 +320,7 @@ sdk.setImageOutputEnabled(true)
 let sdk = SmartSpectraSDK.shared
 sdk.config.apiKey = "YOUR_API_KEY"
 sdk.config.requestedMetrics = [.breathingRate, .pulseRate, .faceLandmarks]
-sdk.config.cameraPosition = .front
+try sdk.useCamera(.front)
 sdk.config.imageOutputEnabled = true
 ```
 
@@ -519,8 +583,8 @@ sdk.config.requestedMetrics = SmartSpectraConfig.cardioMetrics + SmartSpectraCon
 
 Older releases did not expose public `SmartSpectraConfig` access; configuration
 was applied through methods on `SmartSpectraSwiftSDK.shared`. Current releases
-make `sdk.config` the single source of truth and prevent the class of bug where
-views observed one config instance while the SDK held another.
+keep SDK settings on `sdk.config`, so views observe the same configuration used
+by the SDK. Choose the input separately through `useCamera` or `useCustomInput`.
 
 ### Custom SDK Instances
 

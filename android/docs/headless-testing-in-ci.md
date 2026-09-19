@@ -39,7 +39,7 @@ To update an existing test to the public API:
 | --- | --- |
 | `sdk.setVideoInputEnabled(true)` | `val input = sdk.useCustomInput()` while stopped |
 | `sdk.addVideoFrame(bitmap, timestampUs)` | `input.sendFrame(bitmap, timestampUs)`; handle the returned result |
-| `sdk.setVideoInputEnabled(false)` | Stop, then call `sdk.useCamera()` |
+| `sdk.setVideoInputEnabled(false)` | Stop, then call `sdk.useCamera(com.presagetech.smartspectra.CameraSelection.Default)` |
 
 If you retain the testing helpers, enable video input while stopped and await
 `start()` before submitting frames. The helpers now throw `SmartSpectraException`
@@ -135,7 +135,7 @@ class VideoMeasurementTest {
             } finally {
                 // reset() is safe even if start() failed, and preserves custom input.
                 sdk.reset()
-                sdk.useCamera()
+                sdk.useCamera(com.presagetech.smartspectra.CameraSelection.Default)
             }
         }
     }

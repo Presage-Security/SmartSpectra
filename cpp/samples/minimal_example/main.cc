@@ -78,7 +78,7 @@ int main(int argc, char** argv) {
 
     const std::string input_video_path = absl::GetFlag(FLAGS_input_video_path);
     const auto source_error = input_video_path.empty()
-        ? smart_spectra.UseCamera().Build()
+        ? smart_spectra.UseCamera(spectra::CameraSelection::Default()).Build()
         : smart_spectra.UseFile(input_video_path)
               .SetInterframeDelay(absl::GetFlag(FLAGS_interframe_delay)).Build();
     if (!source_error.ok()) {

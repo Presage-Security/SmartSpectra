@@ -8,8 +8,20 @@
 
     <!-- Checkup controls and labels -->
     <string name="title_headless_example">Headless Example</string>
-    <string name="demo_switch_camera_back">Switch to Back Camera</string>
-    <string name="demo_switch_camera_front">Switch to Front Camera</string>
+    <string name="demo_select_camera">Select camera</string>
+    <string name="demo_camera_default">Default</string>
+    <string name="demo_camera_refresh">Refresh</string>
+    <string name="demo_camera_loading">Finding cameras…</string>
+    <string name="demo_camera_failed">Unable to select a camera. Refresh the list and try again.</string>
+    <string name="demo_camera_stop_first">Stop processing before selecting a camera.</string>
+    <string name="demo_camera_empty">No cameras found. Check camera permission, connect a camera, then refresh.</string>
+    <string name="demo_camera_hint">Choose a camera for the next measurement.</string>
+    <string name="demo_camera_front">Front</string>
+    <string name="demo_camera_back">Back</string>
+    <string name="demo_camera_unknown">Unknown facing</string>
+    <string name="demo_camera_unnamed">Camera</string>
+    <string name="demo_camera_label">%1$s · %2$s · %4$s\nID: %3$s</string>
+    <string name="demo_camera_selected">Camera selected: %1$s</string>
     <string name="demo_measurement_duration_seconds">Measurement Duration: %1$ds</string>
     <string name="demo_metadata_id_format">ID: %1$s</string>
     <string name="demo_metadata_timestamp_format">Upload Timestamp: %1$s</string>
@@ -102,4 +114,8 @@
     <string name="expression_label">Facial Expression</string>
     <string name="expression_confidence_default">Confidence: --</string>
     <string name="expression_confidence_format">Confidence: %.0f%%</string>
+    <string name="demo_camera_wide_angle">Wide-angle</string>
+    <string name="demo_camera_ultra_wide">Ultra-wide</string>
+    <string name="demo_camera_telephoto">Telephoto</string>
+    <string name="demo_camera_unknown_lens">Unknown lens</string>
 </resources>

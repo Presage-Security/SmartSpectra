@@ -52,6 +52,14 @@
             </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.button.MaterialButton
+                android:id="@+id/button_select_camera"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/demo_select_camera"
+                app:icon="@drawable/ic_flip_camera" />
+
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/button_start_stop"
                 style="@style/Widget.MaterialComponents.Button"
                 android:layout_width="match_parent"

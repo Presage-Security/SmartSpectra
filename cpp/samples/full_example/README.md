@@ -25,6 +25,12 @@ cmake --build build --target full_example
 # Run with camera input
 ./build/samples/full_example/full_example --camera_device_index=0 --api_key=YOUR_API_KEY_HERE
 
+# Discover cameras without an API key or opening a GUI (Linux, macOS, Windows)
+./build/samples/full_example/full_example --list_cameras
+
+# Select an exact ID from the listing
+./build/samples/full_example/full_example --camera_id="ID" --api_key=YOUR_API_KEY_HERE
+
 # Run with video file input
 ./build/samples/full_example/full_example --input_video_path=/path/to/video.mp4 --api_key=YOUR_API_KEY_HERE
 
@@ -34,6 +40,13 @@ cmake --build build --target full_example
 ```
 
 Adding `eda` to `--requested_metrics` (e.g. `--requested_metrics=pulse_rate,arterial_pressure_trace,chest_trace,abdomen_trace,breathing_rate,eda`) surfaces the streaming EDA Proxy trace as a fourth HUD row beneath the breathing rows.
+
+`--list_cameras` prints each camera's ID, name, facing, and lens type, then exits.
+Treat IDs as opaque and quote them when passing them on the command line.
+`--camera_id` overrides `--camera_device_index` and cannot be combined with
+`--input_video_path`. A missing selected camera fails instead of selecting another
+device. Without an ID, legacy index selection is preserved. Resolution, frame rate,
+and transform flags apply to either camera selection method.
 
 ## macOS Signing
 

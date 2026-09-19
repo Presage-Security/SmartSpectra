@@ -51,10 +51,23 @@ Tests and advanced integrations can create an isolated instance via ``init(confi
   Select caller-owned video input while stopped. No SDK camera discovery, capture, or camera permission is required. Selecting a source invalidates older custom-input handles. Throws `.invalidState` during startup or processing.
 
 - ```swift
+  public func useCamera (_ selection: CameraSelection) throws
+  ```
+
+  Select camera capture while stopped. Default prefers front, then the first discovered camera. Explicit selections never fall back. Selection is resolved at capture startup; an unavailable camera fails start with `.inputUnavailable`. Throws `.configurationFailed` for an empty ID and `.invalidState` while busy. Rejected requests preserve the previous source. Stop/start/reset retain the selection until another source is selected. This call does not open a camera.
+
+- ```swift
+  @available(*, deprecated, message: "Pass an explicit CameraSelection, such as .default or .byId(id).")
   public func useCamera () throws
   ```
 
-  Select SDK-owned camera capture while stopped, using the configured camera position.
+  Select camera capture using the legacy config.cameraPosition behavior.
+
+- ```swift
+  public nonisolated static func availableCameras () throws -> [CameraInfo]
+  ```
+
+  Discover cameras without constructing or authenticating an SDK instance, requesting permission, or starting capture. Visibility depends on platform permissions; a snapshot does not guarantee capture will succeed later. Throws `.inputUnavailable` if discovery fails.
 
 - ```swift
   public func reset () async throws
@@ -180,10 +193,11 @@ Standalone construction is available for tests and advanced integrations that pa
 ### Properties
 
 - ```swift
+  @available(*, deprecated, message: "Use sdk.useCamera(.front), .back, or .byId instead.")
   public var cameraPosition : AVCaptureDevice.Position = .front
   ```
 
-  Camera position used for capture. Defaults to `.front`.
+  Legacy camera position, used until an explicit camera selector is chosen.
 
 - ```swift
   public var logLevel : SmartSpectraLogLevel = .default
@@ -417,6 +431,60 @@ Raw values are stable across SDK versions and match the C++/Android wire values.
 - `case frameConversionFailed = 9`
 - `case nonMonotonicTimestamp = 10`
 - `case timestampGap = 11`
+
+## CameraSelection
+
+A camera request resolved when capture starts. Explicit selections never fall back.
+
+- `` case `default` ``
+- `case front`
+- `case back`
+- `case byId(String)`
+
+## CameraFacing
+
+Direction reported by the camera. External cameras may report `.unknown`.
+
+- `case front`
+- `case back`
+- `case unknown`
+
+## CameraLensType
+
+Best-effort lens classification, independent of digital zoom. Missing metadata and cameras combining multiple lenses report `.unknown`.
+
+- `case unknown`
+- `case wideAngle`
+- `case ultraWide`
+- `case telephoto`
+
+## CameraInfo
+
+A discoverable camera. IDs are opaque and device-local; availability can change.
+
+### Initializers
+
+- ```swift
+  public init (id: String, name: String? = nil, facing: CameraFacing = .unknown, lensType: CameraLensType = .unknown)
+  ```
+
+### Properties
+
+- ```swift
+  public let id : String
+  ```
+
+- ```swift
+  public let name : String?
+  ```
+
+- ```swift
+  public let facing : CameraFacing
+  ```
+
+- ```swift
+  public let lensType : CameraLensType
+  ```
 
 ## FrameSubmissionResult
 

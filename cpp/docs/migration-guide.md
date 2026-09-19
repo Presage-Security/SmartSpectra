@@ -8,6 +8,109 @@ sidebarTitle: Migration Guide
 
 > Applies to SmartSpectra C++ SDK v3.x.
 
+## Upcoming release: explicit camera selection
+
+Camera discovery and typed selection are available on Linux, Windows, macOS,
+and in the native C++ API on iOS. Existing callers keep index-based behavior: omitting source
+configuration or calling `UseCamera()` still selects index zero. The deprecated
+`UseCamera(int device_index = 0)` overload remains available, including its
+original camera inventory and index ordering. Opt in to the new selection
+policy with `UseCamera(CameraSelection::Default())`.
+To require a specific camera, use its discovered ID:
+
+```cpp
+using namespace presage::smartspectra;
+
+std::vector<CameraInfo> cameras;
+if (auto error = SmartSpectra::AvailableCameras(cameras); !error.ok()) {
+    // Handle discovery failure.
+    return;
+}
+if (cameras.empty()) {
+    // No cameras are currently visible to the application.
+    return;
+}
+
+// Present cameras to the user and keep the selected entry's ID.
+const auto& selected = cameras.front();
+if (auto error = spectra.UseCamera(CameraSelection::ById(selected.id))
+                       .SetResolution(1280, 720)
+                       .SetFps(30)
+                       .Build(); !error.ok()) {
+    // Handle configuration failure.
+    return;
+}
+if (auto error = spectra.Start(); !error.ok()) {
+    // Handle authentication, camera access, or other startup failures.
+}
+```
+
+`AvailableCameras()` is static: no SDK instance, API key, permission prompt, or
+capture session is needed. It replaces the output vector. An empty successful
+result means no cameras are visible; visibility can depend on permissions.
+Each `CameraInfo` contains an opaque `id`, an optional display `name`, and a
+`facing` of `kFront`, `kBack`, or `kUnknown`. Treat IDs as platform-local values
+and rediscover before reusing saved choices. Discovery does not reserve a camera
+or guarantee it can be opened later.
+
+| Selection | Behavior |
+| --- | --- |
+| `CameraSelection::Default()` | iOS prefers front and otherwise uses the first discovered camera. macOS uses discovery order: built-in, physical external, then virtual or unknown devices, with IDs breaking ties. Windows uses the first enumerated camera. Linux uses the first compatible V4L2 capture node in numeric device order. Other native backends retain their existing default camera behavior. |
+| `CameraSelection::Front()` | Requires a camera reported as front-facing. |
+| `CameraSelection::Back()` | Requires a camera reported as back-facing. |
+| `CameraSelection::ById(id)` | Requires that exact discovered ID. |
+
+When multiple cameras match a facing, the first in discovery order wins. A
+webcam can report `kUnknown`; use its ID to select it. The Apple inventory
+includes wide-angle built-in cameras and external camera endpoints. On iOS it
+also includes physical ultra-wide and telephoto cameras, when present, with
+wide-angle cameras ordered before the other built-in lenses and external cameras.
+Virtual dual/triple-camera combinations are not listed separately: select an
+individual lens by ID to avoid automatic switching between constituent cameras.
+The additional iOS lenses are available only through typed selection; they do
+not change the indices used by existing applications.
+
+Each `CameraInfo` includes `lens_type` (`CameraLensType::kWideAngle`,
+`kUltraWide`, `kTelephoto`, or `kUnknown`). Classification is best effort;
+unknown metadata and cameras combining multiple lenses report `kUnknown`.
+Use this field for picker labels and continue selecting by the camera's `id`.
+
+On Windows, discovery includes the cameras visible to the application, with
+optional display names and opaque IDs. Facing and lens type currently report
+`kUnknown`; select a camera by ID. `Front()` and `Back()` therefore fail at
+`Start()` with `kInputUnavailable`. Existing integer selections retain their
+original inventory and ordering.
+
+On Linux, discovery lists compatible single-planar V4L2 streaming capture nodes
+in numeric `/dev/videoN` order and uses the device's card name when available.
+IDs prefer `/dev/v4l/by-id` and `/dev/v4l/by-path` aliases, falling back to the
+device node; treat every form as opaque. Facing is populated from the standard
+V4L2 camera-orientation control when a driver provides it. External cameras and
+cameras without orientation metadata report `kUnknown`, and lens type currently
+reports `kUnknown`. Existing integer selections continue to map directly to
+`/dev/videoN`, so they are unaffected by discovery filtering or ordering.
+
+`Build()` validates the request without opening a camera. An empty ID returns
+`kConfigurationFailed` and preserves the previous input source. Explicit
+front/back/ID requests and discovery currently return `kConfigurationFailed`
+on other native backends. Those backends still support the integer camera API
+and `Default()` where native capture is available.
+
+`Start()` resolves the request against the current inventory. A missing or
+inaccessible camera returns `kInputUnavailable`; explicit requests never fall
+back to another ID or facing. Only `Default()` permits a facing fallback.
+Camera permission and application configuration requirements still apply.
+
+Choose a source while uninitialized or idle. To change cameras, complete
+`Stop()`, build the new camera source, and call `Start()` again. A request is
+preserved across stop/start/reset until another source is successfully built.
+The Swift, Android, and Node.js public APIs are unchanged by this addition.
+
+The `smart_spectra_example` sample accepts `--list_cameras` to print camera IDs,
+names, and facing without an API key. Use `--camera_id="ID"` with your API key
+to select one. This flag takes precedence over `--camera_device_index` and
+cannot be combined with `--input_video_path`.
+
 ## C++ SDK v3.4.0 Migration
 
 ### Usage failures now report specific errors
@@ -166,7 +269,8 @@ if (const auto err = spectra.Start(); !err.ok()) {
 }
 ```
 
-If you omit source configuration entirely, `Start()` still defaults to camera 0.
+If you omit source configuration entirely, `Start()` uses
+`CameraSelection::Default()` (see the camera selection notes above).
 
 ### Metric Defaults Are Narrower
 

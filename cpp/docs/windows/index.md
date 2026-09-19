@@ -196,7 +196,8 @@ int main(int argc, char** argv) {
     });
 
     const auto source_error =
-        sdk.UseCamera().SetResolution(1280, 720).SetFps(30).Build();
+        sdk.UseCamera(spectra::CameraSelection::Default())
+            .SetResolution(1280, 720).SetFps(30).Build();
     if (!source_error.ok()) {
         std::cerr << "Failed to create camera source: "
                   << source_error.message << "\n";

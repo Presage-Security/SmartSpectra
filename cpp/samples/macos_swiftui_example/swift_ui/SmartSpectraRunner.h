@@ -3,6 +3,26 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+typedef NS_ENUM(NSInteger, SmartSpectraCameraFacing) {
+    SmartSpectraCameraFacingUnknown,
+    SmartSpectraCameraFacingFront,
+    SmartSpectraCameraFacingBack,
+};
+
+typedef NS_ENUM(NSInteger, SmartSpectraCameraLensType) {
+    SmartSpectraCameraLensTypeUnknown,
+    SmartSpectraCameraLensTypeWideAngle,
+    SmartSpectraCameraLensTypeUltraWide,
+    SmartSpectraCameraLensTypeTelephoto,
+};
+
+@interface SmartSpectraCamera : NSObject
+@property(nonatomic, copy, readonly) NSString *cameraID;
+@property(nonatomic, copy, readonly, nullable) NSString *name;
+@property(nonatomic, readonly) SmartSpectraCameraFacing facing;
+@property(nonatomic, readonly) SmartSpectraCameraLensType lensType;
+@end
+
 @protocol SmartSpectraRunnerDelegate <NSObject>
 - (void)smartSpectraRunnerDidUpdateFrame:(NSImage *)image;
 - (void)smartSpectraRunnerDidUpdateStatus:(NSString *)processing validation:(NSString *)validation;
@@ -19,7 +39,9 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic, weak, nullable) id<SmartSpectraRunnerDelegate> delegate;
 
 + (NSString *)sdkVersion;
-- (nullable NSString *)startWithAPIKey:(NSString *)apiKey;
++ (nullable NSArray<SmartSpectraCamera *> *)availableCamerasWithError:(NSError **)error;
+// nil selects Default; a non-nil ID requires that exact discovered camera.
+- (nullable NSString *)startWithAPIKey:(NSString *)apiKey cameraID:(nullable NSString *)cameraID;
 - (void)stop;
 @end
 

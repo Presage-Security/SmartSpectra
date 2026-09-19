@@ -72,7 +72,7 @@ func connectCameraOutput(_ output: AVCaptureVideoDataOutput) async throws -> Cam
 Configure and attach the output to your app's capture session before calling
 `connectCameraOutput`. Start capture afterward, on your capture session's worker
 queue. To finish, stop capture and detach the delegate, drain the delegate queue,
-then await `sdk.stop()` before releasing the receiver. Call `try sdk.useCamera()`
+then await `sdk.stop()` before releasing the receiver. Call `try sdk.useCamera(.default)`
 while stopped if the next measurement should use SDK capture. Serialize these
 lifecycle operations and handle thrown errors; frame-error callbacks run on the
 delegate queue, so dispatch UI updates to the main actor.
@@ -80,8 +80,7 @@ delegate queue, so dispatch UI updates to the main actor.
 The host app owns its capture session, camera permissions, preview, and camera
 settings. Configure the capture connection to deliver upright pixels, or select
 a `FrameTransform` when calling `useCustomInput()`. Avoid applying the same
-rotation twice. `sdk.config.cameraPosition` does not rotate or mirror custom
-frames. Custom input itself requires no SDK camera permission or capture session;
+rotation twice. Custom input itself requires no SDK camera permission or capture session;
 normal SDK authentication is still required.
 
 For a decoded video or another source, submit a pixel buffer with its timestamp:
@@ -109,7 +108,7 @@ consumption, not completed measurement output. Observe SDK metrics separately.
 
 The handle survives `stop()`/`start()` and `reset()`. Reset stops processing and
 clears measurement output while preserving configuration and the selected input.
-Calling `useCamera()` or selecting another custom input invalidates older
+Calling `useCamera(.default)` or selecting another custom input invalidates older
 handles. Source selection is stopped-only and throws `.invalidState` during
 startup, measurement, or teardown. Stop the host's frame delivery before
 switching sources; the SDK does not stop the host's camera.
@@ -141,7 +140,7 @@ struct HeadlessExample: View {
 
     init() {
         sdk.config.apiKey = "YOUR_API_KEY"
-        sdk.config.cameraPosition = .front
+        // The default camera selection prefers front when available.
     }
 
     var body: some View {

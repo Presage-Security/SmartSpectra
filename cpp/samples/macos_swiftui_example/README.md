@@ -31,11 +31,7 @@ Before first run, check the SDK and runtime setup:
 ./scripts/check-requirements.sh
 ```
 
-To apply safe runtime fixes, run:
-
-```sh
-./scripts/check-requirements.sh --fix
-```
+Follow any instructions it prints before opening Xcode.
 
 ### 3. Open the sample in Xcode
 
@@ -68,6 +64,16 @@ After selecting the app target, use this `Signing & Capabilities` view:
 
 Enter `SMARTSPECTRA_API_KEY` in the app and press Start. On first launch, allow camera access when macOS prompts.
 
+Use **Select Camera** before starting to discover the cameras visible to the SDK.
+The picker shows each camera's name, facing (which may be unknown on macOS), and
+opaque ID. Choose **Default** to use the SDK's preferred camera, or select a
+specific camera. **Refresh** updates the list after connecting or disconnecting a
+camera. Discovery does not require an API key or start capture.
+
+Selection is disabled during a session and becomes available after Stop or a
+failed start. The choice survives Stop/Start and Refresh; a disconnected selected
+camera causes Start to fail instead of falling back to another device.
+
 ## Requirements
 
 - macOS with Xcode installed.
@@ -75,7 +81,7 @@ Enter `SMARTSPECTRA_API_KEY` in the app and press Start. On first launch, allow 
 - Apple Development signing in Xcode.
 - A SmartSpectra API key.
 
-This SDK build requires macOS 14.0 or newer at runtime. The sample uses macOS image frameworks for its preview and requires no separate OpenCV installation.
+This SDK build requires macOS 14.0 or newer at runtime.
 
 The app must be signed with an Apple Development identity because SmartSpectra stores SDK state in Keychain. An ad-hoc signed app can launch, but Keychain writes fail with `-34018`.
 
@@ -157,18 +163,10 @@ task cpp:macos-swiftui-example
 
 ## Requirements Script
 
-The helper script checks the Homebrew SDK, required model files, SDK graph asset path, and code-signing visibility:
+The helper script checks the SDK installation and code-signing setup:
 
 ```sh
 ./scripts/check-requirements.sh
-```
-
-`--fix` can create `$(HOMEBREW_PREFIX)/share/smartspectra/graph` as a symlink to the SDK graph assets.
-
-The graph symlink is needed because `libsmartspectra.dylib` looks for model files under:
-
-```text
-$(HOMEBREW_PREFIX)/share/smartspectra/graph/models
 ```
 
 ## Troubleshooting
@@ -207,15 +205,15 @@ brew unlink smartspectra
 brew install presage/smartspectra/smartspectra-rc
 ```
 
-### Missing `.tflite` model files under `$(HOMEBREW_PREFIX)/share/smartspectra`
+### Missing SDK files
 
-Run:
+Run the diagnostic script:
 
 ```sh
-./scripts/check-requirements.sh --fix
+./scripts/check-requirements.sh
 ```
 
-This links the SDK graph assets into the location expected by this SDK build.
+If required SDK files are missing, reinstall the formula you selected: `brew reinstall presage/smartspectra/smartspectra` for stable or `brew reinstall presage/smartspectra/smartspectra-rc` for release candidates.
 
 ### `Store keychain item 'emd.state.v1' failed: A required entitlement isn't present. (-34018)`
 

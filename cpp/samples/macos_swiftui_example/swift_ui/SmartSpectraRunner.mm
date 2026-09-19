@@ -175,6 +175,16 @@ void DispatchDiagnostics(__weak SmartSpectraRunner *weakRunner, NSString *diagno
 
 }  // namespace
 
+@interface SmartSpectraCamera ()
+@property(nonatomic, copy, readwrite) NSString *cameraID;
+@property(nonatomic, copy, readwrite, nullable) NSString *name;
+@property(nonatomic, readwrite) SmartSpectraCameraFacing facing;
+@property(nonatomic, readwrite) SmartSpectraCameraLensType lensType;
+@end
+
+@implementation SmartSpectraCamera
+@end
+
 @interface SmartSpectraRunner ()
 @property(nonatomic, assign) BOOL running;
 @end
@@ -191,7 +201,39 @@ void DispatchDiagnostics(__weak SmartSpectraRunner *weakRunner, NSString *diagno
     return [NSString stringWithUTF8String:SMART_SPECTRA_VERSION_STRING];
 }
 
-- (nullable NSString *)startWithAPIKey:(NSString *)apiKey {
++ (nullable NSArray<SmartSpectraCamera *> *)availableCamerasWithError:(NSError **)error {
+    std::vector<ss::CameraInfo> cameras;
+    if (auto result = ss::SmartSpectra::AvailableCameras(cameras); !result.ok()) {
+        if (error) {
+            *error = [NSError errorWithDomain:@"SmartSpectraCameraDiscovery"
+                                        code:static_cast<NSInteger>(result.code)
+                                    userInfo:@{NSLocalizedDescriptionKey:
+                [NSString stringWithUTF8String:result.FullMessage().c_str()]}];
+        }
+        return nil;
+    }
+    NSMutableArray<SmartSpectraCamera *> *result = [NSMutableArray arrayWithCapacity:cameras.size()];
+    for (const auto& camera : cameras) {
+        SmartSpectraCamera *info = [[SmartSpectraCamera alloc] init];
+        info.cameraID = [NSString stringWithUTF8String:camera.id.c_str()];
+        info.name = camera.name ? [NSString stringWithUTF8String:camera.name->c_str()] : nil;
+        switch (camera.facing) {
+            case ss::CameraFacing::kFront: info.facing = SmartSpectraCameraFacingFront; break;
+            case ss::CameraFacing::kBack: info.facing = SmartSpectraCameraFacingBack; break;
+            case ss::CameraFacing::kUnknown: info.facing = SmartSpectraCameraFacingUnknown; break;
+        }
+        switch (camera.lens_type) {
+            case ss::CameraLensType::kWideAngle: info.lensType = SmartSpectraCameraLensTypeWideAngle; break;
+            case ss::CameraLensType::kUltraWide: info.lensType = SmartSpectraCameraLensTypeUltraWide; break;
+            case ss::CameraLensType::kTelephoto: info.lensType = SmartSpectraCameraLensTypeTelephoto; break;
+            case ss::CameraLensType::kUnknown: info.lensType = SmartSpectraCameraLensTypeUnknown; break;
+        }
+        [result addObject:info];
+    }
+    return result;
+}
+
+- (nullable NSString *)startWithAPIKey:(NSString *)apiKey cameraID:(nullable NSString *)cameraID {
     if (self.running) {
         return nil;
     }
@@ -312,7 +354,10 @@ void DispatchDiagnostics(__weak SmartSpectraRunner *weakRunner, NSString *diagno
         DispatchFailure(weakSelf, [NSString stringWithUTF8String:message.c_str()]);
     });
 
-    if (auto error = spectra->UseCamera(0).SetResolution(1280, 720).SetFps(30).Build();
+    const auto selection = cameraID == nil
+        ? ss::CameraSelection::Default()
+        : ss::CameraSelection::ById(std::string(cameraID.UTF8String));
+    if (auto error = spectra->UseCamera(selection).SetResolution(1280, 720).SetFps(30).Build();
         !error.ok()) {
         return [NSString stringWithUTF8String:error.FullMessage().c_str()];
     }

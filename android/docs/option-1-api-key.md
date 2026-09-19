@@ -106,12 +106,12 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.10.0")
     implementation("androidx.camera:camera-view:1.6.0")
 
-    implementation("com.presagetech:smartspectra:3.4.0-rc.5-SNAPSHOT")
+    implementation("com.presagetech:smartspectra:3.4.0-rc.6-SNAPSHOT")
 }
 ```
 
 The `+` version selects the current release. To pin an exact version, use the
-value in [`android/samples/version.properties`](https://github.com/Presage-Security/SmartSpectra/blob/v3.4.0-rc.5/android/samples/version.properties).
+value in [`android/samples/version.properties`](https://github.com/Presage-Security/SmartSpectra/blob/v3.4.0-rc.6/android/samples/version.properties).
 
 `androidx.activity:activity-ktx` supplies `ComponentActivity` and
 `registerForActivityResult`, both used by the complete activity below.
@@ -171,7 +171,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
-import com.presagetech.smartspectra.CameraPosition
+import com.presagetech.smartspectra.CameraSelection
 import com.presagetech.smartspectra.ProcessingStatus
 import com.presagetech.smartspectra.SmartSpectraConfig
 import com.presagetech.smartspectra.SmartSpectraSdk
@@ -230,7 +230,7 @@ class MainActivity : ComponentActivity() {
 
         sdk.config.apiKey = API_KEY
         sdk.config.imageOutputEnabled = false
-        sdk.config.cameraPosition = CameraPosition.FRONT
+        sdk.useCamera(CameraSelection.Front)
         sdk.config.requestedMetrics =
             SmartSpectraConfig.breathingMetrics +
                     SmartSpectraConfig.cardioMetrics +

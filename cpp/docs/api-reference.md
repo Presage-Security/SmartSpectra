@@ -24,8 +24,8 @@ spectra.SetOnValidationStatusChanged([](const ValidationStatus& vs, int64_t ts) 
 spectra.SetOnMetrics([](const Metrics& m, int64_t ts) { ... });
 spectra.SetOnError([](const SmartSpectraError& e) { ... });
 
-// 2. Configure input source (optional — defaults to camera 0).
-spectra.UseCamera().Build();
+// 2. Configure input source (optional — legacy default is camera index zero).
+spectra.UseCamera(CameraSelection::Default()).Build();
 spectra.UseFile("video.mp4").SetTimestamps("ts.txt").Build();
 
 // 3. Start (auth + graph + source in one call).
@@ -119,7 +119,7 @@ Thread safety: all public methods are thread-safe and may be called from any thr
   If `out_request_id` is non-null it receives the RequestId assigned to the dispatched request. Returns kInvalidState when no session is active, kProcessingFailed when the request fails to dispatch locally — for example no insight callback registered, a prompt over the size limit, or the session could not be established. This return value covers dispatch only; a server-side failure after dispatch arrives asynchronously on the OnInsightFn callback as Insight::error().
 
 - ```cpp
-  CameraBuilder      UseCamera(int device_index = 0)
+  CameraBuilder UseCamera(int device_index = 0)
   ```
 
   Video source (call before Start).
@@ -127,8 +127,8 @@ Thread safety: all public methods are thread-safe and may be called from any thr
   Simple verbs that return builders for optional config. Only one source is active at a time — calling Use* again overwrites the previous choice.
 
   ```cpp
-  // Camera (default if nothing is called):
-  spectra.UseCamera().Build();          // device 0, 1280x720, 30fps
+  // Typed camera selection (omit source configuration for legacy index zero):
+  spectra.UseCamera(CameraSelection::Default()).Build(); // 1280x720, 30fps
   spectra.UseCamera(2).SetResolution(1920, 1080).SetFps(60).Build();
 
   // Video file:
@@ -145,7 +145,19 @@ Thread safety: all public methods are thread-safe and may be called from any thr
   // input is a shared_ptr<CustomInput> — safe even if spectra is destroyed.
   ```
 
-  All source builders support .SetFrameTransform() for input rotation/mirroring.
+  All source builders support .SetFrameTransform() for input rotation/mirroring. Deprecated: integer/no-argument selection preserves legacy device indices. Use UseCamera(CameraSelection) and AvailableCameras() for new applications.
+
+- ```cpp
+  CameraBuilder UseCamera(CameraSelection selection)
+  ```
+
+  Configure a camera by intent or opaque ID. Build() validates the request; Start() resolves and opens it, returning kInputUnavailable if it is absent or cannot be opened. Explicit requests never fall back to another camera. Call while uninitialized or idle; this does not switch a running camera. Supported on Linux/macOS/iOS/Windows. Other platforms accept only Default().
+
+- ```cpp
+  static SmartSpectraError AvailableCameras(std::vector<CameraInfo>& out)
+  ```
+
+  Discover cameras without constructing an SDK instance, authenticating, requesting permission, or starting capture. Replaces out on success and clears it on failure. An empty successful result means no visible cameras. Camera visibility depends on platform permissions; discovery does not guarantee that a camera can be opened later. Supported on Linux/macOS/iOS/Windows; returns kConfigurationFailed on other platforms in this release.
 
 - ```cpp
   VideoFileBuilder   UseFile(const std::string& path)
@@ -494,6 +506,82 @@ Delivered asynchronously after RequestInsight() dispatches successfully and for 
 ```cpp
 using OnInsightFn = std::function<void(const Insight& insight)>
 ```
+
+## CameraSelection
+
+A camera request, resolved when capture starts. Explicit requests never fall back to a different facing or ID. This value does not open or reserve a device.
+
+### Methods
+
+- ```cpp
+  static CameraSelection Default()
+  ```
+
+  Use the platform's preferred camera. On iOS prefer front, then the first discovered camera; on macOS and Windows use discovery order. Linux uses the first compatible V4L2 capture node in numeric device order.
+
+- ```cpp
+  static CameraSelection Front()
+  ```
+
+  Require a front-facing camera.
+
+- ```cpp
+  static CameraSelection Back()
+  ```
+
+  Require a back-facing camera.
+
+- ```cpp
+  static CameraSelection ById(std::string id)
+  ```
+
+  Require this exact ID from AvailableCameras(). An empty ID is invalid.
+
+## CameraInfo
+
+A snapshot of a discoverable camera. IDs are opaque, platform-local values; rediscover devices before presenting a picker or reusing a saved ID.
+
+### Properties
+
+- ```cpp
+  std::string id
+  ```
+
+- ```cpp
+  std::optional<std::string> name
+  ```
+
+- ```cpp
+  CameraFacing facing = CameraFacing::kUnknown
+  ```
+
+- ```cpp
+  CameraLensType lens_type = CameraLensType::kUnknown
+  ```
+
+## CameraFacing
+
+Camera direction reported by the platform. External cameras may be unknown.
+
+- `kFront`
+- `kBack`
+- `kUnknown`
+
+## CameraLensType
+
+Best-effort lens classification. Unknown includes unavailable metadata and cameras that combine multiple lenses. It does not describe digital zoom.
+
+- `kUnknown`
+- `kWideAngle`
+- `kUltraWide`
+- `kTelephoto`
+
+## CameraSelection::Kind
+
+- `kDefault`
+- `kFront`
+- `kBack`
+- `kById`
 
 ## SmartSpectraLogLevel
 

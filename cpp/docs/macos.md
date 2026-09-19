@@ -35,12 +35,7 @@ xcode-select --install
 ### Add the SDK
 
 The Homebrew formula installs the SmartSpectra SDK and exposes its CMake
-package metadata. The SDK is self-contained — linking your own app against it
-needs no other libraries, and the `hello_vitals` example below builds with
-nothing else installed. The repository samples are separate: several of them
-use OpenCV for video capture and display and need `brew install opencv`.
-The SwiftUI sample below uses native macOS image frameworks and does not
-require OpenCV.
+package metadata.
 
 ```bash
 brew tap presage/smartspectra https://github.com/Presage-Security/homebrew-smartspectra
@@ -126,13 +121,8 @@ cd SmartSpectra/cpp/samples/macos_swiftui_example
 ./scripts/check-requirements.sh
 ```
 
-The script checks the Homebrew SDK, required model files, the SDK graph asset
-path, and code-signing visibility. To apply safe runtime fixes (install missing
-Homebrew packages), run:
-
-```bash
-./scripts/check-requirements.sh --fix
-```
+The script checks the SDK installation and code-signing setup. Follow any
+instructions it prints before opening Xcode.
 
 ### Open in Xcode
 
@@ -313,7 +303,8 @@ int main(int argc, char** argv) {
     });
 
     const auto source_error =
-        sdk.UseCamera().SetResolution(1280, 720).SetFps(30).Build();
+        sdk.UseCamera(spectra::CameraSelection::Default())
+            .SetResolution(1280, 720).SetFps(30).Build();
     if (!source_error.ok()) {
         std::cerr << "Failed to create camera source: "
                   << source_error.message << "\n";
@@ -483,17 +474,17 @@ API reference available at [C++ API Reference](api-reference.md).
 
 ## Troubleshooting
 
-### Runtime libraries or model files missing
+### Missing SDK files
 
-If you see errors about missing runtime libraries or `.tflite` model files,
-run the sample's diagnostic script:
+If the sample reports missing SDK files, run the diagnostic script:
 
 ```bash
-./scripts/check-requirements.sh --fix
+./scripts/check-requirements.sh
 ```
 
-It verifies the Homebrew SDK install, repairs the graph asset path, and
-reinstalls any missing runtime packages.
+If required SDK files are missing, reinstall the formula you selected:
+`brew reinstall presage/smartspectra/smartspectra` for stable or
+`brew reinstall presage/smartspectra/smartspectra-rc` for release candidates.
 
 ### Metrics do not appear immediately
 

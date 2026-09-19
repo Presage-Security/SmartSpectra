@@ -4,7 +4,6 @@
 //
 // SPDX-License-Identifier: LicenseRef-Proprietary
 import SwiftUI
-import AVFoundation
 import SmartSpectra
 
 struct CheckupView: View {
@@ -16,8 +15,6 @@ struct CheckupView: View {
     // to avoid clashing with Foundation's `Measurement`.
     @State private var edgeEdaBuffer: [SmartSpectra.Measurement] = []
 
-    // Set the initial camera position. Can be set to .front or .back. Defaults to .front
-    @State private var cameraPosition: AVCaptureDevice.Position = .front
     // Cardio measurements (pulse rate, arterial pressure trace, HRV).
     @State private var cardioMeasurementsEnabled: Bool = false
     // Face metrics (landmarks, blinking, talking, expressions). Contact support for compatible custom bundles.
@@ -40,8 +37,6 @@ struct CheckupView: View {
             sdk.config.apiKey = apiKey
         }
 
-        // (Optional) Camera and metrics configuration via sdk.config
-        sdk.config.cameraPosition = cameraPosition
     }
 
     var body: some View {
@@ -51,15 +46,7 @@ struct CheckupView: View {
             SmartSpectraView()
 
             if isCustomizationEnabled {
-                // (Optional), example of how to switch camera at runtime
-                Button(cameraPosition == .front ? "Switch to Back Camera": "Switch to Front Camera", systemImage: "camera.rotate") {
-                    if cameraPosition == .front {
-                        cameraPosition = .back
-                    } else {
-                        cameraPosition = .front
-                    }
-                    sdk.config.cameraPosition = cameraPosition
-                }
+                CameraSelectionButton(sdk: sdk)
 
                 Toggle(isOn: $cardioMeasurementsEnabled) {
                     VStack(alignment: .leading, spacing: 2) {
