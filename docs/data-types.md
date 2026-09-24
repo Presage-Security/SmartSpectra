@@ -64,7 +64,7 @@ enum FeatureType {
 - `BREATHING` -- Breathing measurements (chest and abdomen)
 - `EDA` -- EDA Proxy (electrodermal activity) measurement
 - `FACE` -- Facial tracking and analysis
-- `CARDIO` -- Cardiovascular metrics (pulse, HRV, blood pressure)
+- `CARDIO` -- Cardiovascular metrics (pulse, HRV, relative arterial pressure waveform)
 
 ## MetricType
 
@@ -256,20 +256,6 @@ message Hrv {
 - `float` `confidence` -- Confidence score for the HRV measurement, expressed as a percentage in the range [0.0, 100.0]
 - `bool` `stable` -- Whether the HRV measurement is considered stable/reliable
 
-## Strict
-
-Container for strict/exact values that require high precision. Used when measurements need to be treated with special precision requirements.
-
-### Properties
-
-```proto
-message Strict {
-  float value = 1;
-}
-```
-
-- `float` `value` -- The strict value requiring high precision
-
 ## Pulse
 
 Comprehensive pulse-related measurements and derived metrics. Contains heart rate, pulse trace, and respiratory coupling information.
@@ -281,14 +267,12 @@ message Pulse {
   repeated MeasurementWithConfidence rate = 1;
   repeated Measurement trace = 2;
   repeated Measurement pulse_respiration_quotient = 3;
-  Strict strict = 4;
 }
 ```
 
 - `repeated` [`MeasurementWithConfidence`](#measurementwithconfidence) `rate` -- Heart rate measurements with confidence scores
 - `repeated` [`Measurement`](#measurement) `trace` -- Raw pulse trace measurements
 - `repeated` [`Measurement`](#measurement) `pulse_respiration_quotient` -- Pulse-respiration quotient measurements indicating cardio-respiratory coupling
-- [`Strict`](#strict) `strict` -- Strict/high-precision pulse measurements over a fixed time interval. Populated when strict mode analysis is enabled.
 
 ## Breathing
 
@@ -306,7 +290,6 @@ message Breathing {
   repeated Measurement respiratory_line_length = 6;
   repeated Measurement baseline = 7;
   repeated Measurement inhale_exhale_ratio = 8;
-  Strict strict = 9;
 }
 ```
 
@@ -318,7 +301,6 @@ message Breathing {
 - `repeated` [`Measurement`](#measurement) `respiratory_line_length` -- Respiratory line length measurements for breathing pattern analysis
 - `repeated` [`Measurement`](#measurement) `baseline` -- Baseline breathing measurements
 - `repeated` [`Measurement`](#measurement) `inhale_exhale_ratio` -- Inhale to exhale duration ratio measurements
-- [`Strict`](#strict) `strict` -- Strict/high-precision breathing measurements over a fixed time interval. Populated when strict mode analysis is enabled.
 
 ## Landmarks
 

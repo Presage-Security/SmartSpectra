@@ -161,9 +161,11 @@ if (cameras.length > 0) {
 
 `CameraSelection.default`, `.front`, `.back`, and `.byId(id)` share the camera
 selection contract across SDKs. Explicit requests never fall back. Stop/start/reset
-retain the chosen input. Only macOS currently supports discovery and explicit
-selectors in native Node.js; Linux/Windows report `kConfigurationFailed` for those
-operations and continue to support default capture. See the
+retain the chosen input. Native Node.js supports camera discovery and typed
+selection on macOS, Linux, and Windows. Linux and Windows cameras may report
+unknown facing or lens type, so select those cameras by discovered ID. On
+Windows, `.front` and `.back` fail with `kInputUnavailable` because facing is
+not reported. See the
 [migration guide](docs/migration-guide.md) and [API reference](docs/api-reference.md#cameraoptions).
 
 Electron renderer capture uses browser-owned streams and `useMediaStream()`;

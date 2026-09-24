@@ -7,8 +7,8 @@ sidebarTitle: Overview
 # SmartSpectra C++ SDK
 
 Cross-platform C++ SDK for measuring vitals and waveform shapes (pulse,
-breathing, relative blood pressure, and more) from a camera. Headless by default
-with optional preview frames; runs on Linux, macOS, and Windows.
+breathing, relative arterial pressure, and more) from a camera. Headless by
+default with optional preview frames; runs on Linux, macOS, and Windows.
 
 ## Supported Platforms
 
@@ -36,7 +36,7 @@ On Linux, macOS, and Windows, discover cameras with `SmartSpectra::AvailableCame
 choose one with `spectra.UseCamera(CameraSelection::ById(camera.id)).Build()`.
 `Default()`, `Front()`, and `Back()` express a camera preference or requirement.
 Discovery also exists in the native C++ API on iOS. See the
-[camera selection migration notes](docs/migration-guide.md#upcoming-release-explicit-camera-selection)
+[camera selection migration notes](docs/migration-guide.md#explicit-camera-selection)
 for platform support, errors, and a complete example.
 
 ## Common Prerequisites

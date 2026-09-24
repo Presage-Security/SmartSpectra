@@ -83,6 +83,20 @@ allprojects {
             if (requested.group == "org.jsoup" && requested.name == "jsoup") useVersion("1.23.1")
         }
     }
+
+    // AGP 9.2.1's lint and UTP result-listener resolve bouncycastle 1.79, affected by
+    // GHSA-9pwp-9qqc-pr26 and GHSA-qp49-qgx5-5m26 (fixed only in 1.85, no backport). Build and
+    // test tooling only; not on the SDK runtime classpath. Delete once AGP resolves >= 1.85,
+    // since useVersion() would otherwise downgrade it.
+    configurations.matching {
+        it.name == "androidLintTool" || it.name.startsWith("unified-test-platform")
+    }.configureEach {
+        resolutionStrategy.eachDependency {
+            if (requested.group == "org.bouncycastle" && requested.name.endsWith("-jdk18on")) {
+                useVersion("1.85")
+            }
+        }
+    }
 }
 
 // AGP 9's built-in Kotlin compiles .kt files but does not register the

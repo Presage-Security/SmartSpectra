@@ -25,7 +25,7 @@ Point end users at this before their first measurement:
 | **Lighting** | Even, diffuse light on the face. Not too dark, not too bright, no harsh shadows or flicker. |
 | **Framing** | One face, centered, roughly facing the camera. For breathing/chest metrics, the chest is also visible. |
 | **Distance** | Close enough that the face isn't tiny in frame, far enough that it isn't clipped or overexposed. |
-| **Stability** | Camera itself must stay still for breathing/chest metrics. Handheld is fine for pulse, HRV, and blood pressure waveform only. |
+| **Stability** | Camera itself must stay still for breathing/chest metrics. Handheld is fine for pulse, HRV, and the relative arterial pressure waveform only. |
 | **Subject motion** | Stay still. Avoid talking, chewing gum, or large head/body movement during capture. |
 | **Clothing** | Avoid all-dark clothing or tight, high-contrast stripes if measuring breathing. |
 | **Patience** | Some metrics need a full window before they're trustworthy — see [Confidence and warm-up time](#confidence-and-warm-up-time) below. |

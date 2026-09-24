@@ -49,7 +49,10 @@ sdk.SetOnVideoOutput([](const spectra::FrameBuffer& frame, int64_t ts) {
 });
 
 if (const auto source_error =
-        sdk.UseCamera().SetResolution(1280, 720).SetFps(30).Build();
+        sdk.UseCamera(spectra::CameraSelection::Default())
+            .SetResolution(1280, 720)
+            .SetFps(30)
+            .Build();
     !source_error.ok()) {
     // Handle setup error
 } else if (const auto err = sdk.Start(); !err.ok()) {

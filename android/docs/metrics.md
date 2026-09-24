@@ -1,6 +1,6 @@
 ---
 title: Configuring Metrics on Android
-description: Request pulse, breathing, HRV and EDA metric groups from the SmartSpectra Android SDK, and read the samples its LiveData delivers.
+description: Request pulse and breathing rates, HRV and EDA metrics from the SmartSpectra Android SDK, and read LiveData results.
 sidebarTitle: Configuring Metrics
 ---
 
@@ -42,8 +42,6 @@ sdk.metrics.observe(viewLifecycleOwner) { metrics ->
 Set `requestedMetrics = null` to return to the default breathing-only set.
 `cardioMetrics` contains `PULSE_RATE`, `ARTERIAL_PRESSURE_TRACE`, and `HRV`.
 Cardio fields are empty unless you request a cardio metric.
-
-Requested metrics are validated against your subscription during SDK startup. If a metric is not authorized it is omitted from the output — the field is simply empty, with no error — so treat a persistently empty metric as a possible authorization gap rather than a signal-quality problem. If the authorization request itself fails, startup reports an error.
 
 ## Metric Update Patterns
 

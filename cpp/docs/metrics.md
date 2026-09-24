@@ -1,6 +1,6 @@
 ---
 title: Configuring Metrics on C++
-description: Request pulse, breathing, HRV and EDA metric groups from the SmartSpectra C++ SDK, and read the samples its callbacks deliver.
+description: Request pulse and breathing rates, HRV and EDA metrics from the SmartSpectra C++ SDK, and read callback results.
 sidebarTitle: Configuring Metrics
 ---
 
@@ -64,12 +64,6 @@ If `requested_metrics` is empty, the SDK uses `DefaultSupportedMetrics()`,
 which returns `BreathingMetrics()`. Use `BreathingMetrics()` when you are
 explicitly composing a breathing request. Cardio fields are empty unless you
 request a cardio metric such as `PULSE_RATE`.
-
-Requested metrics are validated against your subscription during SDK startup.
-If a metric is not authorized it is omitted from the output — the field is
-simply empty, with no error — so treat a persistently empty metric as a
-possible authorization gap rather than a signal-quality problem. If the
-authorization request itself fails, `Start()` reports an error.
 
 ## Metric Update Patterns
 

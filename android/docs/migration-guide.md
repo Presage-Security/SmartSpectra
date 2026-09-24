@@ -1,6 +1,6 @@
 ---
 title: Android Migration Guide
-description: "Release-by-release migration notes for the SmartSpectra Android SDK: breaking API changes, renamed symbols, and what each upgrade requires."
+description: "Migrate the SmartSpectra Android SDK to typed camera selection, public custom video input, specific usage errors, and other release-by-release API changes."
 sidebarTitle: Migration Guide
 ---
 
@@ -72,6 +72,30 @@ errors appear on the measurement screen. The minimal app also provides a
 landscape layouts.
 After a failed Start, **Select camera** remains available in both apps. Opening
 it awaits `stop()` to recover the SDK from `ERROR` before allowing a new selection.
+
+### Use the public custom-input API
+
+Apps that supply frames now use the public `useCustomInput()` API. Select custom
+input while the SDK is stopped, retain the returned `CustomInput`, await
+`start()`, and submit frames from a worker thread:
+
+```kotlin
+val input = sdk.useCustomInput()
+sdk.start()
+
+val result = input.sendFrame(imageProxy)
+if (result is FrameSubmissionResult.Rejected) {
+    // Handle result.error.
+}
+```
+
+Existing test integrations should replace the `@SmartSpectraTestingApi`
+`setVideoInputEnabled(true)` and `addVideoFrame(...)` calls with
+`useCustomInput()` and `CustomInput.sendFrame(...)`. The public handle supports
+`ImageProxy`, `Bitmap`, and `VideoFrame`. It survives stop/start/reset; selecting
+another source invalidates it. SDK camera permission is not required for custom
+input, but the host app remains responsible for permissions required by its own
+capture code.
 
 ### Check custom-input timestamp rejections in the submission result
 

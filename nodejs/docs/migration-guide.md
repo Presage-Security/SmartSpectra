@@ -1,6 +1,6 @@
 ---
 title: Node.js Migration Guide
-description: "Migrate Node.js camera selection from deviceIndex to CameraSelection, discover camera IDs, and update stopped-only source selection and reset behavior."
+description: "Migrate the SmartSpectra Node.js SDK to CameraSelection, cross-platform camera discovery, stopped-only source changes, and specific usage errors."
 sidebarTitle: Migration Guide
 ---
 
@@ -42,16 +42,20 @@ Classification is best effort; missing metadata and cameras combining multiple
 lenses report `'unknown'`. It does not describe digital zoom or change
 selection. Use it for picker labels and continue selecting by `id`.
 
-On macOS, default selection uses the first camera in discovery order. Explicit
-front/back/ID requests never fall back; an unavailable selection fails startup
-with `kInputUnavailable`. Empty IDs, NUL-containing IDs, invalid selectors, and
-invalid capture options fail selection with `kConfigurationFailed`.
+Native discovery and typed selection are supported on macOS, Linux, and
+Windows. Default selection follows each platform's native discovery order.
+Linux uses compatible V4L2 capture nodes in numeric device order. Windows uses
+the first enumerated camera. Explicit front/back/ID requests never fall back;
+an unavailable selection fails startup with `kInputUnavailable`.
 
-Native discovery and explicit selectors are currently supported on macOS.
-Linux and Windows return `kConfigurationFailed` for these operations; default
-capture remains available. The deprecated Node.js `deviceIndex` option and the
-older index-based C ABI remain compatible. Do not pass `deviceIndex` in the new
-overload's capture options.
+Linux populates facing only when the camera driver provides orientation
+metadata. Windows currently reports unknown facing and lens type, so `.front`
+and `.back` fail with `kInputUnavailable`; use `.byId(id)` for a specific
+Windows camera. Empty IDs, NUL-containing IDs, invalid selectors, and invalid
+capture options fail selection with `kConfigurationFailed`.
+
+The deprecated Node.js `deviceIndex` option and older index-based C ABI remain
+compatible. Do not pass `deviceIndex` in the new overload's capture options.
 
 ### Select sources while stopped
 
@@ -84,3 +88,16 @@ The renderer API continues to use browser capture and `useMediaStream(stream)`.
 These native selectors apply to the package root API, not the renderer entry
 point. Keep browser camera IDs and native camera IDs within their respective
 capture paths.
+
+### Usage failures now report specific errors
+
+Usage entitlement checking continues throughout a measurement as before. In
+v3.4.0, terminal usage failures delivered through the `error` event use these
+specific codes:
+
+- `SmartSpectraErrorCode.kAuthenticationFailed` for rejected credentials
+- `SmartSpectraErrorCode.kCreditExhausted` for an explicit quota denial
+- `SmartSpectraErrorCode.kNetworkError` when entitlement cannot be refreshed in time
+
+The SDK also includes short measurements and the final partial interval before
+`stop()` in usage reporting. No public API changes are required.

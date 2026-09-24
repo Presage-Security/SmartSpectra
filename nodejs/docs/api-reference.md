@@ -368,6 +368,27 @@ Verbosity of SDK logging, set via the SmartSpectraSDK `logLevel` option. Levels 
 - `readonly kError: 3`
 - `readonly kNone: 4`
 
+## MetricType
+
+MetricType integer codes accepted by `requestedMetrics`. Runtime values are generated from protobuf.
+
+- `readonly CHEST_BREATHING: 0`
+- `readonly ABDOMEN_BREATHING: 1`
+- `readonly BREATHING_RATE: 2`
+- `readonly BREATHING_AMPLITUDE: 3`
+- `readonly APNEA: 4`
+- `readonly RESPIRATORY_LINE_LENGTH: 5`
+- `readonly BASELINE: 6`
+- `readonly INHALE_EXHALE_RATIO: 7`
+- `readonly EDA_TRACE: 10`
+- `readonly FACE_LANDMARKS: 11`
+- `readonly BLINKING: 12`
+- `readonly TALKING: 13`
+- `readonly EXPRESSIONS: 14`
+- `readonly PULSE_RATE: 15`
+- `readonly ARTERIAL_PRESSURE_TRACE: 16`
+- `readonly HRV: 17`
+
 ## CameraSelection
 
 - `readonly default: Readonly<{ kind: 'default' }>`
@@ -409,6 +430,12 @@ export type SmartSpectraErrorCodeValue = typeof SmartSpectraErrorCode[keyof type
 
 ```typescript
 export type FrameTransformValue = typeof FrameTransform[keyof typeof FrameTransform];
+```
+
+## MetricTypeValue
+
+```typescript
+export type MetricTypeValue = typeof MetricType[keyof typeof MetricType];
 ```
 
 ## CameraFacing

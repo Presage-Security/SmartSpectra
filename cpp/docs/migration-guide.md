@@ -1,6 +1,6 @@
 ---
 title: C++ Migration Guide
-description: "Release-by-release migration notes for the SmartSpectra C++ SDK: breaking API changes, renamed headers, and what each upgrade requires."
+description: "Migrate the SmartSpectra C++ SDK to C++20, typed camera selection, specific usage errors, and other release-by-release API changes."
 sidebarTitle: Migration Guide
 ---
 
@@ -8,7 +8,23 @@ sidebarTitle: Migration Guide
 
 > Applies to SmartSpectra C++ SDK v3.x.
 
-## Upcoming release: explicit camera selection
+## C++ SDK v3.4.0 Migration
+
+### Build with C++20
+
+SmartSpectra C++ SDK v3.4.0 requires a C++20 compiler. Update projects that
+still compile as C++17 before upgrading:
+
+```cmake
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+```
+
+Use GCC, Clang, or Visual Studio 2022 with C++20 support enabled. This change
+applies to application code that includes SmartSpectra headers as well as code
+that links the prebuilt SDK.
+
+### Explicit camera selection
 
 Camera discovery and typed selection are available on Linux, Windows, macOS,
 and in the native C++ API on iOS. Existing callers keep index-based behavior: omitting source
@@ -104,14 +120,13 @@ Camera permission and application configuration requirements still apply.
 Choose a source while uninitialized or idle. To change cameras, complete
 `Stop()`, build the new camera source, and call `Start()` again. A request is
 preserved across stop/start/reset until another source is successfully built.
-The Swift, Android, and Node.js public APIs are unchanged by this addition.
+Swift, Android, and Node.js also provide typed camera discovery and selection;
+follow the migration guide for each platform when updating a cross-platform app.
 
 The `smart_spectra_example` sample accepts `--list_cameras` to print camera IDs,
 names, and facing without an API key. Use `--camera_id="ID"` with your API key
 to select one. This flag takes precedence over `--camera_device_index` and
 cannot be combined with `--input_video_path`.
-
-## C++ SDK v3.4.0 Migration
 
 ### Usage failures now report specific errors
 

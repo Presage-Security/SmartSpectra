@@ -1,6 +1,6 @@
 ---
 title: Swift Migration Guide
-description: "Release-by-release migration notes for the SmartSpectra Swift SDK: breaking API changes, renamed symbols, and what each upgrade requires."
+description: "Migrate the SmartSpectra Swift SDK to typed camera selection, public custom video input, specific usage errors, and other release-by-release API changes."
 sidebarTitle: Migration Guide
 ---
 
@@ -9,7 +9,9 @@ sidebarTitle: Migration Guide
 > Applies to SmartSpectra Swift SDK v3.x.
 > Migrating from a v3.0 release-candidate prior to rc.13, or from v2.x.
 
-## Custom Video Input
+## Swift SDK v3.4.0 Migration
+
+### Custom video input
 
 Camera capture remains the default. For camera selection changes, see below.
 Use `try sdk.useCustomInput()` to obtain a public frame-submission handle for
@@ -31,8 +33,6 @@ The demo app's Video Testing tab now decodes clips in the app and calls
 sidecars still contain one integer millisecond value per decoded frame; the app
 converts these to microseconds. Decoding uses the formats supported by
 AVFoundation on the selected device or simulator.
-
-## Swift SDK v3.4.0 Migration
 
 ### Camera selection
 

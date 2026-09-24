@@ -96,15 +96,15 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.10.0")
     implementation("androidx.camera:camera-view:1.6.0")
 
-    implementation("com.presagetech:smartspectra:3.4.0-rc.6-SNAPSHOT")
+    implementation("com.presagetech:smartspectra:3.4.0-rc.8-SNAPSHOT")
 }
 ```
 
-The `+` version selects the current release. To pin an exact version, use the
-value in [`android/samples/version.properties`](https://github.com/Presage-Security/SmartSpectra/blob/v3.4.0-rc.6/android/samples/version.properties).
-
 `androidx.activity:activity-ktx` supplies `ComponentActivity` and
 `registerForActivityResult`, both used by the complete activity below.
+
+The version above is the release these docs describe. To use a different one,
+browse the published versions on [Maven Central](https://central.sonatype.com/artifact/com.presagetech/smartspectra/versions).
 
 Manual check:
 

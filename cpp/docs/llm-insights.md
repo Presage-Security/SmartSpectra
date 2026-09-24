@@ -144,7 +144,10 @@ int main(int argc, char** argv) {
     std::cerr << err.FullMessage() << '\n';
   });
 
-  if (const auto err = smart_spectra.UseCamera().Build(); !err.ok()) {
+  if (const auto err = smart_spectra
+                           .UseCamera(spectra::CameraSelection::Default())
+                           .Build();
+      !err.ok()) {
     std::cerr << err.FullMessage() << '\n';
     return 1;
   }
@@ -199,7 +202,7 @@ MainWindow::MainWindow() {
   cfg.AddMetrics(spectra::SmartSpectraConfig::DefaultSupportedMetrics());
   cfg.AddMetrics(spectra::SmartSpectraConfig::CardioMetrics());
   m_spectra = std::make_unique<spectra::SmartSpectra>(std::move(cfg));
-  (void)m_spectra->UseCamera().Build();
+  (void)m_spectra->UseCamera(spectra::CameraSelection::Default()).Build();
 
   // 3. Receive responses. Hop to the UI thread with TryEnqueue before touching
   //    XAML. Hold a weak window ref so teardown can release it.
