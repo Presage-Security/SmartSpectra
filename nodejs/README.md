@@ -1,6 +1,7 @@
 ---
-title: Node.js SDK
-description: Build Node.js apps — including Electron desktop apps — with SmartSpectra via a packaged native runtime loaded through koffi.
+title: Node.js and Electron SDK
+sidebarTitle: Overview
+description: Build Node.js and Electron apps that measure pulse and breathing from a camera on Linux, macOS, and Windows, using a prebuilt native runtime from npm.
 ---
 
 # @smartspectra/node-sdk
@@ -104,26 +105,20 @@ the missing package.
 
 - Electron desktop app: use `@smartspectra/node-sdk/main`,
   `@smartspectra/node-sdk/preload`, and `@smartspectra/node-sdk/renderer`.
-- Headless or server-side Node process: use `@smartspectra/node-sdk`
-  directly and push frames with `useCustomInput()` / `sendFrame()`.
+- Headless Node process with a local camera: use `@smartspectra/node-sdk`
+  directly with `useCamera(CameraSelection.default)`.
+- Headless or server-side Node process with host-provided frames: use
+  `useCustomInput()` / `sendFrame()`.
 - Runnable reference app: [electron-quickstart](https://github.com/Presage-Security/SmartSpectra/tree/main/nodejs/samples/electron-quickstart)
 
-## Headless Node Quickstart
+## Camera Quickstart
 
 > The snippets below are ES modules (`import` + top-level `await`) — save them as `.mjs`, or
 > set `"type": "module"` in your `package.json`. In a CommonJS project, use `require()` and
 > wrap the `await` calls in an `async` function.
 
 ```ts
-import {
-  SmartSpectraSDK, PixelFormat, FrameTransform, ProcessingStatus,
-  breathingMetrics, cardioMetrics,
-  decodeMetrics, setMetricsClass,
-} from '@smartspectra/node-sdk';
-
-// Optional: override the default Metrics decoder.
-// import { Metrics } from './generated/metrics_pb';
-// setMetricsClass(Metrics);
+import { SmartSpectraSDK, CameraSelection, breathingMetrics, cardioMetrics, decodeMetrics } from '@smartspectra/node-sdk';
 
 const sdk = new SmartSpectraSDK({
   apiKey: 'YOUR_API_KEY',
@@ -134,20 +129,59 @@ sdk.on('processingStatus', (status) => console.log('Processing status:', status)
 sdk.on('validationStatus', (code, ts, hint) =>
   console.log('Validation:', code, hint, 'at', ts, 'µs'));
 sdk.on('metrics', (buf, ts) => {
-  const m = decodeMetrics(buf);
-  console.log('Metrics at', ts, 'µs');
+  console.log('Metrics at', ts, 'µs:', decodeMetrics(buf));
 });
 sdk.on('error', (code, message, retryable) =>
   console.error('SmartSpectra error', code, message, 'retryable=', retryable));
 
-sdk.useCustomInput(FrameTransform.kNone);
+sdk.useCamera(CameraSelection.default);
 sdk.start();
 
-// In your capture loop:
-sdk.sendFrame(rgbBuf, width, height, width * 3, PixelFormat.kRGB, captureTsUs);
+console.log('Measuring from the default camera. Press Ctrl+C to stop.');
 
 // On shutdown:
-await sdk.destroy();
+process.on('SIGINT', async () => {
+  await sdk.stopAsync();
+  await sdk.destroy();
+  process.exit(0);
+});
+```
+
+`useCamera(CameraSelection.default)` selects the default camera while stopped; capture begins at
+`start()`. You can discover cameras without creating an SDK instance:
+
+```ts
+import { CameraSelection, SmartSpectraSDK } from '@smartspectra/node-sdk';
+
+const cameras = SmartSpectraSDK.availableCameras();
+if (cameras.length > 0) {
+  sdk.useCamera(CameraSelection.byId(cameras[0].id), { width: 1280, height: 720 });
+}
+```
+
+`CameraSelection.default`, `.front`, `.back`, and `.byId(id)` share the camera
+selection contract across SDKs. Explicit requests never fall back. Stop/start/reset
+retain the chosen input. Native Node.js supports camera discovery and typed
+selection on macOS, Linux, and Windows. Linux and Windows cameras may report
+unknown facing or lens type, so select those cameras by discovered ID. On
+Windows, `.front` and `.back` fail with `kInputUnavailable` because facing is
+not reported. See the
+[migration guide](docs/migration-guide.md) and [API reference](docs/api-reference.md#cameraoptions).
+
+Electron renderer capture uses browser-owned streams and `useMediaStream()`;
+browser device IDs cannot be used for native camera selection. Use the
+custom-input path below when your app already owns frame capture.
+
+## Custom Input Quickstart
+
+To supply frames from another source, replace the camera setup with:
+
+```ts
+import { FrameTransform, PixelFormat } from '@smartspectra/node-sdk';
+
+sdk.useCustomInput(FrameTransform.kNone);
+sdk.start();
+sdk.sendFrame(rgbBuf, width, height, width * 3, PixelFormat.kRGB, captureTsUs);
 ```
 
 ## API reference

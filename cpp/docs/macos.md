@@ -1,6 +1,7 @@
 ---
 title: C++ on macOS
 description: Install the SmartSpectra C++ SDK and run the SwiftUI macOS sample app.
+sidebarTitle: macOS
 ---
 
 # SmartSpectra C++ Quickstart — macOS
@@ -20,7 +21,7 @@ specific need.
 
 ### Prerequisites
 
-- **Xcode** with Command Line Tools (provides a C++17 toolchain and the Swift compiler)
+- **Xcode** with Command Line Tools (provides a C++20 toolchain and the Swift compiler)
 - **Homebrew**
 - **API key** from [physiology.presagetech.com](https://physiology.presagetech.com/auth/login)
 - **Apple Development signing identity** — required for SDK startup on macOS
@@ -34,8 +35,7 @@ xcode-select --install
 ### Add the SDK
 
 The Homebrew formula installs the SmartSpectra SDK and exposes its CMake
-package metadata. The SDK is self-contained — you do not need to install
-OpenCV or any other libraries separately.
+package metadata.
 
 ```bash
 brew tap presage/smartspectra https://github.com/Presage-Security/homebrew-smartspectra
@@ -121,13 +121,8 @@ cd SmartSpectra/cpp/samples/macos_swiftui_example
 ./scripts/check-requirements.sh
 ```
 
-The script checks the Homebrew SDK, required model files, the SDK graph asset
-path, and code-signing visibility. To apply safe runtime fixes (install missing
-Homebrew packages), run:
-
-```bash
-./scripts/check-requirements.sh --fix
-```
+The script checks the SDK installation and code-signing setup. Follow any
+instructions it prints before opening Xcode.
 
 ### Open in Xcode
 
@@ -210,8 +205,8 @@ SMARTSPECTRA_SDK_ROOT = $(HOMEBREW_PREFIX)
 ```
 
 The project derives include and library paths from those two variables. The
-`Validate Setup` build phase checks the SDK header, library, interface
-headers, and OpenCV headers before compilation, so a wrong prefix surfaces
+`Validate Setup` build phase checks the SDK header, library, and interface
+headers before compilation, so a wrong prefix surfaces
 early.
 
 ## Additional Details
@@ -308,7 +303,8 @@ int main(int argc, char** argv) {
     });
 
     const auto source_error =
-        sdk.UseCamera().SetResolution(1280, 720).SetFps(30).Build();
+        sdk.UseCamera(spectra::CameraSelection::Default())
+            .SetResolution(1280, 720).SetFps(30).Build();
     if (!source_error.ok()) {
         std::cerr << "Failed to create camera source: "
                   << source_error.message << "\n";
@@ -357,6 +353,9 @@ Consumer code includes SmartSpectra headers as:
 When linking from your own CMake project:
 
 ```cmake
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 find_package(SmartSpectra CONFIG REQUIRED)
 target_link_libraries(my_app PRIVATE SmartSpectra::SDK)
 ```
@@ -475,17 +474,17 @@ API reference available at [C++ API Reference](api-reference.md).
 
 ## Troubleshooting
 
-### Runtime libraries or model files missing
+### Missing SDK files
 
-If you see errors about missing runtime libraries or `.tflite` model files,
-run the sample's diagnostic script:
+If the sample reports missing SDK files, run the diagnostic script:
 
 ```bash
-./scripts/check-requirements.sh --fix
+./scripts/check-requirements.sh
 ```
 
-It verifies the Homebrew SDK install, repairs the graph asset path, and
-reinstalls any missing runtime packages.
+If required SDK files are missing, reinstall the formula you selected:
+`brew reinstall presage/smartspectra/smartspectra` for stable or
+`brew reinstall presage/smartspectra/smartspectra-rc` for release candidates.
 
 ### Metrics do not appear immediately
 

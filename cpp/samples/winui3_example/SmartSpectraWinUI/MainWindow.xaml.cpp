@@ -58,7 +58,7 @@ namespace winrt::SmartSpectraWinUI::implementation
                     return e.retryable ? L"Network issue — please try again."
                                        : L"Network error: " + Widen(e.message);
                 case spectra::SmartSpectraErrorCode::kInputUnavailable:
-                    return L"Camera is unavailable. Check permissions.";
+                    return L"Camera is unavailable. Check its connection and permissions, then refresh cameras.";
                 case spectra::SmartSpectraErrorCode::kConfigurationFailed:
                     return L"Configuration failed: " + Widen(e.message);
                 case spectra::SmartSpectraErrorCode::kInvalidState:
@@ -109,10 +109,6 @@ namespace winrt::SmartSpectraWinUI::implementation
         cfg.AddMetrics(spectra::SmartSpectraConfig::FaceMetrics());
         cfg.AddMetrics(spectra::SmartSpectraConfig::EdaMetrics());
         m_spectra = std::make_unique<spectra::SmartSpectra>(std::move(cfg));
-
-        if (auto err = m_spectra->UseCamera().Build(); !err.ok()) {
-            StatusText().Text(L"Camera error: " + UserFacing(err));
-        }
 
         // SmartSpectra stores these callbacks, and the window owns SmartSpectra.
         // Keep only a weak window reference here so teardown can release both.
@@ -235,7 +231,7 @@ namespace winrt::SmartSpectraWinUI::implementation
                         }
                         if (eda_latest) {
                             wchar_t buf[64];
-                            swprintf_s(buf, L"EDA  %+.3f", *eda_latest);
+                            swprintf_s(buf, L"EDA Proxy  %+.3f", *eda_latest);
                             self->EdaText().Text(buf);
                         }
                     }
@@ -263,36 +259,34 @@ namespace winrt::SmartSpectraWinUI::implementation
             if (auto self = weak.get()) {
                 self->m_ui_queue.TryEnqueue([weak, s] {
                     if (auto self = weak.get()) {
+                        self->m_status = s;
                         switch (s) {
+                            case spectra::ProcessingStatus::kUninitialized:
                             case spectra::ProcessingStatus::kIdle:
                                 self->StatusText().Text(L"Idle");
                                 self->ToggleButton().Content(box_value(L"Start"));
-                                self->ToggleButton().IsEnabled(true);
                                 self->m_running = false;
                                 break;
                             case spectra::ProcessingStatus::kStarting:
                                 self->StatusText().Text(L"Starting");
-                                self->ToggleButton().IsEnabled(false);
                                 break;
                             case spectra::ProcessingStatus::kRunning:
                                 self->StatusText().Text(L"Running");
                                 self->ToggleButton().Content(box_value(L"Stop"));
-                                self->ToggleButton().IsEnabled(true);
                                 self->m_running = true;
                                 break;
                             case spectra::ProcessingStatus::kStopping:
                                 self->StatusText().Text(L"Stopping");
-                                self->ToggleButton().IsEnabled(false);
                                 break;
                             case spectra::ProcessingStatus::kError:
                                 self->StatusText().Text(L"Error");
                                 self->ToggleButton().Content(box_value(L"Start"));
-                                self->ToggleButton().IsEnabled(true);
                                 self->m_running = false;
                                 break;
                             default:
                                 break;
                         }
+                        self->UpdateControls();
                     }
                 });
             }
@@ -323,6 +317,7 @@ namespace winrt::SmartSpectraWinUI::implementation
                 });
             }
         });
+        RefreshCameras();
     }
 
     MainWindow::~MainWindow() {
@@ -337,24 +332,39 @@ namespace winrt::SmartSpectraWinUI::implementation
     }
 
     void MainWindow::OnToggleClick(IInspectable const&, RoutedEventArgs const&) {
+        if (m_lifecycle_busy || !ToggleButton().IsEnabled()) return;
         if (m_running) {
-            RunLifecycleAsync([](spectra::SmartSpectra& spec) { (void)spec.Stop(); });
+            RunLifecycleAsync([](spectra::SmartSpectra& spec) { return spec.Stop(); });
             return;
         }
+        const int index = CameraPicker().SelectedIndex();
+        if (index < 0 || static_cast<size_t>(index) >= m_cameras.size()) return;
+        const auto selection = spectra::CameraSelection::ById(m_cameras[index].id);
+        PreviewImage().Source(nullptr);
+        m_preview = nullptr;
+        m_preview_w = m_preview_h = 0;
         m_breath_trace.reset();
         m_bp_trace.reset();
         m_eda_trace.reset();
         HeartRateText().Text(L"-- bpm");
         HrvText().Text(L"");
         BreathingRateText().Text(L"Breathing Rate");
-        EdaText().Text(L"EDA");
+        EdaText().Text(L"EDA Proxy");
         ExpressionEmoji().Text(L"");
         ExpressionText().Text(L"");
         InsightText().Text(L"Tap Ask AI to get an analysis of your vitals.");
         BreathingCanvas().Children().Clear();
         BpCanvas().Children().Clear();
         EdaCanvas().Children().Clear();
-        RunLifecycleAsync([](spectra::SmartSpectra& spec) { (void)spec.Start(); });
+        RunLifecycleAsync([selection](spectra::SmartSpectra& spec) {
+            // A failed start leaves the SDK in kError. Reset before configuring
+            // another source; normal stop/start does not need a reset.
+            if (spec.GetStatus() == spectra::ProcessingStatus::kError) {
+                if (auto error = spec.Reset(); !error.ok()) return error;
+            }
+            if (auto error = spec.UseCamera(selection).Build(); !error.ok()) return error;
+            return spec.Start();
+        });
     }
 
     void MainWindow::OnInsightClick(IInspectable const&, RoutedEventArgs const&) {
@@ -385,13 +395,91 @@ namespace winrt::SmartSpectraWinUI::implementation
         PreviewImage().Source(m_preview);
     }
 
+    void MainWindow::OnRefreshCamerasClick(IInspectable const&, RoutedEventArgs const&) {
+        if (RefreshCamerasButton().IsEnabled()) RefreshCameras();
+    }
+
+    void MainWindow::OnCameraSelectionChanged(IInspectable const&, SelectionChangedEventArgs const&) {
+        const int index = CameraPicker().SelectedIndex();
+        if (index >= 0 && static_cast<size_t>(index) < m_cameras.size()) {
+            m_selected_camera_id = m_cameras[index].id;
+            CameraHintText().Text(L"");
+        }
+        UpdateControls();
+    }
+
+    void MainWindow::RefreshCameras() {
+        if (m_lifecycle_busy) return;
+        const auto previous_id = m_selected_camera_id;
+        CameraHintText().Text(L"Looking for cameras...");
+        RunLifecycleAsync([weak = get_weak(), queue = m_ui_queue, previous_id](spectra::SmartSpectra&) {
+            std::vector<spectra::CameraInfo> cameras;
+            auto error = spectra::SmartSpectra::AvailableCameras(cameras);
+            queue.TryEnqueue([weak, previous_id, error, cameras = std::move(cameras)]() mutable {
+                if (auto self = weak.get()) {
+                    self->m_cameras = std::move(cameras);
+                    self->CameraPicker().Items().Clear();
+                    int selected = -1;
+                    for (size_t i = 0; i < self->m_cameras.size(); ++i) {
+                        const auto& camera = self->m_cameras[i];
+                        auto label = camera.name && !camera.name->empty()
+                            ? Widen(*camera.name) : L"Camera " + std::to_wstring(i + 1);
+                        // Identical model names must still produce distinct picker labels.
+                        if (camera.name && std::count_if(self->m_cameras.begin(), self->m_cameras.end(),
+                                [&](const auto& other) { return other.name == camera.name; }) > 1) {
+                            label += L" (" + std::to_wstring(i + 1) + L")";
+                        }
+                        self->CameraPicker().Items().Append(box_value(label));
+                        if (camera.id == previous_id) selected = static_cast<int>(i);
+                    }
+                    if (previous_id.empty() && !self->m_cameras.empty()) selected = 0;
+                    self->CameraPicker().SelectedIndex(selected);
+                    if (!error.ok()) {
+                        self->CameraHintText().Text(L"Could not discover cameras. Try refreshing again.");
+                    } else if (self->m_cameras.empty()) {
+                        self->CameraHintText().Text(L"No cameras found. Connect a camera and refresh.");
+                    } else if (selected < 0) {
+                        self->CameraHintText().Text(L"The previous camera is unavailable. Select another camera.");
+                    } else {
+                        self->CameraHintText().Text(L"");
+                    }
+                }
+            });
+            return error;
+        });
+    }
+
+    void MainWindow::UpdateControls() {
+        const bool can_select = !m_lifecycle_busy &&
+            (m_status == spectra::ProcessingStatus::kUninitialized ||
+             m_status == spectra::ProcessingStatus::kIdle ||
+             m_status == spectra::ProcessingStatus::kError);
+        CameraPicker().IsEnabled(can_select && !m_cameras.empty());
+        RefreshCamerasButton().IsEnabled(can_select);
+        const int index = CameraPicker().SelectedIndex();
+        const bool has_selection = index >= 0 && static_cast<size_t>(index) < m_cameras.size();
+        ToggleButton().IsEnabled(!m_lifecycle_busy &&
+            (m_status == spectra::ProcessingStatus::kRunning || (can_select && has_selection)));
+    }
+
     void MainWindow::RunLifecycleAsync(
-        std::function<void(spectra::SmartSpectra&)> operation) {
+        std::function<spectra::SmartSpectraError(spectra::SmartSpectra&)> operation) {
+        if (m_lifecycle_busy) return;
+        m_lifecycle_busy = true;
+        UpdateControls();
         std::lock_guard<std::mutex> lock(m_lifecycle_mutex);
         if (m_lifecycle_thread.joinable()) m_lifecycle_thread.join();
         m_lifecycle_thread = std::thread(
-            [spec = m_spectra.get(), operation = std::move(operation)]() mutable {
-                if (spec) operation(*spec);
+            [spec = m_spectra.get(), weak = get_weak(), queue = m_ui_queue,
+             operation = std::move(operation)]() mutable {
+                const auto error = operation(*spec);
+                queue.TryEnqueue([weak, error] {
+                    if (auto self = weak.get()) {
+                        self->m_lifecycle_busy = false;
+                        if (!error.ok()) self->StatusText().Text(L"Error: " + UserFacing(error));
+                        self->UpdateControls();
+                    }
+                });
             });
     }
 

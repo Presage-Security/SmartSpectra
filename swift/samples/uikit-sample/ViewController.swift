@@ -18,6 +18,7 @@ class ViewController: UIViewController {
     @IBOutlet private var edaGraphView: LineGraphView!
     @IBOutlet private var statusLabel: UILabel!
     @IBOutlet private var toggleButton: UIButton!
+    @IBOutlet private var cameraButton: UIButton!
     @IBOutlet private var bottomPanel: UIView!
     @IBOutlet private var insightLabel: UILabel!
     @IBOutlet private var insightButton: UIButton!
@@ -29,6 +30,8 @@ class ViewController: UIViewController {
 
     private let sdk = SmartSpectraSDK.shared
     private let gradientLayer = CAGradientLayer()
+    private var cameraTask: Task<Void, Never>?
+    private var cameraAlert: UIAlertController?
 
     private var portraitConstraints: [NSLayoutConstraint] = []
     private var landscapeConstraints: [NSLayoutConstraint] = []
@@ -249,7 +252,7 @@ class ViewController: UIViewController {
         bloodPressureGraphView.append(contentsOf: metrics.cardio.arterialPressureTrace.map(\.value))
 
         if let latest = metrics.eda.trace.last {
-            edaLabel.text = String(format: "EDA  %+.3f", latest.value)
+            edaLabel.text = String(format: "EDA Proxy  %+.3f", latest.value)
         }
         edaGraphView.append(contentsOf: metrics.eda.trace.map(\.value))
     }
@@ -257,6 +260,8 @@ class ViewController: UIViewController {
     // MARK: - Status
 
     private func updateStatus(_ status: ProcessingStatus) {
+        cameraButton.isEnabled = (status == .idle || status == .error) && cameraTask == nil
+        if status != .idle { cameraAlert?.dismiss(animated: true) }
         switch status {
         case .idle:
             statusLabel.text = sdk.error.map { "Error: \(Self.userFacingMessage(for: $0))" } ?? "Idle"
@@ -294,6 +299,80 @@ class ViewController: UIViewController {
 
     // MARK: - Actions
 
+    @IBAction private func cameraTapped() {
+        guard cameraTask == nil, sdk.processingStatus == .idle || sdk.processingStatus == .error else { return }
+        cameraButton.isEnabled = false
+        cameraButton.configuration?.showsActivityIndicator = true
+        cameraTask = Task { @MainActor in
+            defer {
+                cameraTask = nil
+                cameraButton.configuration?.showsActivityIndicator = false
+                cameraButton.isEnabled = sdk.processingStatus == .idle || sdk.processingStatus == .error
+            }
+            do {
+                if sdk.processingStatus == .error { try await sdk.reset() }
+                try Task.checkCancellation()
+                let cameras = try SmartSpectraSDK.availableCameras()
+                guard sdk.processingStatus == .idle else { return }
+                let picker = UIAlertController(
+                    title: "Select Camera",
+                    message: cameras.isEmpty
+                        ? "No cameras found. Check camera permission, connect a camera, then refresh."
+                        : "Choose a camera for the next measurement.",
+                    preferredStyle: .actionSheet
+                )
+                picker.addAction(UIAlertAction(title: "Default", style: .default) { [weak self] _ in
+                    self?.selectCamera(.default)
+                })
+                for camera in cameras {
+                    let facing: String = switch camera.facing {
+                    case .front: "Front"
+                    case .back: "Back"
+                    case .unknown: "Unknown facing"
+                    }
+                    let lens: String = switch camera.lensType {
+                    case .wideAngle: "Wide-angle"
+                    case .ultraWide: "Ultra-wide"
+                    case .telephoto: "Telephoto"
+                    case .unknown: "Unknown lens"
+                    }
+                    let label = "\(camera.name ?? "Camera") · \(facing) · \(lens) · ID: \(camera.id)"
+                    picker.addAction(UIAlertAction(title: label, style: .default) { [weak self] _ in
+                        self?.selectCamera(.byId(camera.id))
+                    })
+                }
+                picker.addAction(UIAlertAction(title: "Refresh", style: .default) { [weak self, weak picker] _ in
+                    picker?.dismiss(animated: true) { self?.cameraTapped() }
+                })
+                picker.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+                picker.popoverPresentationController?.sourceView = cameraButton
+                picker.popoverPresentationController?.sourceRect = cameraButton.bounds
+                cameraAlert = picker
+                present(picker, animated: true)
+            } catch is CancellationError {
+                // Leaving the screen cancels recovery/discovery.
+            } catch {
+                statusLabel.text = "Error: \(Self.userFacingMessage(for: error))"
+            }
+        }
+    }
+
+    private func selectCamera(_ selection: CameraSelection) {
+        do {
+            try sdk.useCamera(selection)
+            statusLabel.text = "Camera selected for the next measurement."
+        } catch {
+            statusLabel.text = "Error: \(Self.userFacingMessage(for: error))"
+        }
+    }
+
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        cameraTask?.cancel()
+        cameraAlert?.dismiss(animated: false)
+        cameraAlert = nil
+    }
+
     @IBAction private func insightTapped() {
         guard sdk.processingStatus == .running else { return }
         insightButton.isEnabled = false
@@ -317,7 +396,7 @@ class ViewController: UIViewController {
                     heartRateLabel.text = "-- bpm"
                     heartRateLabel.textColor = coralColor
                     breathingRateLabel.text = "-- brpm"
-                    edaLabel.text = "EDA"
+                    edaLabel.text = "EDA Proxy"
                     insightLabel.text = "Tap Ask AI to get an analysis of your vitals."
                     breathingGraphView.reset()
                     bloodPressureGraphView.reset()

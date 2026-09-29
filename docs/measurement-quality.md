@@ -1,6 +1,6 @@
 ---
 title: Getting a Good Measurement
-description: Camera setup, lighting, and positioning guidance for accurate SmartSpectra readings, what good vs. bad measurements look like, and how to read the SDK's live validation feedback.
+description: Camera setup, lighting and positioning for accurate SmartSpectra readings, plus how to surface the SDK's live validation feedback to users.
 ---
 
 > **Important:** SDK metrics are offered for general wellness and informational purposes only. SDK metrics have not been cleared by the FDA and may not be used for medical diagnosis or treatment.
@@ -25,7 +25,7 @@ Point end users at this before their first measurement:
 | **Lighting** | Even, diffuse light on the face. Not too dark, not too bright, no harsh shadows or flicker. |
 | **Framing** | One face, centered, roughly facing the camera. For breathing/chest metrics, the chest is also visible. |
 | **Distance** | Close enough that the face isn't tiny in frame, far enough that it isn't clipped or overexposed. |
-| **Stability** | Camera itself must stay still for breathing/chest metrics. Handheld is fine for pulse, HRV, and blood pressure waveform only. |
+| **Stability** | Camera itself must stay still for breathing/chest metrics. Handheld is fine for pulse, HRV, and the relative arterial pressure waveform only. |
 | **Subject motion** | Stay still. Avoid talking, chewing gum, or large head/body movement during capture. |
 | **Clothing** | Avoid all-dark clothing or tight, high-contrast stripes if measuring breathing. |
 | **Patience** | Some metrics need a full window before they're trustworthy — see [Confidence and warm-up time](#confidence-and-warm-up-time) below. |
@@ -153,6 +153,11 @@ bad. Surface the `hint` text directly to end users; it's designed to be shown as
 This is the same enum across platforms — Swift's `ValidationCode`, Kotlin's `ValidationCode`,
 C++'s `spectra::ValidationCode`, and the Node client's `ValidationCodeValue` all carry the same
 codes and wire values.
+
+The table above lists every code you should surface. Each enum also carries one further value,
+`FACE_SIZE_OUT_OF_RANGE` (wire value 4), which is **deprecated** — it is superseded by
+`FACE_TOO_CLOSE` and `FACE_TOO_FAR`, which say which direction to move. Handle it if you switch
+exhaustively, but don't build UI around it.
 
 **Swift:**
 

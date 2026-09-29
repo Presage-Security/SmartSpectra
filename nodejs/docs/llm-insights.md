@@ -1,6 +1,7 @@
 ---
-title: LLM Insights
-description: Request and receive LLM Insights from the Node.js SmartSpectra SDK.
+title: LLM Insights on Node.js
+description: Ask natural-language questions about a measurement and receive LLM Insights through the SmartSpectra Node.js SDK, alongside the metrics stream.
+sidebarTitle: LLM Insights
 ---
 
 # Node.js LLM Insights
@@ -38,7 +39,7 @@ correlate the asynchronous response:
 ```js
 // main process:      requestInsight(text: string): number
 // renderer process:  requestInsight(text: string): Promise<number>
-const requestId = sdk.requestInsight('Summarize the user\'s stress level.'); // await in the renderer
+const requestId = sdk.requestInsight('Summarize my current vital signs and flag anything unusual.'); // await in the renderer
 ```
 
 The prompt is combined with the latest buffered metrics when they exist,
@@ -74,8 +75,10 @@ and `error` are a `result` oneof (exactly one is set), with `requestId`,
 `type` == `INSIGHT_TYPE_VITALS`, so correlate on-demand replies via `requestId`,
 not `type`.
 
-The first auto-fired insight arrives about 15 seconds after processing starts;
-allow that much valid measurement before an on-demand request can be grounded in
+The first auto-fired insight arrives once pulse rate has a stable reading,
+typically about 15 seconds after processing starts; further snapshots follow as
+breathing rate and HRV stabilise, then every 60 seconds. Allow at least
+15 seconds of valid measurement before an on-demand request can be grounded in
 the user's physiology. Note that the service may return no insight for a given
 request (for example when nothing new is worth surfacing), in which case the
 callback does not fire.

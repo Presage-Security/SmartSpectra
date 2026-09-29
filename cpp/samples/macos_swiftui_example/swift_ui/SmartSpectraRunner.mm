@@ -1,15 +1,14 @@
 #import "SmartSpectraRunner.h"
 
+#include "PreviewImage.h"
+
 #include <iomanip>
 #include <atomic>
-#include <cstring>
 #include <memory>
 #include <mutex>
 #include <sstream>
 #include <string>
 #include <vector>
-
-#include <opencv2/imgproc.hpp>
 
 #include <smartspectra/smartspectra.h>
 #include <smartspectra/version.hpp>
@@ -150,7 +149,7 @@ std::vector<std::string> BuildMetricLines(const ss::Metrics& metrics) {
         const auto& eda = metrics.eda();
         AddLatestMeasurementLine(
             lines,
-            "EDA level",
+            "EDA Proxy level",
             eda.trace_size(),
             [&eda](int index) -> const auto& { return eda.trace(index); },
             "",
@@ -158,110 +157,6 @@ std::vector<std::string> BuildMetricLines(const ss::Metrics& metrics) {
     }
 
     return lines;
-}
-
-bool CopyFrameToBgr(const ss::FrameBuffer& frame, cv::Mat& output_bgr) {
-    if (frame.data == nullptr || frame.width <= 0 || frame.height <= 0 || frame.stride_bytes <= 0) {
-        return false;
-    }
-
-    switch (frame.format) {
-        case ss::PixelFormat::kBGR:
-            output_bgr = cv::Mat(frame.height, frame.width, CV_8UC3,
-                                 const_cast<uint8_t*>(frame.data),
-                                 frame.stride_bytes).clone();
-            return true;
-        case ss::PixelFormat::kRGB: {
-            cv::Mat rgb(frame.height, frame.width, CV_8UC3,
-                        const_cast<uint8_t*>(frame.data),
-                        frame.stride_bytes);
-            cv::cvtColor(rgb, output_bgr, cv::COLOR_RGB2BGR);
-            return true;
-        }
-        case ss::PixelFormat::kBGRA: {
-            cv::Mat bgra(frame.height, frame.width, CV_8UC4,
-                         const_cast<uint8_t*>(frame.data),
-                         frame.stride_bytes);
-            cv::cvtColor(bgra, output_bgr, cv::COLOR_BGRA2BGR);
-            return true;
-        }
-        case ss::PixelFormat::kRGBA: {
-            cv::Mat rgba(frame.height, frame.width, CV_8UC4,
-                         const_cast<uint8_t*>(frame.data),
-                         frame.stride_bytes);
-            cv::cvtColor(rgba, output_bgr, cv::COLOR_RGBA2BGR);
-            return true;
-        }
-        case ss::PixelFormat::kYUYV: {
-            cv::Mat yuyv(frame.height, frame.width, CV_8UC2,
-                         const_cast<uint8_t*>(frame.data),
-                         frame.stride_bytes);
-            cv::cvtColor(yuyv, output_bgr, cv::COLOR_YUV2BGR_YUY2);
-            return true;
-        }
-        case ss::PixelFormat::kNV12:
-        case ss::PixelFormat::kNV21: {
-            cv::Mat yuv(frame.height + frame.height / 2, frame.width, CV_8UC1);
-            for (int row = 0; row < frame.height; ++row) {
-                std::memcpy(yuv.ptr(row),
-                            frame.data + row * frame.stride_bytes,
-                            static_cast<size_t>(frame.width));
-            }
-            const uint8_t* chroma = frame.data + frame.stride_bytes * frame.height;
-            for (int row = 0; row < frame.height / 2; ++row) {
-                std::memcpy(yuv.ptr(frame.height + row),
-                            chroma + row * frame.stride_bytes,
-                            static_cast<size_t>(frame.width));
-            }
-
-            cv::cvtColor(yuv, output_bgr,
-                         frame.format == ss::PixelFormat::kNV12
-                             ? cv::COLOR_YUV2BGR_NV12
-                             : cv::COLOR_YUV2BGR_NV21);
-            return true;
-        }
-    }
-
-    return false;
-}
-
-NSImage *ImageFromBgrMat(const cv::Mat& bgr) {
-    if (bgr.empty()) {
-        return nil;
-    }
-
-    cv::Mat rgba;
-    cv::cvtColor(bgr, rgba, cv::COLOR_BGR2RGBA);
-
-    NSData *data = [NSData dataWithBytes:rgba.data
-                                  length:rgba.total() * rgba.elemSize()];
-    CGDataProviderRef provider = CGDataProviderCreateWithCFData((__bridge CFDataRef)data);
-    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-    CGImageRef cgImage = CGImageCreate(
-        rgba.cols,
-        rgba.rows,
-        8,
-        32,
-        rgba.step[0],
-        colorSpace,
-        kCGImageAlphaLast | kCGBitmapByteOrderDefault,
-        provider,
-        nullptr,
-        false,
-        kCGRenderingIntentDefault);
-
-    NSImage *image = nil;
-    if (cgImage != nullptr) {
-        image = [[NSImage alloc] initWithCGImage:cgImage
-                                            size:NSMakeSize(rgba.cols, rgba.rows)];
-    }
-
-    if (cgImage != nullptr) {
-        CGImageRelease(cgImage);
-    }
-    CGColorSpaceRelease(colorSpace);
-    CGDataProviderRelease(provider);
-    return image;
 }
 
 void DispatchFailure(__weak SmartSpectraRunner *weakRunner, NSString *message) {
@@ -280,6 +175,16 @@ void DispatchDiagnostics(__weak SmartSpectraRunner *weakRunner, NSString *diagno
 
 }  // namespace
 
+@interface SmartSpectraCamera ()
+@property(nonatomic, copy, readwrite) NSString *cameraID;
+@property(nonatomic, copy, readwrite, nullable) NSString *name;
+@property(nonatomic, readwrite) SmartSpectraCameraFacing facing;
+@property(nonatomic, readwrite) SmartSpectraCameraLensType lensType;
+@end
+
+@implementation SmartSpectraCamera
+@end
+
 @interface SmartSpectraRunner ()
 @property(nonatomic, assign) BOOL running;
 @end
@@ -296,7 +201,39 @@ void DispatchDiagnostics(__weak SmartSpectraRunner *weakRunner, NSString *diagno
     return [NSString stringWithUTF8String:SMART_SPECTRA_VERSION_STRING];
 }
 
-- (nullable NSString *)startWithAPIKey:(NSString *)apiKey {
++ (nullable NSArray<SmartSpectraCamera *> *)availableCamerasWithError:(NSError **)error {
+    std::vector<ss::CameraInfo> cameras;
+    if (auto result = ss::SmartSpectra::AvailableCameras(cameras); !result.ok()) {
+        if (error) {
+            *error = [NSError errorWithDomain:@"SmartSpectraCameraDiscovery"
+                                        code:static_cast<NSInteger>(result.code)
+                                    userInfo:@{NSLocalizedDescriptionKey:
+                [NSString stringWithUTF8String:result.FullMessage().c_str()]}];
+        }
+        return nil;
+    }
+    NSMutableArray<SmartSpectraCamera *> *result = [NSMutableArray arrayWithCapacity:cameras.size()];
+    for (const auto& camera : cameras) {
+        SmartSpectraCamera *info = [[SmartSpectraCamera alloc] init];
+        info.cameraID = [NSString stringWithUTF8String:camera.id.c_str()];
+        info.name = camera.name ? [NSString stringWithUTF8String:camera.name->c_str()] : nil;
+        switch (camera.facing) {
+            case ss::CameraFacing::kFront: info.facing = SmartSpectraCameraFacingFront; break;
+            case ss::CameraFacing::kBack: info.facing = SmartSpectraCameraFacingBack; break;
+            case ss::CameraFacing::kUnknown: info.facing = SmartSpectraCameraFacingUnknown; break;
+        }
+        switch (camera.lens_type) {
+            case ss::CameraLensType::kWideAngle: info.lensType = SmartSpectraCameraLensTypeWideAngle; break;
+            case ss::CameraLensType::kUltraWide: info.lensType = SmartSpectraCameraLensTypeUltraWide; break;
+            case ss::CameraLensType::kTelephoto: info.lensType = SmartSpectraCameraLensTypeTelephoto; break;
+            case ss::CameraLensType::kUnknown: info.lensType = SmartSpectraCameraLensTypeUnknown; break;
+        }
+        [result addObject:info];
+    }
+    return result;
+}
+
+- (nullable NSString *)startWithAPIKey:(NSString *)apiKey cameraID:(nullable NSString *)cameraID {
     if (self.running) {
         return nil;
     }
@@ -364,12 +301,13 @@ void DispatchDiagnostics(__weak SmartSpectraRunner *weakRunner, NSString *diagno
             return;
         }
 
-        cv::Mat bgr;
-        if (!CopyFrameToBgr(frame, bgr)) {
+        CGImageRef preview = CreatePreviewImage(frame);
+        if (preview == nullptr) {
             return;
         }
-
-        NSImage *image = ImageFromBgrMat(bgr);
+        NSImage *image = [[NSImage alloc] initWithCGImage:preview
+                                                   size:NSMakeSize(frame.width, frame.height)];
+        CGImageRelease(preview);
         if (image == nil) {
             return;
         }
@@ -416,7 +354,10 @@ void DispatchDiagnostics(__weak SmartSpectraRunner *weakRunner, NSString *diagno
         DispatchFailure(weakSelf, [NSString stringWithUTF8String:message.c_str()]);
     });
 
-    if (auto error = spectra->UseCamera(0).SetResolution(1280, 720).SetFps(30).Build();
+    const auto selection = cameraID == nil
+        ? ss::CameraSelection::Default()
+        : ss::CameraSelection::ById(std::string(cameraID.UTF8String));
+    if (auto error = spectra->UseCamera(selection).SetResolution(1280, 720).SetFps(30).Build();
         !error.ok()) {
         return [NSString stringWithUTF8String:error.FullMessage().c_str()];
     }

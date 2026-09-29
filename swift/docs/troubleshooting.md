@@ -1,6 +1,7 @@
 ---
-title: Troubleshooting
-description: Solutions to common build, runtime, and integration issues with the SmartSpectra Swift SDK.
+title: Swift Troubleshooting
+description: Troubleshoot SmartSpectra Swift setup, camera permissions, custom input frame rejections, timestamps, and iOS Simulator measurements.
+sidebarTitle: Troubleshooting
 ---
 
 # iOS Troubleshooting
@@ -9,21 +10,32 @@ description: Solutions to common build, runtime, and integration issues with the
 
 ### Package not found in Xcode
 
-Ensure you're adding the package via **File → Add Package Dependencies...**, entering `https://github.com/Presage-Security/SmartSpectra-Swift`, and selecting a stable version such as `3.0.0` for repeatable builds. Use **Branch → main** only when testing the latest final public release before pinning a version.
+Ensure you're adding the package via **File → Add Package Dependencies...**, entering `https://github.com/Presage-Security/SmartSpectra-Swift`, and selecting the release tag `3.4.0`, from the [SmartSpectra-Swift releases](https://github.com/Presage-Security/SmartSpectra-Swift/releases), for repeatable builds. Pin the current release rather than an older one — the [migration guide](migration-guide.md) documents behaviour changes since 3.0. Use **Branch → main** only when testing the latest final public release before pinning a version.
 
 If you pasted a subdirectory URL such as `/tree/main/swift/sdk`, replace it with the repository root URL above. Swift Package Manager resolves the package from the repo root.
 
 ---
 
-### Build fails on simulator
+### Measurement does not start on the simulator
 
-The SDK requires a physical device with a camera. Select a real device target in Xcode — the simulator is not supported.
+The simulator has no camera, so camera-driven measurement needs a physical device.
+Select a real device target in Xcode for normal development.
+
+The simulator supports supplied video frames through public
+[`useCustomInput()`](headless-mode.md#use-your-own-camera-or-video-source),
+or the testing-only file-playback API — see
+[Headless testing in CI](headless-testing-in-ci.md), which runs a full measurement on
+the iOS Simulator.
 
 ---
 
 ## Camera & Permissions
 
 ### `NSCameraUsageDescription` missing
+
+This key is required when your app opens a camera, including SDK-owned capture.
+Custom input does not check or request camera access; a decoder-only integration
+does not need camera permission. Your own camera capture still needs it.
 
 In Xcode:
 
@@ -32,7 +44,7 @@ In Xcode:
 3. Add a new row for `Privacy - Camera Usage Description`.
 4. Set the value to `This app needs camera access to measure vitals.`
 
-The SDK fails gracefully with a clear runtime error if this key is absent or empty.
+With SDK-owned capture, the SDK fails gracefully if this key is absent or empty.
 
 Or add the entry directly to your `Info.plist`:
 
@@ -45,7 +57,10 @@ Or add the entry directly to your `Info.plist`:
 
 ### Camera permission denied at runtime
 
-If the user previously denied camera access, the SDK surfaces an action to open iOS Settings. Ensure your `Info.plist` description string clearly explains why camera access is needed — iOS shows this string in the permission prompt, and a vague description increases denial rates.
+For SDK-owned capture, the reference sample offers an action to open iOS Settings
+when camera permission is denied. With custom input, your app handles permission
+for its own capture source. Ensure your `Info.plist` description explains why
+your app needs camera access.
 
 ---
 
@@ -63,7 +78,16 @@ If processing fails immediately with a missing-auth error, make sure you set `sd
 
 ### OAuth not working
 
-When registering your OAuth app, you need your **Apple Org ID** (Team ID, e.g. `AB12CDE34F`), not a certificate fingerprint. Find it in [App Store Connect](https://developer.apple.com/help/account/). Place the downloaded `PresageService-Info.plist` in your app's root directory — no additional code is needed.
+When registering your OAuth app, enter the app target's Bundle Identifier exactly as Xcode shows it, including capitalization. Enter your **Apple Org ID** (Team ID, e.g. `AB12CDE34F`) for the Organization ID: exactly 10 uppercase alphanumeric characters, not a certificate fingerprint. Find it in **Xcode → Settings → Accounts**, select your Apple ID and team, and read the `Team ID` value — or in your [Apple Developer Account](https://developer.apple.com) under `Membership Details`.
+
+Place the downloaded `PresageService-Info.plist` in your app, enable its app-target membership, and add the **App Attest** capability under the target's `Signing & Capabilities` tab. Run on a supported physical iOS or iPadOS device and confirm `DCAppAttestService.shared.isSupported` is `true`; the simulator cannot create an App Attest identity.
+
+The plist must set `IS_OAUTH_ENABLED` to `true` and contain non-blank string values for `CLIENT_ID` and `SUB`. `BUNDLE_ID`, when present, must exactly match the running app target's Bundle Identifier; older plists without `BUNDLE_ID` skip the local check and rely on the server's verification. An invalid field or mismatch produces a non-retryable `configurationFailed` error as soon as the SDK loads, before any authentication network request. The error message identifies the invalid field or mismatch without exposing its value.
+
+Portal sandbox behavior controls which App Attest identities the server accepts:
+
+- Enabled: accepts development identities from locally signed builds and production identities from TestFlight or the App Store.
+- Disabled: accepts production identities only.
 
 Your app repo should look roughly like this:
 
@@ -129,6 +153,29 @@ Field mapping:
 ---
 
 ## Headless Mode
+
+### Custom input stays in `.starting`
+
+Await `sdk.start()`, then begin submitting frames. Do not wait for
+`processingStatus == .running` before sending the first frame. An accepted
+frame is not a completed measurement; continue observing `sdk.metrics`,
+`sdk.validationStatus`, and `sdk.error`.
+
+### Custom frames are rejected
+
+Inspect the `SmartSpectraError` in `FrameSubmissionResult.rejected`:
+
+| Code | What to check |
+| --- | --- |
+| `.invalidState` | Await start before sending. Stop before selecting a source. A replaced input handle cannot be reused. |
+| `.frameConversionFailed` | Supply BGRA or 8-bit bi-planar NV12 with even dimensions for NV12. Sample buffers must contain ready, uncompressed pixels. |
+| `.nonMonotonicTimestamp` | Use finite, nonnegative, strictly increasing microsecond timestamps below `Int64.max - 2`. Sample buffers use their presentation timestamps. |
+| `.timestampGap` | Stop and start after a gap over two seconds; do not rewrite live capture timestamps to conceal an interruption. |
+
+Keep pixels alive and unchanged until submission returns. Supply upright pixels
+or select a fixed `FrameTransform`; the SDK does not infer sample orientation
+from metadata. See [custom input](headless-mode.md#use-your-own-camera-or-video-source)
+for supported layouts and lifecycle details.
 
 ### `processingStatus` cases don't match
 

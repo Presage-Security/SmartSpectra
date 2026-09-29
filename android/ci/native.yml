@@ -1,0 +1,112 @@
+# yaml-language-server: $schema=https://gitlab.com/gitlab-org/gitlab/-/raw/master/app/assets/javascripts/editor/schema/ci.json
+---
+variables:
+    EDGE_CROSS_ANDROID_IMAGE_URI: "${GITLAB_DOCKER_REGISTRY_URI}/ci_cd_edge_cross_android:${AMD64_IMAGE_TAG}"
+    EDGE_CROSS_ANDROID_AWS_IMAGE_URI: "${GITLAB_DOCKER_REGISTRY_URI}/ci_cd_edge_cross_android_aws:${AMD64_IMAGE_TAG}"
+
+.build_smartspectra_android_binary:
+  tags:
+    - build_server
+  stage: build_binary
+  timeout: 5h
+  before_script:
+    - bash ci/scripts/set_ci_remote_cache.sh
+  script:
+    - pushd edge
+    - bash ./build_scripts/android/build_android.sh
+    - popd
+    - |
+      if [ -n "$CI_MERGE_REQUEST_ID" ] && { [ "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME" = "test" ] || [ "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME" = "main" ]; }; then
+          echo "Checking for uncommitted changes in SmartSpectra Android directory for merge request to test..."
+          # Detect any change (staged, unstaged, or untracked) under smartspectra/android/
+          if [ -n "$(git status --porcelain -- smartspectra/android/)" ]; then
+              echo "Error: Build process modified files in smartspectra/android/ directory. This means binaries were not updated before merge to test."
+              echo "Modified files in SmartSpectra Android directory:"
+              git status --porcelain -- smartspectra/android/
+              echo "Please either:"
+              echo "1. Update the binaries manually and open a MR to dev"
+              echo "2. Download the artifacts from this job and paste them in the right folders, then commit them and open a MR to dev"
+              exit 2
+          fi
+          echo "No uncommitted changes found in SmartSpectra Android directory."
+      fi
+
+build_smartspectra_android_binary:
+  retry:
+    max: 2
+    when:
+      - runner_system_failure
+  extends: .build_smartspectra_android_binary
+  image: ${EDGE_CROSS_ANDROID_IMAGE_URI}
+  interruptible: true  # artifact-only build (jni/jars/protobufs); no S3/registry push
+  allow_failure:
+    exit_codes:
+      - 2
+  # Produce current-commit binaries whenever this child is selected, including tags.
+  rules:
+    - !reference [.rules:cd, rules]
+    - if: $CI_MERGE_REQUEST_ID
+    - if: $CI_COMMIT_BRANCH =~ /^(dev|test|main)$/
+  artifacts:
+    when: always
+    paths:
+      - smartspectra/android/sdk/jni/
+      - smartspectra/android/sdk/src/main/java/com/presagetech/smartspectra/Messages.java
+      - smartspectra/android/sdk/src/main/assets/
+      - smartspectra/android/sdk/src/main/java/com/presagetech/smartspectra/proto/*.java
+    expire_in: 2 days
+
+build_smartspectra_android_native_sbom:
+  retry:
+    max: 2
+    when:
+      - runner_system_failure
+  extends: .build_smartspectra_android_binary
+  # AWS variant: this job publishes to S3 via publish_sbom.sh, which hard-fails
+  # without the aws CLI (the plain cross-android image does not carry it).
+  image: ${EDGE_CROSS_ANDROID_AWS_IMAGE_URI}
+  stage: sbom
+  interruptible: false  # publishes immutable SBOM and Grype report to S3
+  before_script:
+    - !reference [.build_smartspectra_android_binary, before_script]
+    - python3 -m pip install --quiet uv
+  rules:
+    # Manual opt-in on dev-target MRs: dry-run only (publish_sbom.sh never publishes from an MR), so
+    # anyone changing the SBOM machinery can validate + vuln-scan it pre-merge.
+    - if: $CI_MERGE_REQUEST_IID && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "dev"
+      when: manual
+      allow_failure: true  # rules+when:manual blocks the child bridge without this (see fedramp_publish_gate)
+      interruptible: true
+      changes:
+        paths:
+          !reference [.android_changes, changes]
+    - if: $CI_COMMIT_BRANCH == "dev"
+      changes:
+        paths:
+          !reference [.android_changes, changes]
+        compare_to: $LAST_SUCCESSFUL_DEV_PIPELINE
+    - if: $CI_COMMIT_BRANCH == "test"
+      changes:
+        paths:
+          !reference [.android_changes, changes]
+        compare_to: $LAST_SUCCESSFUL_TEST_PIPELINE
+    - if: $CI_COMMIT_BRANCH == "main"
+      changes:
+        paths:
+          !reference [.android_changes, changes]
+        compare_to: $LAST_SUCCESSFUL_MAIN_PIPELINE
+  script:
+    # Retain the Android build script's SDK/NDK setup and workspace preparation
+    # before generating, validating, and scanning the native dependency inventory.
+    - pushd edge
+    - bash ./build_scripts/android/build_android.sh --sbom --sbom-upload
+    - popd
+    - uv run --script ci/scripts/validate-third-party-notices.py --sbom android=edge/edge_android_sbom.csv
+  artifacts:
+    paths:
+      - edge/edge_android_sbom.csv
+      - edge/edge_android_sbom.json
+      - edge/edge_android_bazel_sbom.csv
+    expire_in: 30 days
+    reports:
+      cyclonedx: edge/edge_android_sbom.json

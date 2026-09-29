@@ -62,21 +62,6 @@ need_cmd() {
   fi
 }
 
-brew_install_if_missing() {
-  local formula="$1"
-  if brew list --versions "$formula" >/dev/null 2>&1; then
-    info "Homebrew package present: $formula"
-    return
-  fi
-
-  if [[ "$FIX" -eq 1 ]]; then
-    info "Installing Homebrew package: $formula"
-    brew install "$formula"
-  else
-    warn "Missing Homebrew package: $formula (run $0 --fix or brew install $formula)"
-  fi
-}
-
 need_cmd sw_vers
 need_cmd xcodebuild
 
@@ -138,12 +123,6 @@ elif [[ "$FIX" -eq 1 ]]; then
   ln -s "$SDK_GRAPH" "$EXPECTED_GRAPH"
 else
   warn "Missing expected SmartSpectra graph path: $EXPECTED_GRAPH (run $0 --fix)"
-fi
-
-if command -v brew >/dev/null 2>&1; then
-  brew_install_if_missing opencv
-else
-  warn "Homebrew not found; install opencv another way"
 fi
 
 IDENTITIES="$(security find-identity -v -p codesigning 2>/dev/null || true)"

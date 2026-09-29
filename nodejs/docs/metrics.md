@@ -1,6 +1,7 @@
 ---
-title: Configuring Metrics
-description: Request and read SmartSpectra metrics from the Node.js SDK.
+title: Configuring Metrics on Node.js
+description: Request pulse and breathing rates, HRV and EDA metrics from the SmartSpectra Node.js SDK, and read event results.
+sidebarTitle: Configuring Metrics
 ---
 
 The Node.js SDK passes requested metric codes through to the native SmartSpectra C++ SDK. Omitting `requestedMetrics` uses the default breathing bundle.
@@ -20,7 +21,7 @@ const sdk = new SmartSpectraSDK({
 });
 ```
 
-The bundle exports (`breathingMetrics`, `cardioMetrics`, `faceMetrics`, `micromotionMetrics`, `edaMetrics`) contain the `MetricType` integer codes defined in `metric_types.proto`. `defaultSupportedMetrics` is the bundle used when `requestedMetrics` is omitted (currently equal to `breathingMetrics`).
+The bundle exports (`breathingMetrics`, `cardioMetrics`, `faceMetrics`, `edaMetrics`) contain the `MetricType` integer codes defined in `metric_types.proto`. `defaultSupportedMetrics` is the bundle used when `requestedMetrics` is omitted (currently equal to `breathingMetrics`).
 
 ### Read Metrics
 
@@ -106,6 +107,7 @@ type Hrv = {
   baevsky: number;
   timestamp: number;
   confidence: number;
+  stable: boolean;
 };
 
 type Eda = {
@@ -120,4 +122,4 @@ type Face = {
 };
 ```
 
-EDA may take longer to produce its first sample than breathing or cardio outputs. See [Data Types](../../docs/data-types.md) for the complete protobuf schema.
+EDA Proxy may take longer to produce its first sample than breathing or cardio outputs. See [Data Types](../../docs/data-types.md) for the complete protobuf schema.

@@ -21,6 +21,9 @@ final class AppModel: NSObject, ObservableObject, SmartSpectraRunnerDelegate {
     @Published var lastMetricTime = "never"
     @Published var apiKey: String
     @Published var isRunning = false
+    @Published private(set) var cameras: [SmartSpectraCamera] = []
+    @Published private(set) var selectedCameraID: String?
+    @Published private(set) var cameraDiscoveryError = ""
     let sdkVersion = SmartSpectraRunner.sdkVersion()
 
     private let runner = SmartSpectraRunner()
@@ -31,7 +34,33 @@ final class AppModel: NSObject, ObservableObject, SmartSpectraRunnerDelegate {
         runner.delegate = self
     }
 
+    var selectedCameraName: String {
+        guard let selectedCameraID else { return "Default" }
+        return cameras.first { $0.cameraID == selectedCameraID }?.name ?? selectedCameraID
+    }
+
+    func refreshCameras() {
+        guard !isRunning else { return }
+        cameraDiscoveryError = ""
+        do {
+            cameras = try SmartSpectraRunner.availableCameras()
+        } catch {
+            cameras = []
+            cameraDiscoveryError = error.localizedDescription
+        }
+        // Retain the chosen ID even if it is disconnected. Start must fail
+        // explicitly instead of silently switching to a different camera.
+    }
+
+    func selectCamera(_ cameraID: String?) {
+        guard !isRunning else { return }
+        selectedCameraID = cameraID
+        errorMessage = ""
+        frame = nil
+    }
+
     func start() {
+        guard !isRunning else { return }
         let trimmedAPIKey = apiKey.trimmingCharacters(in: .whitespacesAndNewlines)
         apiKey = trimmedAPIKey
 
@@ -49,12 +78,14 @@ final class AppModel: NSObject, ObservableObject, SmartSpectraRunnerDelegate {
         hasLiveMetrics = false
         lastMetricTime = "never"
         diagnostics = "Frames: 0 | accepted: 0 | blocked: 0"
-        if let message = runner.start(withAPIKey: trimmedAPIKey) {
+        isRunning = true
+        processingStatus = "starting"
+        if let message = runner.start(withAPIKey: trimmedAPIKey, cameraID: selectedCameraID) {
             errorMessage = message
             isRunning = false
+            processingStatus = "failed"
             return
         }
-        isRunning = true
     }
 
     func stop() {
@@ -100,7 +131,7 @@ final class AppModel: NSObject, ObservableObject, SmartSpectraRunnerDelegate {
         }
 
         updateVitalDisplays(from: metrics)
-        let tilePrefixes = ["Pulse rate:", "Breathing rate:", "EDA level:"]
+        let tilePrefixes = ["Pulse rate:", "Breathing rate:", "EDA Proxy level:"]
         self.metrics = metrics.filter { line in
             !tilePrefixes.contains(where: line.hasPrefix)
         }
@@ -135,7 +166,7 @@ final class AppModel: NSObject, ObservableObject, SmartSpectraRunnerDelegate {
                 )
             } else if metric.hasPrefix("Breathing rate:") {
                 updateRate(metric, value: \.breathingRateText, confidence: \.breathingConfidenceText)
-            } else if metric.hasPrefix("EDA level:") {
+            } else if metric.hasPrefix("EDA Proxy level:") {
                 updateEdaLevel(metric)
             }
         }

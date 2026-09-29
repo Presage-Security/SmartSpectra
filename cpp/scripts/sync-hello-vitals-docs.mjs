@@ -18,6 +18,7 @@ const blockSources = {
 const targetDocs = [
   resolve(cppRoot, "docs", "linux", "ubuntu-22-04.md"),
   resolve(cppRoot, "docs", "linux", "ubuntu-24-04.md"),
+  resolve(cppRoot, "docs", "linux", "debian-13.md"),
   resolve(cppRoot, "docs", "macos.md"),
   resolve(cppRoot, "docs", "windows", "index.md"),
 ];

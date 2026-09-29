@@ -179,7 +179,7 @@
                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="card-06-eda">
                                                 <rect key="frame" x="0" y="296" width="361" height="110"/>
                                                 <subviews>
-                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="EDA" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="lbl-09-eda-title">
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="EDA Proxy" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="lbl-09-eda-title">
                                                         <rect key="frame" x="12" y="8" width="337" height="16"/>
                                                         <fontDescription key="fontDescription" style="UICTFontTextStyleCaption1"/>
                                                         <color key="textColor" white="1" alpha="0.5" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -258,6 +258,18 @@
                                                 <color key="textColor" white="1" alpha="0.5" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                             </label>
 
+                                            <!-- Camera selection -->
+                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="btn-camera-select">
+                                                <rect key="frame" x="0" y="330" width="361" height="44"/>
+                                                <constraints>
+                                                    <constraint firstAttribute="height" constant="44" id="btn-camera-height"/>
+                                                </constraints>
+                                                <buttonConfiguration key="configuration" style="gray" title="Select Camera" cornerStyle="capsule"/>
+                                                <connections>
+                                                    <action selector="cameraTapped" destination="BYZ-38-t0r" eventType="touchUpInside" id="camera-action"/>
+                                                </connections>
+                                            </button>
+
                                             <!-- Start/Stop Button -->
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="btn-01-toggle">
                                                 <rect key="frame" x="0" y="330" width="361" height="50"/>
@@ -308,6 +320,7 @@
                         <outlet property="validationLabel" destination="lbl-06-validation" id="con-09"/>
                         <outlet property="statusLabel" destination="lbl-01-status" id="con-02"/>
                         <outlet property="toggleButton" destination="btn-01-toggle" id="con-03"/>
+                        <outlet property="cameraButton" destination="btn-camera-select" id="camera-outlet"/>
                         <outlet property="heartRateLabel" destination="lbl-03-hr-value" id="con-05"/>
                         <outlet property="breathingRateLabel" destination="lbl-04-br-value" id="con-08"/>
                         <outlet property="breathingGraphView" destination="grp-01-breathing" id="con-06"/>

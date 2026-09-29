@@ -12,17 +12,23 @@ import android.view.View
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AlertDialog
 import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.button.MaterialButton
-import com.presagetech.smartspectra.CameraPosition
+import com.presagetech.smartspectra.CameraSelection
+import com.presagetech.smartspectra.CameraLensType
+import com.presagetech.smartspectra.CameraFacing
+import com.presagetech.smartspectra.SmartSpectraException
 import com.presagetech.smartspectra.SmartSpectraConfig
 import com.presagetech.smartspectra.ProcessingStatus
 import com.presagetech.smartspectra.SmartSpectraSdk
 import com.presagetech.smartspectra.ValidationStatus
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 
 class MainActivity : AppCompatActivity() {
     private val sdk by lazy { SmartSpectraSdk.shared }
@@ -40,6 +46,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var validationLabel: TextView
     private lateinit var statusLabel: TextView
     private lateinit var toggleButton: MaterialButton
+    private lateinit var cameraButton: MaterialButton
+    private var cameraDiscovery: Job? = null
+    private var cameraDialog: AlertDialog? = null
     private lateinit var insightLabel: TextView
     private lateinit var insightButton: MaterialButton
 
@@ -64,7 +73,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         sdk.config.apiKey = apiKey
         sdk.config.imageOutputEnabled = false
-        sdk.config.cameraPosition = CameraPosition.FRONT
+        // The SDK defaults to camera capture. Preserve any previously selected ID.
         sdk.config.requestedMetrics =
             SmartSpectraConfig.breathingMetrics +
             SmartSpectraConfig.cardioMetrics +
@@ -82,10 +91,12 @@ class MainActivity : AppCompatActivity() {
         validationLabel = findViewById(R.id.validation_label)
         statusLabel = findViewById(R.id.status_label)
         toggleButton = findViewById(R.id.toggle_button)
+        cameraButton = findViewById(R.id.camera_button)
         insightLabel = findViewById(R.id.insight_label)
         insightButton = findViewById(R.id.insight_button)
 
         toggleButton.setOnClickListener { toggleProcessing() }
+        cameraButton.setOnClickListener { showCameraPicker() }
         insightButton.setOnClickListener { requestInsight() }
 
         bindSdk()
@@ -103,6 +114,73 @@ class MainActivity : AppCompatActivity() {
                 else -> Unit
             }
         }
+    }
+
+    override fun onStop() {
+        cameraDiscovery?.cancel()
+        cameraDialog?.dismiss()
+        cameraDialog = null
+        super.onStop()
+    }
+
+    private fun showCameraPicker() {
+        if (!canSelectCamera(sdk.processingStatus.value) || cameraDiscovery?.isActive == true) return
+        cameraButton.isEnabled = false
+        statusLabel.setText(R.string.camera_loading)
+        cameraDiscovery = lifecycleScope.launch {
+            try {
+                // ERROR is not selectable in the SDK until failed-start cleanup completes.
+                if (sdk.processingStatus.value == ProcessingStatus.ERROR) sdk.stop()
+                val cameras = SmartSpectraSdk.availableCameras(applicationContext)
+                if (sdk.processingStatus.value != ProcessingStatus.IDLE) return@launch
+                val labels = listOf(getString(R.string.camera_default)) + cameras.map { camera ->
+                    val facing = getString(when (camera.facing) {
+                        CameraFacing.FRONT -> R.string.camera_front
+                        CameraFacing.BACK -> R.string.camera_back
+                        CameraFacing.UNKNOWN -> R.string.camera_unknown
+                    })
+                    val lens = getString(when (camera.lensType) {
+                        CameraLensType.WIDE_ANGLE -> R.string.camera_wide_angle
+                        CameraLensType.ULTRA_WIDE -> R.string.camera_ultra_wide
+                        CameraLensType.TELEPHOTO -> R.string.camera_telephoto
+                        CameraLensType.UNKNOWN -> R.string.camera_unknown_lens
+                    })
+                    getString(R.string.camera_label,
+                        camera.name ?: getString(R.string.camera_unnamed), facing, camera.id, lens)
+                }
+                statusLabel.setText(if (cameras.isEmpty()) R.string.camera_empty else R.string.status_idle)
+                cameraDialog = AlertDialog.Builder(this@MainActivity)
+                    .setTitle(R.string.camera_select)
+                    .setItems(labels.toTypedArray()) { _, index ->
+                        try {
+                            val selection = if (index == 0) CameraSelection.Default
+                                else CameraSelection.ById(cameras[index - 1].id)
+                            // Rechecks SDK state if startup raced with the picker.
+                            sdk.useCamera(selection)
+                            statusLabel.text = getString(R.string.camera_selected, labels[index])
+                        } catch (error: Exception) {
+                            showCameraError(error)
+                        }
+                    }
+                    .setNeutralButton(R.string.camera_refresh) { _, _ -> showCameraPicker() }
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .show()
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Exception) {
+                showCameraError(error)
+            } finally {
+                cameraButton.isEnabled = canSelectCamera(sdk.processingStatus.value)
+            }
+        }
+    }
+
+    private fun canSelectCamera(status: ProcessingStatus?): Boolean =
+        status == ProcessingStatus.IDLE || status == ProcessingStatus.ERROR
+
+    private fun showCameraError(error: Exception) {
+        statusLabel.text = getString(R.string.status_error,
+            (error as? SmartSpectraException)?.error?.message ?: getString(R.string.camera_failed))
     }
 
     private fun bindSdk() {
@@ -230,6 +308,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateProcessingStatus(status: ProcessingStatus?) {
         latestProcessingStatus = status
+        cameraButton.isEnabled = canSelectCamera(status) && cameraDiscovery?.isActive != true
+        if (status != ProcessingStatus.IDLE) cameraDialog?.dismiss()
         updateValidationHint()
         when (status) {
             ProcessingStatus.IDLE -> {

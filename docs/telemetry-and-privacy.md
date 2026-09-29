@@ -33,7 +33,8 @@ A single aggregate summary per session, containing only:
 The telemetry is aggregate-only. It never includes:
 
 - Raw video or image frames.
-- Measured vitals values (pulse, breathing, blood pressure, …).
+- Measured metric values of any kind — pulse rate, breathing rate, HRV, the
+  relative arterial pressure waveform, and every other metric the SDK computes.
 - File paths, prompts, or free-text error messages.
 - User identifiers or stable device identifiers.
 
@@ -48,14 +49,10 @@ tracking.
 
 Telemetry is opt-out through configuration on supported SDKs. It defaults to on;
 when disabled, the SDK starts no telemetry session and transmits nothing.
-Set the opt-out on the SDK config:
-
-- **Positive `enableTelemetry = false`** — `SmartSpectraConfig::enable_telemetry`
-  in C++, `enableTelemetry` in Swift/iOS, Kotlin/Android, Node, React Native,
-  and the .NET wrapper (`SmartSpectraConfig.EnableTelemetry`).
-- **Negative `disable_telemetry = 1`** in the C/FFI surfaces — the C ABI
-  (`smartspectra_config_t.disable_telemetry`) and Go (`Config.DisableTelemetry`),
-  inverted so a zero-initialized config keeps telemetry on.
+Set `enableTelemetry = false` on the SDK config:
+`SmartSpectraConfig::enable_telemetry` in C++, `enableTelemetry` in Swift/iOS,
+Kotlin/Android and Node, and `SmartSpectraConfig.EnableTelemetry` in the
+[.NET wrapper for Windows](https://smartspectra.presagetech.com/docs/cpp/windows/windows-dotnet).
 
 Telemetry is sent over the same authenticated, TLS-pinned channel the SDK uses
 for its other server requests, and only while the SDK has an active server

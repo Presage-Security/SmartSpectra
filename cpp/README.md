@@ -1,13 +1,14 @@
 ---
-title: C++ SDK
-description: Get started with SmartSpectra C++ across Linux, macOS, and Windows.
+title: Get Started with the SmartSpectra C++ SDK
+description: Measure pulse and breathing from a camera or video file with the SmartSpectra C++ SDK on Linux, macOS, and Windows. C++20 and CMake.
+sidebarTitle: Overview
 ---
 
 # SmartSpectra C++ SDK
 
 Cross-platform C++ SDK for measuring vitals and waveform shapes (pulse,
-breathing, relative blood pressure, and more) from a camera. Headless by default
-with optional preview frames; runs on Linux, macOS, and Windows.
+breathing, relative arterial pressure, and more) from a camera. Headless by
+default with optional preview frames; runs on Linux, macOS, and Windows.
 
 ## Supported Platforms
 
@@ -20,6 +21,8 @@ with optional preview frames; runs on Linux, macOS, and Windows.
 | macOS Apple Silicon (14.0+) | Supported | Homebrew package available |
 | Windows 10 / 11 (x64) | Experimental | ZIP distribution available |
 | macOS Intel | Not supported | — |
+| Debian 13 / Trixie (amd64) | Experimental | Debian package available |
+| Debian 13 / Trixie (arm64) | Experimental | Debian package available |
 | Debian 12 | Not supported | — |
 | RHEL 9 / Fedora 41 | Not supported | — |
 
@@ -27,12 +30,21 @@ For platforms marked "Not supported" or anything not listed above, contact
 [support@presagetech.com](mailto:support@presagetech.com) if you have a
 specific need.
 
+## Camera selection
+
+On Linux, macOS, and Windows, discover cameras with `SmartSpectra::AvailableCameras(cameras)` and
+choose one with `spectra.UseCamera(CameraSelection::ById(camera.id)).Build()`.
+`Default()`, `Front()`, and `Back()` express a camera preference or requirement.
+Discovery also exists in the native C++ API on iOS. See the
+[camera selection migration notes](docs/migration-guide.md#explicit-camera-selection)
+for platform support, errors, and a complete example.
+
 ## Common Prerequisites
 
 All platforms need:
 
 - **CMake 3.22.1+**
-- **C++17 compiler** (GCC, Clang, or MSVC 2022)
+- **C++20 compiler** (GCC, Clang, or MSVC 2022)
 - An **API key** from [physiology.presagetech.com](https://physiology.presagetech.com/auth/login) —
   an AI assistant connected to the [SmartSpectra MCP Server](../docs/mcp-server.md) can fetch it
   from your account for you
@@ -44,7 +56,11 @@ or OpenSSL separately on any platform.
 
 Each guide is self-contained: prerequisites → install → first running build.
 
-- [**Linux Quickstart (Ubuntu/Mint)**](docs/linux/index.md) — apt-based install for Ubuntu 22.04 / Mint 21 and Ubuntu 24.04 / Mint 22 (`amd64` + `arm64`)
+> **Start with a full runnable sample:** choose the quickstart for your
+> platform below. Each guide includes a complete `hello_vitals.cpp` and
+> `CMakeLists.txt`.
+
+- [**Linux Quickstart (Debian/Ubuntu/Mint)**](docs/linux/index.md) — apt-based install for Debian 13 / Trixie, Ubuntu 22.04 / Mint 21, and Ubuntu 24.04 / Mint 22 (`amd64` + `arm64`)
 - [**macOS Quickstart**](docs/macos.md) — Homebrew formula, Apple Silicon
 - [**Windows Quickstart**](docs/windows/index.md) — prebuilt ZIP from GitHub Releases
 

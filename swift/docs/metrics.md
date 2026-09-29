@@ -1,6 +1,7 @@
 ---
-title: Configuring Metrics
-description: Request and read SmartSpectra metrics from the Swift SDK.
+title: Configuring Metrics on Swift
+description: Request pulse and breathing rates, HRV and EDA metrics from the SmartSpectra Swift SDK, and read published results.
+sidebarTitle: Configuring Metrics
 ---
 
 # Configuring iOS Metrics
@@ -140,6 +141,7 @@ Hrv {
     baevsky: Double
     timestamp: Int64
     confidence: Float
+    stable: Bool
 }
 
 Eda {
@@ -154,4 +156,4 @@ Face {
 }
 ```
 
-EDA may take longer to produce its first sample than breathing or cardio outputs. See [Data Types](../../docs/data-types.md) for the complete protobuf schema.
+EDA Proxy may take longer to produce its first sample than breathing or cardio outputs. See [Data Types](../../docs/data-types.md) for the complete protobuf schema.

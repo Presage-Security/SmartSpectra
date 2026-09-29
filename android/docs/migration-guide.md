@@ -1,12 +1,124 @@
 ---
-title: Migration Guide
-description: Android-specific migration notes for SmartSpectra SDK upgrades.
+title: Android Migration Guide
+description: "Migrate the SmartSpectra Android SDK to typed camera selection, public custom video input, specific usage errors, and other release-by-release API changes."
+sidebarTitle: Migration Guide
 ---
 
 # SmartSpectra Android SDK Migration Guide
 
 > Applies to SmartSpectra Android SDK v3.x.
 > Migrating from a v3.0 release-candidate prior to rc.12, or from v2.x.
+
+## Android SDK v3.4.0 Migration
+
+### Camera selection
+
+Camera selection is opt-in. Existing applications retain the front-camera default
+and the behavior of `config.cameraPosition`, including active-camera changes.
+That property, `CameraPosition`, and the original `useCamera()` method remain
+available, with deprecation warnings. To adopt discovery and strict selection,
+call `useCamera(selection)` while stopped:
+
+```kotlin
+import com.presagetech.smartspectra.CameraSelection
+import com.presagetech.smartspectra.SmartSpectraSdk
+
+// From a coroutine. Discovery needs only application context, not an SDK instance:
+val cameras = SmartSpectraSdk.availableCameras(context)
+
+// Select an input while stopped; useCamera does not open a camera.
+sdk.useCamera(CameraSelection.Default)
+sdk.useCamera(CameraSelection.Front)
+sdk.useCamera(CameraSelection.Back)
+cameras.firstOrNull()?.let { camera ->
+    sdk.useCamera(CameraSelection.ById(camera.id))
+}
+```
+
+Discovery returns `CameraInfo(id, name, facing, lensType)`. IDs are opaque and device-local;
+`name` is optional and currently null on Android. Facing is `FRONT`, `BACK`, or
+`UNKNOWN`; external cameras report `UNKNOWN`. Discovery does not prompt for
+permission or start capture. Visibility depends on platform permissions, and a
+snapshot does not guarantee that capture will succeed later. Discovery failure
+throws `SmartSpectraException` with `INPUT_UNAVAILABLE`.
+
+`lensType` is `WIDE_ANGLE`, `ULTRA_WIDE`, `TELEPHOTO`, or `UNKNOWN`.
+Android classification is approximate, relative to the default camera with the
+same facing. Missing or ambiguous metadata and logical cameras combining
+multiple lenses report `UNKNOWN`. Classification does not describe digital zoom
+or change camera selection; continue selecting by `id`.
+
+`Default` explicitly opts into preferring front, then the first camera in
+discovery order. Explicit `Front`, `Back`,
+and `ById` requests never fall back to a different facing or ID. Camera
+resolution occurs at startup; an unavailable selection fails `start()` with
+`INPUT_UNAVAILABLE`. After stopping, select an available camera and start again.
+
+`useCamera(selection)` throws `INVALID_STATE` during startup, processing, stopping, or
+reset, and `CONFIGURATION_FAILED` for an empty ID. A rejected request preserves
+the previous source. To change cameras, await `stop()`, call `useCamera(selection)`,
+and call `start()` again. Stop/start/reset retain the selected camera until you
+choose another source. Typed selection does not switch a running camera implicitly. Once selected,
+changes to the deprecated `cameraPosition` property do not override it. Calling
+the deprecated `useCamera()` returns to that property's selection behavior.
+
+The demo app's **Select camera** control lists discovered cameras with their
+name, facing, lens type, and ID. Choose a camera for the next measurement, **Default** to
+restore automatic selection, or **Refresh** to discover connected cameras again.
+The checkup, headless, and capture screens share this picker; selection is disabled while
+processing. Discovery and selection errors appear in the picker, and capture
+errors appear on the measurement screen. The minimal app also provides a
+**Select camera** control, with Default and Refresh actions in both portrait and
+landscape layouts.
+After a failed Start, **Select camera** remains available in both apps. Opening
+it awaits `stop()` to recover the SDK from `ERROR` before allowing a new selection.
+
+### Use the public custom-input API
+
+Apps that supply frames now use the public `useCustomInput()` API. Select custom
+input while the SDK is stopped, retain the returned `CustomInput`, await
+`start()`, and submit frames from a worker thread:
+
+```kotlin
+val input = sdk.useCustomInput()
+sdk.start()
+
+val result = input.sendFrame(imageProxy)
+if (result is FrameSubmissionResult.Rejected) {
+    // Handle result.error.
+}
+```
+
+Existing test integrations should replace the `@SmartSpectraTestingApi`
+`setVideoInputEnabled(true)` and `addVideoFrame(...)` calls with
+`useCustomInput()` and `CustomInput.sendFrame(...)`. The public handle supports
+`ImageProxy`, `Bitmap`, and `VideoFrame`. It survives stop/start/reset; selecting
+another source invalidates it. SDK camera permission is not required for custom
+input, but the host app remains responsible for permissions required by its own
+capture code.
+
+### Check custom-input timestamp rejections in the submission result
+
+`CustomInput.sendFrame()` returns `FrameSubmissionResult.Rejected` with
+`NON_MONOTONIC_TIMESTAMP` or `TIMESTAMP_GAP` when it rejects a timestamp.
+These rejections leave the session active and do not publish a global
+`sdk.error`. Check each submission result even if you also observe `sdk.error`.
+
+A rejected timestamp does not advance the accepted timeline. Correct the next
+timestamp, or stop and start the SDK to begin a fresh timeline after an interruption.
+
+### Usage failures now report specific errors
+
+Usage entitlement checking continues throughout a measurement as before. What
+changes in v3.4.0 is how a terminal usage failure is reported. Observe
+`sdk.error` and handle:
+
+- `AUTHENTICATION_FAILED` for rejected credentials
+- `CREDIT_EXHAUSTED` for an explicit quota denial
+- `NETWORK_ERROR` when entitlement cannot be refreshed in time
+
+The SDK also includes short measurements and the final partial interval before
+`stop()` in usage reporting. No public API changes are required.
 
 ## Android SDK v3.3.0 Migration
 
@@ -209,7 +321,7 @@ everything you need:
 ```kotlin
 val sdk = SmartSpectraSdk.shared
 sdk.config.apiKey = "YOUR_API_KEY"
-sdk.config.cameraPosition = CameraPosition.FRONT
+sdk.useCamera(CameraSelection.Front)
 sdk.config.requestedMetrics = SmartSpectraConfig.breathingMetrics + SmartSpectraConfig.cardioMetrics
 
 // Drive the lifecycle from your own button.

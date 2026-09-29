@@ -14,7 +14,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.camera.core.CameraSelector
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
@@ -34,6 +33,7 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.presagetech.smartspectra.proto.MetricsProto
 import com.presagetech.smartspectra.SmartSpectraConfig
+import com.presagetech.smartspectra_example.ui.CameraPickerDialogFragment
 import com.presagetech.smartspectra.SmartSpectraSdk
 import com.presagetech.smartspectra_example.SmartSpectraButton
 import com.presagetech.smartspectra_example.util.toChartEntries
@@ -59,10 +59,6 @@ class CheckupFragment : Fragment() {
     private val isCustomizationEnabled = true
     private val isFaceMeshEnabled = true
 
-    // SmartSpectra SDK settings
-    // define front or back camera to use
-    private var cameraPosition: Int = CameraSelector.LENS_FACING_FRONT
-
     // Cardio measurements toggle
     private var cardioMeasurementsEnabled: Boolean = false
 
@@ -72,11 +68,7 @@ class CheckupFragment : Fragment() {
     // EDA measurements toggle
     private var edaMeasurementsEnabled: Boolean = false
 
-    private val smartSpectraSdk: SmartSpectraSdk = SmartSpectraSdk.shared.apply {
-        // Optional configurations
-        // select camera (front or back, defaults to front when not set)
-        // config.cameraPosition = CameraPosition.FRONT
-    }
+    private val smartSpectraSdk = SmartSpectraSdk.shared
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -84,13 +76,6 @@ class CheckupFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.cameraPosition.collect { lensFacing ->
-                    cameraPosition = lensFacing
-                }
-            }
-        }
         // Render the finished traces accumulated by the ViewModel. Capture runs
         // in a separate Activity, so accumulation lives in the ViewModel (which
         // survives this fragment being stopped); here we just render its snapshot
@@ -126,7 +111,7 @@ class CheckupFragment : Fragment() {
         faceMetricsEnabled = viewModel.faceMetricsEnabled.value
         edaMeasurementsEnabled = viewModel.edaMeasurementsEnabled.value
         refreshRequestedMetrics()
-        addCameraToggle()
+        addCameraPicker()
         addCardioToggle()
         addFaceMetricsToggle()
         addEdaToggle()
@@ -243,30 +228,21 @@ class CheckupFragment : Fragment() {
         buttonContainer.addView(edaContainer)
     }
 
-    private fun addCameraToggle() {
-        val cameraPositionButton = MaterialButton(
+    private fun addCameraPicker() {
+        val cameraButton = MaterialButton(
             requireContext(), null, com.google.android.material.R.attr.materialIconButtonStyle
         ).apply {
-            text = if (viewModel.cameraPosition.value == CameraSelector.LENS_FACING_FRONT) {
-                getString(R.string.demo_switch_camera_back)
-            } else {
-                getString(R.string.demo_switch_camera_front)
-            }
+            setText(R.string.demo_select_camera)
             setIconResource(R.drawable.ic_flip_camera)
             iconGravity = MaterialButton.ICON_GRAVITY_TEXT_START
             iconPadding = resources.getDimensionPixelSize(R.dimen.demo_button_icon_padding)
+            isEnabled = CameraPickerDialogFragment.canOpen(smartSpectraSdk.processingStatus.value)
+            setOnClickListener { CameraPickerDialogFragment.show(childFragmentManager) }
         }
-        cameraPositionButton.setOnClickListener {
-            if (cameraPosition == CameraSelector.LENS_FACING_FRONT) {
-                cameraPosition = CameraSelector.LENS_FACING_BACK
-                cameraPositionButton.text = getString(R.string.demo_switch_camera_front)
-            } else {
-                cameraPosition = CameraSelector.LENS_FACING_FRONT
-                cameraPositionButton.text = getString(R.string.demo_switch_camera_back)
-            }
-            viewModel.setCameraPosition(cameraPosition)
+        smartSpectraSdk.processingStatus.observe(viewLifecycleOwner) { status ->
+            cameraButton.isEnabled = CameraPickerDialogFragment.canOpen(status)
         }
-        buttonContainer.addView(cameraPositionButton)
+        buttonContainer.addView(cameraButton)
     }
 
     private fun handleMetrics(metrics: MetricsProto.Metrics) {

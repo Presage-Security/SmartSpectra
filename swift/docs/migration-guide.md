@@ -1,12 +1,150 @@
 ---
-title: Migration Guide
-description: Migration notes for SmartSpectra Swift SDK upgrades.
+title: Swift Migration Guide
+description: "Migrate the SmartSpectra Swift SDK to typed camera selection, public custom video input, specific usage errors, and other release-by-release API changes."
+sidebarTitle: Migration Guide
 ---
 
 # SmartSpectra Swift SDK Migration Guide
 
 > Applies to SmartSpectra Swift SDK v3.x.
 > Migrating from a v3.0 release-candidate prior to rc.13, or from v2.x.
+
+## Swift SDK v3.4.0 Migration
+
+### Custom video input
+
+Camera capture remains the default. For camera selection changes, see below.
+Use `try sdk.useCustomInput()` to obtain a public frame-submission handle for
+your own camera or decoder. Await `sdk.start()` before submitting
+`CVPixelBuffer` or `CMSampleBuffer` frames. See the
+[custom camera example](headless-mode.md#use-your-own-camera-or-video-source).
+
+`try await sdk.reset()` stops processing and clears measurement output, retaining
+configuration and the custom-input handle. `try sdk.useCamera(.default)` switches back
+to SDK capture while stopped. Replacing an input invalidates older handles.
+
+The testing SPI `setVideoInputEnabled(_:)` now selects a source only while
+stopped. Calls during an active session leave the source unchanged and publish
+`.invalidState` on `sdk.error`. Move these calls after `stop()` or `reset()`.
+File playback remains testing-only; caller-owned frame input is public.
+
+The demo app's Video Testing tab now decodes clips in the app and calls
+`CustomInput.sendFrame` directly, with no testing SPI import. Optional timestamp
+sidecars still contain one integer millisecond value per decoded frame; the app
+converts these to microseconds. Decoding uses the formats supported by
+AVFoundation on the selected device or simulator.
+
+### Camera selection
+
+Camera selection is opt-in. Existing applications retain the front-camera default
+and the behavior of `sdk.config.cameraPosition`. That property and the original
+`try sdk.useCamera()` method remain available, with deprecation warnings.
+To adopt discovery and strict selection, call `try sdk.useCamera(selection)` while
+stopped:
+
+```swift
+// Discovery needs no SDK instance, authentication, or permission prompt.
+let cameras = try SmartSpectraSDK.availableCameras()
+
+let sdk = SmartSpectraSDK.shared
+try sdk.useCamera(.default)
+try sdk.useCamera(.front)
+try sdk.useCamera(.back)
+if let camera = cameras.first {
+    try sdk.useCamera(.byId(camera.id))
+}
+```
+
+Discovery returns `CameraInfo(id: name: facing: lensType:)`. IDs are opaque and device-local;
+names are optional. Facing is `.front`, `.back`, or `.unknown`, including external
+cameras whose direction is unknown. Visibility depends on platform permissions;
+discovery does not reserve a camera or guarantee a later capture will succeed.
+Discovery failures throw `SmartSpectraError` with `.inputUnavailable`.
+
+`lensType` reports `.wideAngle`, `.ultraWide`, `.telephoto`, or `.unknown`.
+Classification is best effort; missing metadata and cameras combining multiple
+lenses report `.unknown`. It does not describe digital zoom or change selection.
+Use it for picker labels and continue selecting by `id`.
+
+Explicit `.default` prefers front, then uses the first discovered camera. Explicit `.front`, `.back`, and `.byId` requests
+never fall back. Selection is resolved when capture starts; an unavailable
+camera fails `start()` with `.inputUnavailable`.
+
+`useCamera` throws `.configurationFailed` for an empty ID and `.invalidState`
+during startup, processing, stopping, or reset. A rejected request preserves
+the previous source. Stop/start/reset retain the selection until another source
+is selected. Once a typed selection is made, changes to the deprecated
+`cameraPosition` property do not override it. Calling the deprecated `useCamera()`
+returns to that property's selection behavior. To change cameras, await `stop()`, select, and start again:
+
+```swift
+try await sdk.stop()
+try sdk.useCamera(.back)
+try await sdk.start()
+```
+
+Choose the input from an explicit app action or initial setup while stopped.
+SwiftUI view initializers can run repeatedly, so avoid selecting an input there.
+
+The SwiftUI demo's checkup, headless, and capture screens and the UIKit sample
+provide **Select Camera** controls. The picker lists discovered cameras by name,
+facing, and opaque ID, with **Default** and **Refresh** actions. Selection is
+disabled during startup, processing, and stopping. After a failed Start, opening
+the picker awaits `reset()` before allowing a new selection; this also recovers
+failures that occurred before a processing session existed. Navigating between
+screens does not change the selected camera.
+
+The iOS Simulator may return no cameras. The picker displays an empty-state
+message and still offers Default and Refresh; selecting an actual camera ID
+requires a device with discoverable cameras.
+
+### Usage failures now report specific errors
+
+Usage entitlement checking continues throughout a measurement as before. What
+changes in v3.4.0 is how a terminal usage failure is reported. Observe
+`sdk.error` and handle:
+
+- `.authenticationFailed` for rejected credentials
+- `.creditExhausted` for an explicit quota denial
+- `.networkError` when entitlement cannot be refreshed in time
+
+The SDK also includes short measurements and the final partial interval before
+`stop()` in usage reporting. No public API changes are required.
+
+## Swift SDK v3.3.1 Migration
+
+### Stricter `PresageService-Info.plist` validation
+
+The SDK now validates the OAuth plist once, when the SDK loads, and surfaces
+problems as a non-retryable `configurationFailed` error instead of a generic
+auth-readiness failure at `start()`.
+
+What still works without changes:
+
+- No `PresageService-Info.plist` → API-key authentication, as before.
+- `IS_OAUTH_ENABLED` set to `false` (or legacy integer `0`) → API-key
+  authentication, as before.
+- An older plist revision **missing** `IS_OAUTH_ENABLED` → treated as
+  OAuth-off (API-key authentication), with a log message suggesting a
+  re-download from the portal.
+- An OAuth plist **missing** `BUNDLE_ID` (older revisions) → the local
+  bundle-identifier pre-check is skipped; the server still verifies your
+  app's bundle identifier during authentication.
+
+What now fails fast (previously fell back silently or failed later with a
+generic error):
+
+- `IS_OAUTH_ENABLED` present with a non-boolean value (e.g. the string
+  `"true"`) → `configurationFailed`; the API key, if any, is ignored.
+- OAuth enabled with a missing, blank, or wrong-typed `CLIENT_ID` or `SUB`
+  → `configurationFailed`.
+- `BUNDLE_ID` present with a blank or non-string value, or not matching the
+  running app target's Bundle Identifier → `configurationFailed`.
+
+If you hit any of these after upgrading, re-download the current
+`PresageService-Info.plist` for your app from
+[physiology.presagetech.com](https://physiology.presagetech.com) — error
+messages name the offending plist key but never echo its value.
 
 ## Swift SDK v3.3.0 Migration
 
@@ -151,7 +289,7 @@ if let metrics = sdk.metrics {
 
 - authentication should be set through `sdk.config.apiKey`
 - metric selection should be set through `sdk.config.requestedMetrics`
-- camera selection should be set through `sdk.config.cameraPosition`
+- camera selection should be set through `try sdk.useCamera(selection)` while stopped
 - preview frame publishing should be controlled through `sdk.config.imageOutputEnabled`
 
 ### Removed
@@ -165,7 +303,7 @@ if let metrics = sdk.metrics {
 | Old | New |
 | --- | --- |
 | `sdk.setApiKey("...")` | `sdk.config.apiKey = "..."` |
-| `sdk.setCameraPosition(.front)` | `sdk.config.cameraPosition = .front` |
+| `sdk.setCameraPosition(.front)` | `try sdk.useCamera(.front)` |
 | `sdk.setImageOutputEnabled(true)` | `sdk.config.imageOutputEnabled = true` |
 | no public metric-selection API | `sdk.config.requestedMetrics = [...]` |
 
@@ -182,7 +320,7 @@ sdk.setImageOutputEnabled(true)
 let sdk = SmartSpectraSDK.shared
 sdk.config.apiKey = "YOUR_API_KEY"
 sdk.config.requestedMetrics = [.breathingRate, .pulseRate, .faceLandmarks]
-sdk.config.cameraPosition = .front
+try sdk.useCamera(.front)
 sdk.config.imageOutputEnabled = true
 ```
 
@@ -235,8 +373,14 @@ if let validationStatus = sdk.validationStatus {
     case .ok:
         break
     case .noFaceFound, .multipleFacesFound, .faceNotCentered,
-        .faceSizeOutOfRange, .tooDark, .tooBright,
-        .chestNotVisible, .cameraTuning:
+        .tooDark, .tooBright, .chestNotVisible, .cameraTuning,
+        .frameRateTooLow, .excessiveMotion,
+        .faceTooClose, .faceTooFar, .faceTooHigh, .faceTooLow,
+        .faceNotForward:
+        break
+    default:
+        // .faceSizeOutOfRange is deprecated in favour of
+        // .faceTooClose / .faceTooFar, and new codes may be added.
         break
     }
 }
@@ -439,8 +583,8 @@ sdk.config.requestedMetrics = SmartSpectraConfig.cardioMetrics + SmartSpectraCon
 
 Older releases did not expose public `SmartSpectraConfig` access; configuration
 was applied through methods on `SmartSpectraSwiftSDK.shared`. Current releases
-make `sdk.config` the single source of truth and prevent the class of bug where
-views observed one config instance while the SDK held another.
+keep SDK settings on `sdk.config`, so views observe the same configuration used
+by the SDK. Choose the input separately through `useCamera` or `useCustomInput`.
 
 ### Custom SDK Instances
 
@@ -620,7 +764,7 @@ sdk.config.requestedMetrics =
     SmartSpectraConfig.breathingMetrics + SmartSpectraConfig.cardioMetrics
 ```
 
-Current releases also expose an EDA bundle:
+Current releases also expose an EDA Proxy bundle:
 
 ```swift
 sdk.config.requestedMetrics =

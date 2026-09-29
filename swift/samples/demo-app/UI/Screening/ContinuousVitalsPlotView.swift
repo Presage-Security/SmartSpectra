@@ -6,7 +6,7 @@
 import SwiftUI
 import SmartSpectra
 
-/// Live graph of breathing traces (and cardio / EDA traces when enabled) during
+/// Live graph of breathing traces (and cardio / EDA Proxy traces when enabled) during
 /// continuous mode. Sample-local reimplementation of the v3 SDK view; reads the
 /// SDK's public observable surface (`metrics`, `requestedMetrics`).
 struct ContinuousVitalsPlotView: View {
@@ -69,8 +69,8 @@ struct ContinuousVitalsPlotView: View {
 
             if sdk.edaInferenceEnabled {
                 VitalSection(
-                    title: "EDA",
-                    valueText: edaLevel > 0 ? "\(edaLevel)" : nil, // TODO: Display EDA value once presentation is finalized.
+                    title: "EDA Proxy",
+                    valueText: edaLevel > 0 ? "\(edaLevel)" : nil, // TODO: Display EDA Proxy value once presentation is finalized.
                     icon: "waveform.path.ecg",
                     color: .green
                 ) {
@@ -120,7 +120,7 @@ struct ContinuousVitalsPlotView: View {
             }
 
             if sdk.edaInferenceEnabled {
-                // Accumulate the EDA trace like breathing/cardio above. Each metrics
+                // Accumulate the EDA Proxy trace like breathing/cardio above. Each metrics
                 // update carries a delta that is empty on many frames; replacing the
                 // trace wholesale cleared the chart on every empty delta (the live
                 // "blink"). `appendProtoArray` no-ops on an empty delta and merges by

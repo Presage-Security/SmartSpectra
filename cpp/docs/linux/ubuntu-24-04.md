@@ -18,7 +18,7 @@ This guide covers the `noble` apt suite, which supports both `amd64` and
 ### Prerequisites
 
 - **CMake 3.22.1 or later** (the version shipped with Ubuntu 24.04 / Mint 22 is sufficient)
-- **C++17 compiler** such as GCC or Clang
+- **C++20 compiler** such as GCC or Clang
 - **Vulkan-capable graphics driver** — Linux builds use Vulkan inference by default. The SDK package installs the Vulkan loader dependency through apt, but the host must provide a working Vulkan driver.
 - **`cmake`, `curl`, `gpg`, and `pkg-config`** — used by the build, install, and verify steps below. Install with `sudo apt install cmake curl gpg pkg-config` if they are not already present.
 - **API key** from [physiology.presagetech.com](https://physiology.presagetech.com/auth/login)
@@ -72,7 +72,7 @@ Verify that the package is visible to build tools:
 pkg-config --modversion SmartSpectra
 ```
 
-The command prints the installed SDK version (for example, `1.7.0`). If it
+The command prints the installed SDK version (for example, `3.3.0`). If it
 prints nothing or reports that the package is missing, reinstall
 `libsmartspectra-dev` and confirm you are on a supported Ubuntu 24.04 /
 Mint 22 (`amd64` or `arm64`) host.
@@ -205,7 +205,8 @@ int main(int argc, char** argv) {
     });
 
     const auto source_error =
-        sdk.UseCamera().SetResolution(1280, 720).SetFps(30).Build();
+        sdk.UseCamera(spectra::CameraSelection::Default())
+            .SetResolution(1280, 720).SetFps(30).Build();
     if (!source_error.ok()) {
         std::cerr << "Failed to create camera source: "
                   << source_error.message << "\n";
@@ -240,10 +241,10 @@ entire file:
 ```cmake
 cmake_minimum_required(VERSION 3.22.1)
 project(SmartSpectraHelloVitals CXX)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(SmartSpectra REQUIRED)
+find_package(SmartSpectra CONFIG REQUIRED)
 add_executable(hello_vitals hello_vitals.cpp)
 target_link_libraries(hello_vitals SmartSpectra::SDK)
 ```
@@ -305,46 +306,27 @@ If the console output does not match the target state, check these first:
 - `libsmartspectra-dev` did not finish installing before CMake was run
 - the API key argument or `SMARTSPECTRA_API_KEY` environment variable is missing
 - another app is already using the camera
-- the host has no desktop keyring session; see [Running headless](#running-headless-docker-ci-no-desktop)
 - the binary is an older build from before the latest source change
 
 ## Running headless (Docker, CI, no desktop)
 
-A desktop Ubuntu or Mint session provides D-Bus and a Secret Service backend
-(gnome-keyring) automatically. Without one — in a Docker container, on a CI
-runner, or in an SSH session with no desktop — the SDK cannot persist its
-device identity and aborts at initialization with:
-
-```text
-Load secret 'key_id' failed: D-Bus Secret Service is not reachable
-```
-
-Install a D-Bus launcher and a Secret Service backend, then start a session
-bus and unlock a fresh keyring before running your binary:
-
-```bash
-sudo apt install -y dbus-x11 gnome-keyring
-eval "$(dbus-launch --sh-syntax)"
-echo "" | gnome-keyring-daemon --unlock --components=secrets >/dev/null 2>&1
-./build/hello_vitals
-```
-
-`dbus-launch --sh-syntax` writes `export DBUS_SESSION_BUS_ADDRESS=…;` to
-stdout so the `eval` exports the address into the current shell's
-environment, and `gnome-keyring-daemon --unlock --components=secrets` opens
-the secrets backend with an empty passphrase so libsecret reads and writes
-keys unattended. The same three commands also satisfy the SDK on a stock
-Ubuntu Server install. (Without `--sh-syntax`, `dbus-launch` prints bare
-`KEY=value` lines that `eval` treats as shell-local assignments rather
-than env exports, so the SDK subprocess does not inherit the bus address.)
+Current SDK releases run without a desktop session in Docker, CI, and SSH-only
+environments. No alternate SDK package or additional system-service setup is
+required.
 
 ## Build the Provided Samples
 
 The SDK package does not install the sample source code. To build the repository
 samples against the installed SDK, clone the SmartSpectra repository after
-installing `libsmartspectra-dev`:
+installing `libsmartspectra-dev`.
+
+Several of the samples use OpenCV for video capture and display, and CMake
+configures every sample in the tree even when you build a single target, so
+install the OpenCV development package first. The `hello_vitals` quickstart
+earlier on this page is a standalone project and does not need it.
 
 ```bash
+sudo apt install libopencv-dev
 git clone https://github.com/Presage-Security/SmartSpectra.git
 cd SmartSpectra/cpp/samples
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
@@ -432,11 +414,6 @@ API reference available at [C++ API Reference](../api-reference.md).
 ## Troubleshooting
 
 If you are upgrading an older C++ integration, start with the [C++ Migration Guide](../migration-guide.md).
-
-If your binary fails at startup with `Load secret 'key_id' failed: D-Bus
-Secret Service is not reachable`, you are on a host without a desktop session
-— see [Running headless](#running-headless-docker-ci-no-desktop) for the
-D-Bus and keyring bootstrap.
 
 ### Debian `Signed-By` conflict
 

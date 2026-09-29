@@ -57,6 +57,8 @@ spectra::FrameTransform ParseFrameTransform(const std::string& s) {
 
 // region ==================================== CAMERA PARAMETERS =======================================================
 ABSL_FLAG(int, camera_device_index, 0, "The index of the camera device to use.");
+ABSL_FLAG(bool, list_cameras, false, "List camera IDs and exit without authentication (Linux/macOS/Windows).");
+ABSL_FLAG(std::string, camera_id, "", "Exact discovered camera ID; overrides camera_device_index (Linux/macOS/Windows).");
 ABSL_FLAG(int, capture_width_px, 1280, "Capture width in pixels.");
 ABSL_FLAG(int, capture_height_px, 720, "Capture height in pixels.");
 ABSL_FLAG(int, capture_fps, 30, "Capture frames per second.");
@@ -136,6 +138,31 @@ int main(int argc, char** argv) {
         "Run Presage SmartSpectra C++ REST Continuous Example.\n"
         "Hit 'q' to quit.");
     absl::ParseCommandLine(argc, argv);
+
+    if (absl::GetFlag(FLAGS_list_cameras)) {
+        std::vector<spectra::CameraInfo> cameras;
+        if (auto error = spectra::SmartSpectra::AvailableCameras(cameras); !error.ok()) {
+            std::cerr << error.FullMessage() << '\n';
+            return EXIT_FAILURE;
+        }
+        for (const auto& camera : cameras) {
+            const char* facing = camera.facing == spectra::CameraFacing::kFront ? "front" :
+                                 camera.facing == spectra::CameraFacing::kBack ? "back" : "unknown";
+            const char* lens = camera.lens_type == spectra::CameraLensType::kWideAngle ? "wide-angle" :
+                               camera.lens_type == spectra::CameraLensType::kUltraWide ? "ultra-wide" :
+                               camera.lens_type == spectra::CameraLensType::kTelephoto ? "telephoto" : "unknown";
+            std::cout << camera.id << '\t' << camera.name.value_or("Unnamed camera")
+                      << '\t' << facing << '\t' << lens << '\n';
+        }
+        return EXIT_SUCCESS;
+    }
+
+    const std::string camera_id = absl::GetFlag(FLAGS_camera_id);
+    const std::string video_path = absl::GetFlag(FLAGS_input_video_path);
+    if (!camera_id.empty() && !video_path.empty()) {
+        std::cerr << "Choose either --camera_id or --input_video_path.\n";
+        return EXIT_FAILURE;
+    }
 
     int verbosity = absl::GetFlag(FLAGS_verbosity);
     bool headless = absl::GetFlag(FLAGS_headless);
@@ -325,11 +352,12 @@ int main(int argc, char** argv) {
         });
 
     // --- Video source (configure before Start) ---
-    std::string video_path = absl::GetFlag(FLAGS_input_video_path);
-
     if (video_path.empty()) {
+        auto camera = camera_id.empty()
+            ? smart_spectra.UseCamera(absl::GetFlag(FLAGS_camera_device_index))
+            : smart_spectra.UseCamera(spectra::CameraSelection::ById(camera_id));
         const auto source_error =
-            smart_spectra.UseCamera(absl::GetFlag(FLAGS_camera_device_index))
+            camera
                 .SetResolution(absl::GetFlag(FLAGS_capture_width_px),
                                absl::GetFlag(FLAGS_capture_height_px))
                 .SetFps(absl::GetFlag(FLAGS_capture_fps))
@@ -463,8 +491,9 @@ int main(int argc, char** argv) {
         }
     }
 
-    // Stop() can return successfully after a terminal error lands during its
-    // unlocked teardown, so inspect the final state before choosing the exit code.
+    // An error may race with a user-requested exit and settle while Stop() is
+    // waiting for SDK workers, so inspect the final state before choosing the
+    // process exit code.
     session_failed =
         session_failed || smart_spectra.GetStatus() == spectra::ProcessingStatus::kError;
 

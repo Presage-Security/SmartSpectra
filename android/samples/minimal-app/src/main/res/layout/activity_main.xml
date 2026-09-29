@@ -240,6 +240,17 @@
             android:textSize="12sp" />
 
         <com.google.android.material.button.MaterialButton
+            android:id="@+id/camera_button"
+            style="@style/Widget.Material3.Button.TonalButton"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="10dp"
+            android:text="@string/camera_select"
+            android:textAllCaps="false"
+            android:textColor="@color/sample_text_primary"
+            app:backgroundTint="@color/sample_button_secondary" />
+
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/toggle_button"
             style="@style/Widget.Material3.Button"
             android:layout_width="match_parent"

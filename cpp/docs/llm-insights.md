@@ -1,6 +1,7 @@
 ---
-title: LLM Insights
-description: Request and receive LLM Insights from the C++ SmartSpectra SDK.
+title: LLM Insights on C++
+description: Ask natural-language questions about a measurement and receive LLM Insights through the SmartSpectra C++ SDK, alongside the metrics stream.
+sidebarTitle: LLM Insights
 ---
 
 # C++ LLM Insights
@@ -61,7 +62,7 @@ through the callback above; correlate it via `Insight::request_id()`.
 
 ```cpp
 int32_t request_id = 0;
-if (const auto err = smart_spectra.RequestInsight("Summarize the user's stress level.", &request_id);
+if (const auto err = smart_spectra.RequestInsight("Summarize my current vital signs and flag anything unusual.", &request_id);
     !err.ok()) {
   std::cerr << err.FullMessage() << '\n';
 }
@@ -82,8 +83,10 @@ is currently delivered with `type()` == `INSIGHT_TYPE_VITALS` (`SPEECH` and
 on-demand replies from auto-fired vitals. Full field documentation is in
 [Data Types → Insight](../../docs/data-types.md#insight).
 
-The first auto-fired insight arrives about 15 seconds after the session starts;
-allow that much valid measurement before an on-demand request can be grounded in
+The first auto-fired insight arrives once pulse rate has a stable reading,
+typically about 15 seconds after the session starts; further snapshots follow as
+breathing rate and HRV stabilise, then every 60 seconds. Allow at least
+15 seconds of valid measurement before an on-demand request can be grounded in
 the user's physiology.
 
 ## Complete examples
@@ -141,7 +144,10 @@ int main(int argc, char** argv) {
     std::cerr << err.FullMessage() << '\n';
   });
 
-  if (const auto err = smart_spectra.UseCamera().Build(); !err.ok()) {
+  if (const auto err = smart_spectra
+                           .UseCamera(spectra::CameraSelection::Default())
+                           .Build();
+      !err.ok()) {
     std::cerr << err.FullMessage() << '\n';
     return 1;
   }
@@ -196,7 +202,7 @@ MainWindow::MainWindow() {
   cfg.AddMetrics(spectra::SmartSpectraConfig::DefaultSupportedMetrics());
   cfg.AddMetrics(spectra::SmartSpectraConfig::CardioMetrics());
   m_spectra = std::make_unique<spectra::SmartSpectra>(std::move(cfg));
-  (void)m_spectra->UseCamera().Build();
+  (void)m_spectra->UseCamera(spectra::CameraSelection::Default()).Build();
 
   // 3. Receive responses. Hop to the UI thread with TryEnqueue before touching
   //    XAML. Hold a weak window ref so teardown can release it.

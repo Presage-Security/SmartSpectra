@@ -8,17 +8,13 @@ import SmartSpectra
 
 struct HeadlessSDKExample: View {
     private let sdk = SmartSpectraSDK.shared
-    @State private var isVitalMonitoringEnabled: Bool = false
+    private var isVitalMonitoringEnabled: Bool { sdk.processingStatus == .running }
     @State private var showCameraFeed: Bool = false
     @State private var showInsightsChat: Bool = false
     // Hoisted here so its messages survive sheet dismissals. Creating it
     // inside `InsightsChatView` would tie its lifetime to the sheet,
     // wiping chat history on every close.
     @State private var chatViewModel = InsightsChatViewModel()
-
-    init() {
-        sdk.config.cameraPosition = .front
-    }
 
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
@@ -31,15 +27,13 @@ struct HeadlessSDKExample: View {
                         .font(.caption)
                     Spacer()
                     Button(isVitalMonitoringEnabled ? "Stop": "Start") {
-                        isVitalMonitoringEnabled.toggle()
                         if isVitalMonitoringEnabled {
-                            startVitalsMonitoring()
-                        } else {
                             stopVitalsMonitoring()
+                        } else {
+                            startVitalsMonitoring()
                         }
                     }
-                    .disabled(sdk.error?.code == .inputUnavailable && !isVitalMonitoringEnabled)
-                    .opacity((sdk.error?.code != .inputUnavailable || isVitalMonitoringEnabled) ? 1.0 : 0.6)
+                    .disabled(sdk.processingStatus == .starting || sdk.processingStatus == .stopping)
                 }
                 .padding(.horizontal, 10)
 
@@ -58,11 +52,14 @@ struct HeadlessSDKExample: View {
                         Text(sdk.error?.message ?? "An error occurred during processing.")
                             .font(.caption)
                             .foregroundStyle(.red)
+                            .accessibilityIdentifier("startupError")
                         Spacer()
                     }
                     .padding(.horizontal)
                 }
             }
+
+            CameraSelectionButton(sdk: sdk)
 
             // Camera Preview Toggle
             HStack {
@@ -137,6 +134,7 @@ struct HeadlessSDKExample: View {
     }
 
     func stopVitalsMonitoring() {
+        guard sdk.processingStatus != .idle else { return }
         Task {
             do {
                 try await sdk.stop()

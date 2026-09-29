@@ -1,25 +1,12 @@
 ---
-title: Troubleshooting
+title: Android Troubleshooting
 description: Solutions to common build, runtime, and integration issues with the SmartSpectra Android SDK.
+sidebarTitle: Troubleshooting
 ---
 
 # Android Troubleshooting
 
 ## Build & Setup
-
-### `Could not resolve com.github.PhilJay:MPAndroidChart:v3.1.0`
-
-The JitPack repository is missing. Add it to `settings.gradle` (or `build.gradle` for older projects):
-
-```groovy
-repositories {
-    google()
-    mavenCentral()
-    maven { url 'https://jitpack.io' }
-}
-```
-
----
 
 ### `Manifest merger failed: uses-sdk:minSdkVersion 24 cannot be smaller than version 28`
 
@@ -35,15 +22,39 @@ android {
 
 ---
 
-### `Unresolved reference: AppCompatActivity` (or similar import errors)
+### `AAR requires API 36.1` (or a compile SDK version that is too low)
 
-Ensure all required imports are present in your activity file:
+SmartSpectra 3.2.x requires `compileSdk 36.1` or later. Update your app module
+and Android build tooling, then sync Gradle again:
+
+```kotlin
+android {
+    compileSdk = 36
+    compileSdkMinor = 1
+}
+```
+
+Use AGP 8.10.1 or later and Kotlin 2.2.x. If your project uses Gradle 9, use an
+AGP 9.x release. See [Option 1: API Key](option-1-api-key.md#requirements)
+for the complete compatible toolchain.
+
+---
+
+### `Unresolved reference: ComponentActivity` (or similar import errors)
+
+The quickstarts extend `ComponentActivity`, which comes from
+`androidx.activity:activity-ktx`. Confirm that dependency is declared, then check
+the imports in your activity file:
 
 ```kotlin
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.ComponentActivity
 import com.presagetech.smartspectra.SmartSpectraSdk
 ```
+
+If you are following older material that used `AppCompatActivity`, either switch to
+`ComponentActivity` or add `androidx.appcompat:appcompat` yourself — the SDK does not
+pull it in.
 
 ---
 
@@ -56,7 +67,7 @@ Remove icon references from `AndroidManifest.xml` or add the missing drawable re
     android:allowBackup="true"
     android:label="@string/app_name"
     android:supportsRtl="true"
-    android:theme="@style/Theme.AppCompat">
+    android:theme="@style/Theme.Material3.DayNight">
 ```
 
 ---
@@ -76,11 +87,14 @@ If the `R` class stops resolving in the linter, Sync Project with Gradle Files t
 
 ### Camera permission denied / measurement won't start
 
-The host app is responsible for requesting Android's runtime camera permission
-before calling `sdk.start()`. The SDK does not show the permission dialog itself.
+When using SDK-owned camera capture, the host app requests Android's runtime
+camera permission before calling `sdk.start()`. The SDK does not show the
+permission dialog itself. Custom input does not require camera permission from
+the SDK; your capture source may require it separately.
 Common causes:
 
-- Testing on an emulator — a physical device with a working camera is required.
+- Testing measurements on an emulator — use [recorded frames](headless-testing-in-ci.md);
+  the simulated camera feed is not suitable for measuring a person's vitals.
 - Permission was previously denied — guide the user to re-enable camera access in system Settings.
 - `start()` was called before permission was granted — observe `sdk.error` for `SmartSpectraError(code = INPUT_UNAVAILABLE, retryable = true)`.
 
@@ -132,7 +146,7 @@ private fun startMeasurement() {
 }
 ```
 
-If `start()` is called without permission, the SDK publishes a
+With SDK-owned camera capture, if `start()` is called without permission, the SDK publishes a
 `SmartSpectraError(code = INPUT_UNAVAILABLE, retryable = true)` to `sdk.error`.
 Observe that error to surface recovery UI and retry after the user grants access.
 

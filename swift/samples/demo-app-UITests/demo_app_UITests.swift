@@ -13,11 +13,12 @@ final class demo_app_UITests: UITestBase {
         XCTAssertTrue(waitForAppToLoad(), "App should launch")
         
         // Test main controls on Checkup tab
-        let cameraButton = app.buttons["Switch to Back Camera"]
-        if cameraButton.waitForExistence(timeout: 2) {
-            cameraButton.tap()
-            XCTAssertTrue(app.buttons["Switch to Front Camera"].waitForExistence(timeout: 2), "Camera should switch")
-        }
+        let cameraButton = app.buttons["selectCamera"]
+        XCTAssertTrue(cameraButton.waitForExistence(timeout: 5))
+        cameraButton.tap()
+        let defaultCamera = app.buttons["cameraDefault"]
+        XCTAssertTrue(defaultCamera.waitForExistence(timeout: 5))
+        defaultCamera.tap()
 
         // Test measurement duration stepper
         let stepper = app.steppers.firstMatch

@@ -1,6 +1,7 @@
 ---
-title: LLM Insights
-description: Request and receive LLM Insights from the Android SmartSpectra SDK.
+title: LLM Insights on Android
+description: Ask natural-language questions about a measurement and receive LLM Insights through the SmartSpectra Android SDK, alongside the metrics stream.
+sidebarTitle: LLM Insights
 ---
 
 # Android LLM Insights
@@ -65,7 +66,7 @@ public fun requestInsight(text: String): Int
 ```
 
 ```kotlin
-pendingRequestId = runCatching { sdk.requestInsight("Summarize the user's stress level.") }
+pendingRequestId = runCatching { sdk.requestInsight("Summarize my current vital signs and flag anything unusual.") }
     .onFailure { /* dispatch failed */ }
     .getOrNull()
 ```
@@ -83,8 +84,10 @@ text with `insight.analysis` / `insight.error`, and correlate with
 use `requestId`, not `type`, to distinguish replies.) Full field documentation is
 in [Data Types → Insight](../../docs/data-types.md#insight).
 
-The first auto-fired insight arrives about 15 seconds after the session starts;
-allow that much valid measurement before an on-demand request can be grounded in
+The first auto-fired insight arrives once pulse rate has a stable reading,
+typically about 15 seconds after the session starts; further snapshots follow as
+breathing rate and HRV stabilise, then every 60 seconds. Allow at least
+15 seconds of valid measurement before an on-demand request can be grounded in
 the user's physiology. The service may return no insight for a given request, in
 which case the observer is not called.
 

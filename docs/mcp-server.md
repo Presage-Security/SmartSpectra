@@ -1,6 +1,6 @@
 ---
 title: SmartSpectra MCP Server
-description: Connect an AI assistant to your SmartSpectra account with the hosted MCP server — get or rotate your API key, register an iOS or Android app ID, download the OAuth config file, check plan usage and credits, and search these docs.
+description: "Connect an AI assistant to your SmartSpectra account with the hosted MCP server: manage API keys, register apps, check plan usage, and search these docs."
 ---
 
 # SmartSpectra MCP Server

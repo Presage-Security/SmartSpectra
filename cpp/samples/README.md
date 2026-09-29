@@ -44,7 +44,13 @@ App-style samples built by platform-specific tooling:
 3. Install the build tools required by your platform. The SDK installation guide
    lists the CMake, compiler, and package-manager setup for Linux, macOS, and
    Windows.
-4. Ubuntu 22.04 / Mint 21 (`jammy`) only: before building the repository
+4. Install the OpenCV development package. Several samples in this tree call
+   `find_package(OpenCV REQUIRED ...)`, and CMake configures every sample even
+   when you build a single target, so it is needed for any build here:
+   `sudo apt install libopencv-dev` on Ubuntu, `brew install opencv` on macOS.
+   On Windows, point CMake at your own OpenCV build with
+   `-DOpenCV_DIR=<path-to-opencv-build>`.
+5. Ubuntu 22.04 / Mint 21 (`jammy`) only: before building the repository
    samples, add the Presage apt source first. Then, if the stock
    `libopencv-dev` was already installed before that apt source was
    configured, purge it and reinstall it:

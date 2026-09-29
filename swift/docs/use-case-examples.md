@@ -1,6 +1,7 @@
 ---
 title: Use Case Examples
-description: Example SmartSpectra Swift integration patterns for common app use cases.
+description: SmartSpectra Swift examples for metrics, face landmarks, custom camera and decoded video input, data export, and iOS UI state.
+sidebarTitle: Use Case Examples
 ---
 
 # iOS Use Case Examples
@@ -35,7 +36,14 @@ struct ExampleHostView: View {
 Read the latest face landmarks from `sdk.metrics` and render them into your own overlay.
 Face landmarks are only populated when face metrics are requested.
 
+Landmarks are **pixel coordinates in the capture frame**, so scale `x` by the frame
+width and `y` by the frame *height* — they are different numbers. Capture defaults to
+1280x720; if you change the capture resolution, change these constants to match.
+
 ```swift
+let captureWidth: CGFloat = 1280
+let captureHeight: CGFloat = 720
+
 sdk.config.requestedMetrics = SmartSpectraConfig.breathingMetrics + SmartSpectraConfig.faceMetrics
 
 if let latestLandmarks = sdk.metrics?.face.landmarks.last {
@@ -46,8 +54,8 @@ if let latestLandmarks = sdk.metrics?.face.landmarks.last {
                     .fill(.blue)
                     .frame(width: 3, height: 3)
                     .position(
-                        x: CGFloat(landmark.x) * geometry.size.width / 1280.0,
-                        y: CGFloat(landmark.y) * geometry.size.height / 1280.0
+                        x: CGFloat(landmark.x) * geometry.size.width / captureWidth,
+                        y: CGFloat(landmark.y) * geometry.size.height / captureHeight
                     )
             }
         }
@@ -175,20 +183,39 @@ struct MonitoringView: View {
 
 ## Camera Handling
 
-Set the camera on the shared config before calling `try await sdk.start()`.
+For SDK-owned capture, select the camera while stopped before calling
+`try await sdk.start()`.
 
 ```swift
 let sdk = SmartSpectraSDK.shared
 
 sdk.config.apiKey = "YOUR_API_KEY"
-sdk.config.cameraPosition = .front
+try sdk.useCamera(.front)
 ```
 
-If your app needs to use the other camera for a later session, update the shared config before starting again.
+To change cameras, stop, select the camera, and start again. Explicit selections
+never fall back to another camera.
 
 ```swift
-func switchToBackCamera() {
+@MainActor
+func switchToBackCamera() async throws {
     let sdk = SmartSpectraSDK.shared
-    sdk.config.cameraPosition = .back
+    try await sdk.stop()
+    try sdk.useCamera(.back)
+    try await sdk.start()
 }
 ```
+
+## Your Own Camera or Video Decoder
+
+If your app already captures video, select `try sdk.useCustomInput()` while
+stopped, await `sdk.start()`, and pass each uncompressed sample to
+`input.sendFrame(sampleBuffer)`. Handle `.rejected(let error)` and observe
+metrics as above. Your app keeps ownership of its camera and buffers.
+
+The [AVFoundation example](headless-mode.md#use-your-own-camera-or-video-source)
+shows capture delegation and buffer requirements. The demo app's
+[Video Testing sample](https://github.com/Presage-Security/SmartSpectra/blob/main/swift/samples/demo-app/VideoInput/VideoTestingView.swift)
+uses `AVAssetReader` to decode a clip and submit its frames through the public
+API, including cancellation, frame rejection, and cleanup. Both paths require
+normal SDK authentication.

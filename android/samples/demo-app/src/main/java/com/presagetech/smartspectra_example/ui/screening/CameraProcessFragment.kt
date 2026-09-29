@@ -24,7 +24,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import com.google.android.material.button.MaterialButton
-import com.presagetech.smartspectra.CameraPosition
+import com.presagetech.smartspectra_example.ui.CameraPickerDialogFragment
 import com.presagetech.smartspectra.ProcessingStatus
 import com.presagetech.smartspectra.SmartSpectraError
 import com.presagetech.smartspectra.SmartSpectraSdk
@@ -109,7 +109,7 @@ internal class CameraProcessFragment : Fragment() {
             toggleProcessing()
         }
 
-        flipCameraButton.setOnClickListener { flipCamera() }
+        flipCameraButton.setOnClickListener { selectCamera() }
 
         return view
     }
@@ -162,10 +162,9 @@ internal class CameraProcessFragment : Fragment() {
         builder.show()
     }
 
-    private fun flipCamera() {
-        sdk.config.cameraPosition = when (sdk.config.cameraPosition) {
-            CameraPosition.FRONT -> CameraPosition.BACK
-            CameraPosition.BACK -> CameraPosition.FRONT
+    private fun selectCamera() {
+        if (CameraPickerDialogFragment.canOpen(sdk.processingStatus.value)) {
+            CameraPickerDialogFragment.show(childFragmentManager)
         }
     }
 
@@ -190,10 +189,10 @@ internal class CameraProcessFragment : Fragment() {
 
     private fun onProcessingStatusChanged(status: ProcessingStatus) {
         latestProcessingStatus = status
+        flipCameraButton.isEnabled = CameraPickerDialogFragment.canOpen(status)
         when (status) {
             ProcessingStatus.IDLE -> {
                 latestValidationStatus = null
-                flipCameraButton.isEnabled = true
                 recordingButton.isEnabled = true
                 recordingButton.text = getString(R.string.start)
                 recordingButton.textSize = 20.0f
@@ -204,14 +203,12 @@ internal class CameraProcessFragment : Fragment() {
             }
 
             ProcessingStatus.STARTING -> {
-                flipCameraButton.isEnabled = false
                 updateHintText()
                 previewDisplayView.visibility = View.VISIBLE
                 previewIdleDimView.visibility = View.GONE
             }
 
             ProcessingStatus.RUNNING -> {
-                flipCameraButton.isEnabled = false
                 recordingButton.isEnabled = true
                 recordingButton.text = getString(R.string.stop)
                 recordingButton.textSize = 20.0f
@@ -222,7 +219,6 @@ internal class CameraProcessFragment : Fragment() {
             }
 
             ProcessingStatus.STOPPING -> {
-                flipCameraButton.isEnabled = false
                 recordingButton.isEnabled = false
                 recordingButton.text = getString(R.string.stop)
                 recordingButton.textSize = 20.0f
@@ -232,7 +228,6 @@ internal class CameraProcessFragment : Fragment() {
             }
 
             ProcessingStatus.ERROR -> {
-                flipCameraButton.isEnabled = true
                 recordingButton.isEnabled = true
                 recordingButton.text = getString(R.string.start)
                 recordingButton.textSize = 20.0f

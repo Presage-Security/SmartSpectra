@@ -16,6 +16,10 @@ struct ScreeningControlsOverlay: View {
         VStack {
             Spacer()
 
+            CameraSelectionButton(sdk: sdk)
+                .buttonStyle(.borderedProminent)
+                .padding(.bottom, 8)
+
             Text(overlayStatusText)
                 .font(.subheadline)
                 .foregroundStyle(.white)

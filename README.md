@@ -1,6 +1,8 @@
 # SmartSpectra SDK
 
-This repository hosts SmartSpectra SDK from PresageTech for measuring vitals such as pulse, breathing, and more using a camera. The SDK supports multiple platforms, including Android, iOS, and C++ for Windows, Mac, and Linux.
+This repository hosts SmartSpectra SDK from PresageTech for measuring vitals
+such as pulse, breathing, and more using a camera. The SDK supports Android,
+iOS, Node.js and Electron, and C++ for Windows, macOS, and Linux.
 
 ## Table of Contents
 
@@ -14,6 +16,7 @@ This repository hosts SmartSpectra SDK from PresageTech for measuring vitals suc
   - [Platform-Specific Guides](#platform-specific-guides)
     - [Android](#android)
     - [iOS](#ios)
+    - [Node.js and Electron](#nodejs-and-electron)
     - [Windows / Mac / Linux (C++)](#windows--mac--linux-c)
   - [Bugs & Troubleshooting](#bugs--troubleshooting)
 
@@ -41,17 +44,22 @@ Presage also hosts an MCP (Model Context Protocol) server at `https://mcp.presag
 - **Breathing Waveform**  
   Real-time breathing waveform supporting biofeedback and breathing rate.
 
-- **Myofacial Analysis**  
+- **Face Analysis**
   Supporting face-point analysis, iris tracking, blinking detection, talking detection, and facial expression classification.
 
-- **Relative Blood Pressure Waveform**  
-  Relative blood pressure waveform shape.
+- **Relative Arterial Pressure Waveform**
+  Relative arterial pressure waveform shape. This is not a blood pressure
+  measurement and cannot estimate systolic or diastolic pressure.
 
 - **Integrated Quality Control**  
   Confidence and stability metrics providing insight into the confidence in the signal. User feedback on imaging conditions to support successful use.
 
 - **Camera Selection**  
-  Front or rear facing camera selection on iOS or Android and specification of camera input for applications using the C++ SDK.
+  Discover and select cameras by facing or ID on Android, iOS, Node.js, and C++.
+
+- **Caller-owned Video**
+  Submit frames from your own camera or decoder with the Android, Swift,
+  Node.js, or C++ custom-input API.
 
 - **LLM Insights**  
   Turn the vitals the SDK computes on-device into natural-language analysis from a large language model, on request. See the [LLM Insights overview](docs/llm-insights/index.md).
@@ -75,7 +83,7 @@ The SDK can report a small, aggregate, per-session diagnostic summary so we can 
 
 ## Authentication
 
-- We support API key authentication for C++, iOS, and Android. We also support OAuth authentication for iOS and Android. See the platform-specific guides for setup instructions.
+- We support API key authentication for Android, iOS, Node.js, and C++. We also support OAuth authentication for iOS and Android. See the platform-specific guides for setup instructions.
 - Either path can be set up by an AI assistant instead of by hand — see [docs/mcp-server.md](docs/mcp-server.md).
 
 ## Platform-Specific Guides
@@ -101,6 +109,16 @@ For iOS integration, refer to the [iOS README](swift/README.md). The guide inclu
 - Integration steps for your app using Swift Package Manager.
 - Example usage and troubleshooting tips.
 
+### Node.js and Electron
+
+For Node.js and Electron integration, refer to the
+[Node.js README](nodejs/README.md). The guide includes:
+
+- Supported operating systems and Node.js versions.
+- npm installation and runtime packaging instructions.
+- Native camera, Electron renderer, and custom-input workflows.
+- Example usage and troubleshooting tips.
+
 ### Windows / Mac / Linux (C++)
 
 For C++ integration on Windows, macOS, and Linux, refer to the [C++ README](cpp/README.md). The guide includes:
@@ -109,6 +127,8 @@ For C++ integration on Windows, macOS, and Linux, refer to the [C++ README](cpp/
 
 - Supported systems and architectures.
 - Installation via the prebuilt ZIP (Windows), Homebrew (macOS), or apt (Linux).
+  Debian 13 / Trixie supports both `amd64` and `arm64`; follow the
+  [Debian installation and quickstart guide](cpp/docs/linux/debian-13.md).
 - Build instructions and example applications.
 - A Linux redistribution path for bundling the published SDK tarball into your
   own `.deb`: [Redistribute SmartSpectra on Linux](docs/redistribute_smartspectra_on_linux.md).

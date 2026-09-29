@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject private var model: AppModel
+    @State private var showingCameraPicker = false
 
     private let coral = Color(red: 1.0, green: 0.42, blue: 0.42)
     private let teal = Color(red: 0.31, green: 0.80, blue: 0.77)
@@ -15,6 +16,9 @@ struct ContentView: View {
 
             controls
                 .frame(width: 320)
+        }
+        .sheet(isPresented: $showingCameraPicker) {
+            cameraPicker
         }
     }
 
@@ -118,7 +122,7 @@ struct ContentView: View {
                 }
 
                 VitalTile(
-                    title: "EDA",
+                    title: "EDA Proxy",
                     value: model.edaLevelText,
                     unit: "",
                     confidence: "",
@@ -179,6 +183,16 @@ struct ContentView: View {
                     .disabled(!model.isRunning)
                 }
 
+                VStack(alignment: .leading, spacing: 8) {
+                    Button("Select Camera") { showingCameraPicker = true }
+                        .accessibilityIdentifier("selectCamera")
+                        .disabled(model.isRunning)
+                    Text(model.selectedCameraName)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .textSelection(.enabled)
+                }
+
                 if !model.errorMessage.isEmpty {
                     Text(model.errorMessage)
                         .font(.callout)
@@ -203,6 +217,71 @@ struct ContentView: View {
                 Spacer(minLength: 0)
             }
             .padding(20)
+        }
+    }
+
+    private var cameraPicker: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("Select Camera").font(.headline)
+                Spacer()
+                Button("Refresh") { model.refreshCameras() }
+                    .accessibilityIdentifier("cameraRefresh")
+                    .disabled(model.isRunning)
+            }
+            if !model.cameraDiscoveryError.isEmpty {
+                Text(model.cameraDiscoveryError).foregroundStyle(.red)
+            } else if model.cameras.isEmpty {
+                Text("No cameras found. Check camera permission, connect a camera, then refresh.")
+                    .foregroundStyle(.secondary)
+            }
+            List {
+                Button("Default") { selectCamera(nil) }
+                    .accessibilityIdentifier("cameraDefault")
+                ForEach(model.cameras, id: \.cameraID) { camera in
+                    Button { selectCamera(camera.cameraID) } label: {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(camera.name ?? "Camera")
+                            Text("\(facingLabel(camera.facing)) · \(lensLabel(camera.lensType)) · ID: \(camera.cameraID)")
+                                .font(.caption).foregroundStyle(.secondary)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .disabled(model.isRunning)
+            HStack {
+                Spacer()
+                Button("Cancel") { showingCameraPicker = false }
+                    .keyboardShortcut(.cancelAction)
+            }
+        }
+        .padding(20)
+        .frame(width: 480, height: 360)
+        .onAppear { model.refreshCameras() }
+    }
+
+    private func selectCamera(_ cameraID: String?) {
+        model.selectCamera(cameraID)
+        showingCameraPicker = false
+    }
+
+    private func lensLabel(_ lens: SmartSpectraCameraLensType) -> String {
+        switch lens {
+        case .wideAngle: return "Wide-angle"
+        case .ultraWide: return "Ultra-wide"
+        case .telephoto: return "Telephoto"
+        default: return "Unknown lens"
+        }
+    }
+
+    private func facingLabel(_ facing: SmartSpectraCameraFacing) -> String {
+        switch facing {
+        case .front: return "Front"
+        case .back: return "Back"
+        default: return "Unknown facing"
         }
     }
 }

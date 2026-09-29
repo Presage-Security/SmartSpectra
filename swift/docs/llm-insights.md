@@ -1,6 +1,7 @@
 ---
-title: LLM Insights
-description: Request and receive LLM Insights from the Swift SmartSpectra SDK.
+title: LLM Insights on Swift
+description: Ask natural-language questions about a measurement and receive LLM Insights through the SmartSpectra Swift SDK, alongside the metrics stream.
+sidebarTitle: LLM Insights
 ---
 
 # Swift LLM Insights
@@ -67,7 +68,7 @@ public func requestInsight(_ text: String) throws -> Int32
 
 ```swift
 do {
-    pendingRequestId = try sdk.requestInsight("Summarize the user's stress level.")
+    pendingRequestId = try sdk.requestInsight("Summarize my current vital signs and flag anything unusual.")
 } catch {
     // e.g. processing not active
 }
@@ -91,8 +92,10 @@ otherwise sent prompt-only.
 Full field documentation is in
 [Data Types → Insight](../../docs/data-types.md#insight).
 
-The first auto-fired insight arrives about 15 seconds after the session starts;
-allow that much valid measurement before an on-demand request can be grounded in
+The first auto-fired insight arrives once pulse rate has a stable reading,
+typically about 15 seconds after the session starts; further snapshots follow as
+breathing rate and HRV stabilise, then every 60 seconds. Allow at least
+15 seconds of valid measurement before an on-demand request can be grounded in
 the user's physiology.
 
 ## See also

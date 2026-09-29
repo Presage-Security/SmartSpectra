@@ -1,6 +1,7 @@
 ---
-title: Headless Testing in CI
+title: Headless Testing in CI on Node.js
 description: Run a full SmartSpectra measurement in CI by feeding a recorded video through the Node.js SDK.
+sidebarTitle: Headless Testing in CI
 ---
 
 # Headless Testing in CI (Node.js)
@@ -32,8 +33,12 @@ import {
   ProcessingStatus,
   breathingMetrics,
   cardioMetrics,
-  decodeMetrics,
 } from '@smartspectra/node-sdk';
+// Import decodeMetrics from the `/messages` entry point: it always decodes
+// using the bundled Metrics class. The root export's decodeMetrics returns
+// the raw Buffer unless you first register a class with setMetricsClass(),
+// which would make every field read below undefined and fail the check.
+import { decodeMetrics } from '@smartspectra/node-sdk/messages';
 
 const sdk = new SmartSpectraSDK({
   apiKey: process.env.SMARTSPECTRA_API_KEY,

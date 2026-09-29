@@ -1,6 +1,7 @@
 ---
-title: Configuring Metrics
-description: Request and read SmartSpectra metrics from the C++ SDK.
+title: Configuring Metrics on C++
+description: Request pulse and breathing rates, HRV and EDA metrics from the SmartSpectra C++ SDK, and read callback results.
+sidebarTitle: Configuring Metrics
 ---
 
 # Configuring C++ Metrics
@@ -28,16 +29,25 @@ config.AddMetrics({MetricType::PULSE_RATE});
 
 ### Read Metrics
 
-Read the latest breathing and pulse samples from `SetOnMetrics`:
+Read the latest breathing and pulse samples from `SetOnMetrics`. This complete
+example includes the SDK construction and the pulse accessor:
 
 ```cpp
 #include <smartspectra/messages/metrics.h>
 #include <smartspectra/smartspectra.h>
+#include <smartspectra/smartspectra_config.h>
 #include <glog/logging.h>
 #include <utility>
 
+namespace spectra = presage::smartspectra;
+
+spectra::SmartSpectraConfig config;
+config.api_key = "YOUR_API_KEY";
+config.requested_metrics = spectra::SmartSpectraConfig::BreathingMetrics();
+config.AddMetrics(spectra::SmartSpectraConfig::CardioMetrics());
+
 spectra::SmartSpectra spectra(config);
-spectra.SetOnMetrics([](const presage::smartspectra::Metrics& metrics, int64_t) {
+spectra.SetOnMetrics([](const spectra::Metrics& metrics, int64_t) {
     if (metrics.has_breathing() && metrics.breathing().rate_size() > 0) {
         const auto& rate = metrics.breathing().rate(metrics.breathing().rate_size() - 1);
         LOG(INFO) << "Breathing rate: " << rate.value();
@@ -54,10 +64,6 @@ If `requested_metrics` is empty, the SDK uses `DefaultSupportedMetrics()`,
 which returns `BreathingMetrics()`. Use `BreathingMetrics()` when you are
 explicitly composing a breathing request. Cardio fields are empty unless you
 request a cardio metric such as `PULSE_RATE`.
-
-Requested metrics are validated against your subscription during SDK startup.
-If a metric is not authorized, it is omitted from the output. If the
-authorization request fails, `Start()` reports an error.
 
 ## Metric Update Patterns
 
@@ -143,7 +149,7 @@ spectra.SetOnMetrics([](const presage::smartspectra::Metrics& metrics, int64_t) 
 
     if (metrics.has_eda() && metrics.eda().trace_size() > 0) {
         const auto& eda = metrics.eda().trace(metrics.eda().trace_size() - 1);
-        LOG(INFO) << "EDA trace: " << eda.value();
+        LOG(INFO) << "EDA Proxy trace: " << eda.value();
     }
 
     if (metrics.has_face() && metrics.face().landmarks_size() > 0) {
@@ -191,6 +197,7 @@ Hrv {
     double baevsky;
     int64 timestamp;
     float confidence;
+    bool stable;
 }
 
 Eda {
@@ -205,13 +212,13 @@ Face {
 }
 ```
 
-EDA may take longer to produce its first sample than breathing or cardio outputs. See [Data Types](../../docs/data-types.md) for the complete protobuf schema.
+EDA Proxy may take longer to produce its first sample than breathing or cardio outputs. See [Data Types](../../docs/data-types.md) for the complete protobuf schema.
 
 ## Timing and Stability
 
 All measurement samples use `timestamp` values in microseconds. Trace metrics
 are produced at frame cadence when the underlying signal is available; lower
-rate outputs such as EDA may arrive less frequently.
+rate outputs such as EDA Proxy may arrive less frequently.
 
 Measurement types expose a `stable()` flag. Check it before using a sample for
 critical decisions or user-facing summaries:

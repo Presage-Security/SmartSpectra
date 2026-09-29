@@ -17,7 +17,6 @@ The following Apache-licensed components are included in this shipped artifact:
   - Kompute
   - MediaPipe
   - ml_dtypes
-  - OpenCensus Proto
   - OpenCV
   - protoc-gen-validate
   - ruy

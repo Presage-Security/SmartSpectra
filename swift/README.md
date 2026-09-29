@@ -1,6 +1,7 @@
 ---
-title: Quick Start
-description: Get started with the SmartSpectra Swift SDK for iOS — iOS 17+.
+title: Swift Quick Start
+description: Measure pulse and breathing from the iPhone camera or custom AVFoundation, CVPixelBuffer, and CMSampleBuffer input with the SmartSpectra Swift SDK. Requires iOS 17 or later.
+sidebarTitle: Quick Start
 ---
 
 # SmartSpectra Swift Quickstart
@@ -21,6 +22,12 @@ These quickstarts intentionally request only:
 - `MetricType.expressions`
 
 Please see the detailed documents for additional features.
+
+To supply frames from your own camera or video decoder, use
+[`useCustomInput()`](docs/headless-mode.md#use-your-own-camera-or-video-source).
+The SDK also supports its default camera capture through `start()`.
+The demo app's [Video Testing sample](https://github.com/Presage-Security/SmartSpectra/blob/main/swift/samples/demo-app/VideoInput/VideoTestingView.swift)
+decodes a selected clip and submits frames through this public API.
 
 ## Important Implementation Rules
 
