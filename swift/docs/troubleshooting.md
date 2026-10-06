@@ -10,7 +10,7 @@ sidebarTitle: Troubleshooting
 
 ### Package not found in Xcode
 
-Ensure you're adding the package via **File → Add Package Dependencies...**, entering `https://github.com/Presage-Security/SmartSpectra-Swift`, and selecting the release tag `3.4.0-rc.8`, from the [SmartSpectra-Swift releases](https://github.com/Presage-Security/SmartSpectra-Swift/releases), for repeatable builds. Pin the current release rather than an older one — the [migration guide](migration-guide.md) documents behaviour changes since 3.0. Use **Branch → main** only when testing the latest final public release before pinning a version.
+Ensure you're adding the package via **File → Add Package Dependencies...**, entering `https://github.com/Presage-Security/SmartSpectra-Swift`, and selecting the release tag `3.5.0-rc.2`, from the [SmartSpectra-Swift releases](https://github.com/Presage-Security/SmartSpectra-Swift/releases), for repeatable builds. Pin the current release rather than an older one — the [migration guide](migration-guide.md) documents behaviour changes since 3.0. Use **Branch → main** only when testing the latest final public release before pinning a version.
 
 If you pasted a subdirectory URL such as `/tree/main/swift/sdk`, replace it with the repository root URL above. Swift Package Manager resolves the package from the repo root.
 

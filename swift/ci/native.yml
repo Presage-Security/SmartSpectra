@@ -5,9 +5,6 @@ build_smartspectra_swift_binary:
   interruptible: true  # artifact-only build (xcframework, generated protobufs); no S3/registry push
   variables:
     VENV_DIR: ".venv"
-  allow_failure:
-    exit_codes:
-      - 2
   before_script:
     - bash ci/scripts/set_ci_remote_cache.sh
   # Always build current-commit binaries when the Swift child is selected.
@@ -32,21 +29,6 @@ build_smartspectra_swift_binary:
     - command -v task >/dev/null 2>&1 || brew install go-task
     - popd
     - task ios:xcframework:verify
-    - |
-      if [ -n "$CI_MERGE_REQUEST_ID" ] && { [ "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME" = "test" ] || [ "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME" = "main" ]; }; then
-          echo "Checking for uncommitted changes in SmartSpectra Swift directory for merge request to test..."
-          # Detect any change (staged, unstaged, or untracked) under smartspectra/swift/
-          if [ -n "$(git status --porcelain -- smartspectra/swift/)" ]; then
-              echo "Error: Build process modified files in smartspectra/swift/ directory. This means binaries were not updated before merge to test."
-              echo "Modified files in SmartSpectra Swift directory:"
-              git status --porcelain -- smartspectra/swift/
-              echo "Please either:"
-              echo "1. Update the binaries manually and open a MR to dev"
-              echo "2. Download the artifacts from this job and paste them in the right folders, then commit them and open a MR to dev"
-              exit 2
-          fi
-          echo "No uncommitted changes found in SmartSpectra Swift directory. Skipping upload for merge request."
-      fi
   # Only source-build/test inputs travel through the CI artifact upload. The
   # unified distribution archive is built in publishers to avoid a combined 413.
   artifacts:
@@ -56,6 +38,23 @@ build_smartspectra_swift_binary:
       - smartspectra/swift/sdk/Sources/Frameworks/
       - smartspectra/swift/sdk/Sources/SmartSpectra/Generated/Protobuf/*.pb.swift
     expire_in: 2 days
+
+# Publishes the CI-built native bundle (xcframework, internal headers, generated
+# protobufs) to the GitLab generic package registry so a checkout can fetch it
+# instead of committing it. Version is the native key; a key already published is skipped.
+publish_smartspectra_swift_native_registry:
+  tags:
+    - macos
+  stage: deploy
+  interruptible: false  # pushes to the GitLab package registry
+  needs:
+    - job: build_smartspectra_swift_binary
+      artifacts: true
+  rules:
+    - !reference [.rules:cd, rules]
+    - if: $CI_COMMIT_BRANCH =~ /^(dev|test|main)$/
+  script:
+    - bash ci/scripts/publish_mobile_native_bundle.sh swift
 
 build_smartspectra_swift_native_sbom:
   allow_failure: false

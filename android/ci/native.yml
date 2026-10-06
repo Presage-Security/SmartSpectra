@@ -15,21 +15,6 @@ variables:
     - pushd edge
     - bash ./build_scripts/android/build_android.sh
     - popd
-    - |
-      if [ -n "$CI_MERGE_REQUEST_ID" ] && { [ "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME" = "test" ] || [ "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME" = "main" ]; }; then
-          echo "Checking for uncommitted changes in SmartSpectra Android directory for merge request to test..."
-          # Detect any change (staged, unstaged, or untracked) under smartspectra/android/
-          if [ -n "$(git status --porcelain -- smartspectra/android/)" ]; then
-              echo "Error: Build process modified files in smartspectra/android/ directory. This means binaries were not updated before merge to test."
-              echo "Modified files in SmartSpectra Android directory:"
-              git status --porcelain -- smartspectra/android/
-              echo "Please either:"
-              echo "1. Update the binaries manually and open a MR to dev"
-              echo "2. Download the artifacts from this job and paste them in the right folders, then commit them and open a MR to dev"
-              exit 2
-          fi
-          echo "No uncommitted changes found in SmartSpectra Android directory."
-      fi
 
 build_smartspectra_android_binary:
   retry:
@@ -39,9 +24,6 @@ build_smartspectra_android_binary:
   extends: .build_smartspectra_android_binary
   image: ${EDGE_CROSS_ANDROID_IMAGE_URI}
   interruptible: true  # artifact-only build (jni/jars/protobufs); no S3/registry push
-  allow_failure:
-    exit_codes:
-      - 2
   # Produce current-commit binaries whenever this child is selected, including tags.
   rules:
     - !reference [.rules:cd, rules]
@@ -110,3 +92,21 @@ build_smartspectra_android_native_sbom:
     expire_in: 30 days
     reports:
       cyclonedx: edge/edge_android_sbom.json
+
+# Publishes the CI-built native bundle (JNI libs, assets, generated Java) to the
+# GitLab generic package registry so a checkout can fetch it instead of committing
+# it. Version is the native key (hash of the native inputs); a key already published is skipped.
+publish_smartspectra_android_native_registry:
+  tags:
+    - build_server
+  stage: deploy
+  image: ${EDGE_CROSS_ANDROID_AWS_IMAGE_URI}
+  interruptible: false  # pushes to the GitLab package registry
+  needs:
+    - job: build_smartspectra_android_binary
+      artifacts: true
+  rules:
+    - !reference [.rules:cd, rules]
+    - if: $CI_COMMIT_BRANCH =~ /^(dev|test|main)$/
+  script:
+    - bash ci/scripts/publish_mobile_native_bundle.sh android

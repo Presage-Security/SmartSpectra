@@ -73,7 +73,7 @@ In Xcode:
 
 1. Click `File` → `Add Package Dependencies...`
 2. Paste `https://github.com/Presage-Security/SmartSpectra-Swift/`
-3. For repeatable builds, choose `Exact Version` and enter a released tag such as `3.4.0-rc.8`, from the [SmartSpectra-Swift releases](https://github.com/Presage-Security/SmartSpectra-Swift/releases)
+3. For repeatable builds, choose `Exact Version` and enter a released tag such as `3.5.0-rc.2`, from the [SmartSpectra-Swift releases](https://github.com/Presage-Security/SmartSpectra-Swift/releases)
 4. Use `Branch` → `main` only when testing the latest final public release before pinning a version
 5. Add the package to the `Cool Vitals` app target
 

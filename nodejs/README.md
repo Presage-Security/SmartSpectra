@@ -263,6 +263,20 @@ once the graph reports `Running`. Call `sdk.useMediaStream(stream)` before
 are managed by the host; SDK-acquired streams are released on
 `stop()` / `reset()` / `destroy()`.
 
+For a camera mounted sideways or upside down, pass a `FrameTransform` with the
+stream:
+
+```ts
+import { FrameTransform } from '@smartspectra/node-sdk/renderer';
+sdk.useMediaStream(stream, { frameTransform: FrameTransform.kRotate90CW });
+```
+
+The default is `FrameTransform.kNone`. The SDK rotates or mirrors each frame
+before processing from the next `start()`; your preview element is not
+transformed. The selected transform survives `stop()` / `start()` and `reset()`.
+Each `useMediaStream()` call replaces the previous transform, so pass it again
+when you swap streams.
+
 The renderer uses `MediaStreamTrackProcessor` + `OffscreenCanvas` to
 extract RGBA pixels and ships each frame to the main process via the
 MessagePort. Graph callbacks flow back through the same port.

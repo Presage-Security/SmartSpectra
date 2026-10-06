@@ -1,0 +1,10 @@
+# Endpoints every Android Gradle job reaches from a cold cache, checked up front by
+# ci/scripts/check_network_access.sh. Keep in sync with gradle-wrapper.properties and the
+# repositories in settings.gradle.kts. Format: required|optional URL description
+required https://services.gradle.org/distributions/        Gradle wrapper distribution
+required https://dl.google.com/dl/android/maven2/          google(): AGP, AndroidX
+required https://repo.maven.apache.org/maven2/             mavenCentral(): libraries, Dokka
+required https://plugins.gradle.org/m2/                    gradlePluginPortal(): nexus-publish, cyclonedx, foojay
+required https://plugins-artifacts.gradle.org/             Plugin Portal artifact CDN (portal 303s here)
+optional https://jitpack.io/                               JitPack: MPAndroidChart, sample apps only
+optional https://central.sonatype.com/repository/maven-snapshots/  Sonatype snapshots: rc-flavor SDK only
