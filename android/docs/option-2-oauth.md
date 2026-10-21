@@ -96,7 +96,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.10.0")
     implementation("androidx.camera:camera-view:1.6.0")
 
-    implementation("com.presagetech:smartspectra:3.5.0-rc.2-SNAPSHOT")
+    implementation("com.presagetech:smartspectra:3.5.0-rc.3-SNAPSHOT")
 }
 ```
 

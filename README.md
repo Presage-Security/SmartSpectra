@@ -2,7 +2,8 @@
 
 This repository hosts SmartSpectra SDK from PresageTech for measuring vitals
 such as pulse, breathing, and more using a camera. The SDK supports Android,
-iOS, Node.js and Electron, and C++ for Windows, macOS, and Linux.
+iOS, Node.js and Electron, C++ for Windows, macOS, and Linux, and .NET for
+Windows (experimental).
 
 ## Table of Contents
 
@@ -18,6 +19,7 @@ iOS, Node.js and Electron, and C++ for Windows, macOS, and Linux.
     - [iOS](#ios)
     - [Node.js and Electron](#nodejs-and-electron)
     - [Windows / Mac / Linux (C++)](#windows--mac--linux-c)
+    - [Windows (.NET, experimental)](#windows-net-experimental)
   - [Bugs & Troubleshooting](#bugs--troubleshooting)
 
 ## Getting Started
@@ -59,7 +61,7 @@ Presage also hosts an MCP (Model Context Protocol) server at `https://mcp.presag
 
 - **Caller-owned Video**
   Submit frames from your own camera or decoder with the Android, Swift,
-  Node.js, or C++ custom-input API.
+  Node.js, C++, or .NET custom-input API.
 
 - **LLM Insights**  
   Turn the vitals the SDK computes on-device into natural-language analysis from a large language model, on request. See the [LLM Insights overview](docs/llm-insights/index.md).
@@ -83,7 +85,7 @@ The SDK can report a small, aggregate, per-session diagnostic summary so we can 
 
 ## Authentication
 
-- We support API key authentication for Android, iOS, Node.js, and C++. We also support OAuth authentication for iOS and Android. See the platform-specific guides for setup instructions.
+- We support API key authentication for Android, iOS, Node.js, C++, and .NET. We also support OAuth authentication for iOS and Android. See the platform-specific guides for setup instructions.
 - Either path can be set up by an AI assistant instead of by hand — see [docs/mcp-server.md](docs/mcp-server.md).
 
 ## Platform-Specific Guides
@@ -132,6 +134,15 @@ For C++ integration on Windows, macOS, and Linux, refer to the [C++ README](cpp/
 - Build instructions and example applications.
 - A Linux redistribution path for bundling the published SDK tarball into your
   own `.deb`: [Redistribute SmartSpectra on Linux](docs/redistribute_smartspectra_on_linux.md).
+
+### Windows (.NET, experimental)
+
+For .NET 8 integration on Windows, refer to the [.NET README](windows/README.md). The guide includes:
+
+- Installation of the `SmartSpectra.Net` NuGet package from the stable and release-candidate feeds.
+- Video-file and custom-frame quickstarts.
+- API reference, threading rules, and troubleshooting tips.
+- A WinUI 3 webcam sample: [SmartSpectraDotNetWinUI](windows/samples/SmartSpectraDotNetWinUI).
 
 ## Bugs & Troubleshooting
 

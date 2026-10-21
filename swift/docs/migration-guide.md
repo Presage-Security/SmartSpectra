@@ -9,6 +9,28 @@ sidebarTitle: Migration Guide
 > Applies to SmartSpectra Swift SDK v3.x.
 > Migrating from a v3.0 release-candidate prior to rc.13, or from v2.x.
 
+## Device Compatibility (v3.5.0 preview)
+
+Device Compatibility is a new optional SDK operation. Existing applications do
+not need to migrate an earlier compatibility API.
+
+Call `sdk.isDeviceCompatible()` on your configured SDK instance. It checks the
+selected metrics and supported camera configuration using the SDK's existing
+authentication, and returns `DeviceCompatibilityVerdict`. Compare the verdict
+explicitly with Ready, Limited, Blocked, or Inconclusive; it is not a Boolean.
+
+Use `sdk.getDeviceCompatibilityResult()` to retrieve the latest completed
+`DeviceCompatibilityResult`, containing `verdict`, an actionable `reason`, and a
+`diagnostics` JSON string. Check that the optional/nullable result is present before
+reading it. A new check clears the prior result, while a rejected concurrent call
+preserves the active check's ownership of the result.
+
+The check does not change the SDK's measurement settings. Unsupported selections
+return Inconclusive with an explanation rather than testing a different workload.
+
+See [Device Compatibility Results and Recovery](../../docs/device-compatibility-experience.md)
+for setup, result handling, diagnostic export, and platform-specific lifecycle behavior.
+
 ## Swift SDK v3.4.0 Migration
 
 ### Custom video input

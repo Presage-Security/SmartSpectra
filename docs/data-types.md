@@ -68,7 +68,7 @@ enum FeatureType {
 
 ## MetricType
 
-MetricType defines individual physiological measurements that can be requested and produced during video-based vital signs analysis.
+MetricType defines individual physiological measurements that can be requested during video-based vital signs analysis. Metrics marked Coming soon do not produce values in the current SDK.
 
 ```proto
 enum MetricType {
@@ -96,6 +96,11 @@ enum MetricType {
 - `CHEST_BREATHING` -- Breathing upper (chest) metrics
 - `ABDOMEN_BREATHING` -- Breathing lower (abdomen) metrics
 - `BREATHING_RATE` -- Breathing aggregate metrics
+- `BREATHING_AMPLITUDE` -- Coming soon: breathing amplitude. Not generated in the current SDK.
+- `APNEA` -- Coming soon: apnea detection. Not generated in the current SDK.
+- `RESPIRATORY_LINE_LENGTH` -- Coming soon: respiratory line length. Not generated in the current SDK.
+- `BASELINE` -- Coming soon: breathing baseline. Not generated in the current SDK.
+- `INHALE_EXHALE_RATIO` -- Coming soon: inhale/exhale ratio. Not generated in the current SDK.
 - `EDA_TRACE` -- EDA Proxy metrics
 - `FACE_LANDMARKS` -- Face metrics
 - `PULSE_RATE` -- Cardio metrics
@@ -296,11 +301,11 @@ message Breathing {
 - `repeated` [`MeasurementWithConfidence`](#measurementwithconfidence) `rate` -- Respiratory rate measurements with confidence scores. `stable` marks confidence at or above the minimum accepted accuracy standard for breathing rate (+/-1 br/min), which corresponds to confidence >= 45; see the [breathing model card](https://vandv.presagetech.com/breathing_model_card.html) for the confidence-to-error mapping.
 - `repeated` [`Measurement`](#measurement) `upper_trace` -- Chest breathing movement trace measurements. The trace has no confidence of its own; `stable` is inherited from the breathing rate verdict (>= 45); see the [breathing model card](https://vandv.presagetech.com/breathing_model_card.html).
 - `repeated` [`Measurement`](#measurement) `lower_trace` -- Abdominal breathing movement trace measurements. The trace has no confidence of its own; `stable` is inherited from the breathing rate verdict (>= 45); see the [breathing model card](https://vandv.presagetech.com/breathing_model_card.html).
-- `repeated` [`Measurement`](#measurement) `amplitude` -- Breathing amplitude measurements
-- `repeated` [`DetectionStatus`](#detectionstatus) `apnea` -- Apnea (breathing cessation) detection status
-- `repeated` [`Measurement`](#measurement) `respiratory_line_length` -- Respiratory line length measurements for breathing pattern analysis
-- `repeated` [`Measurement`](#measurement) `baseline` -- Baseline breathing measurements
-- `repeated` [`Measurement`](#measurement) `inhale_exhale_ratio` -- Inhale to exhale duration ratio measurements
+- `repeated` [`Measurement`](#measurement) `amplitude` -- Coming soon: breathing amplitude. Not generated in the current SDK; this field remains empty.
+- `repeated` [`DetectionStatus`](#detectionstatus) `apnea` -- Coming soon: apnea (breathing cessation) detection. Not generated in the current SDK; this field remains empty.
+- `repeated` [`Measurement`](#measurement) `respiratory_line_length` -- Coming soon: respiratory line length. Not generated in the current SDK; this field remains empty.
+- `repeated` [`Measurement`](#measurement) `baseline` -- Coming soon: breathing baseline. Not generated in the current SDK; this field remains empty.
+- `repeated` [`Measurement`](#measurement) `inhale_exhale_ratio` -- Coming soon: inhale/exhale duration ratio. Not generated in the current SDK; this field remains empty.
 
 ## Landmarks
 

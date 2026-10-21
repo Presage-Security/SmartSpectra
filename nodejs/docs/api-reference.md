@@ -23,6 +23,18 @@ await sdk.destroy();
 ### Methods
 
 - ```typescript
+  isDeviceCompatible(): Promise<DeviceCompatibilityVerdict>
+  ```
+
+  Device Compatibility uses this SDK's authentication.
+
+- ```typescript
+  getDeviceCompatibilityResult(): DeviceCompatibilityResult | undefined
+  ```
+
+  Latest completed result; undefined before/during a check or after an error.
+
+- ```typescript
   static availableCameras(): CameraInfo[]
   ```
 
@@ -325,6 +337,7 @@ Error codes on errors thrown by lifecycle methods and delivered via the 'error' 
 - `readonly kFrameConversionFailed: 9`
 - `readonly kNonMonotonicTimestamp: 10`
 - `readonly kTimestampGap: 11`
+- `readonly kMetricNotAuthorized: 13`
 
 ## decodeMetrics()
 
@@ -357,6 +370,22 @@ readonly facing: CameraFacing
 ```typescript
 readonly lensType: CameraLensType
 ```
+
+## DeviceCompatibilityResult
+
+```typescript
+readonly verdict: DeviceCompatibilityVerdict
+```
+
+```typescript
+readonly reason: string
+```
+
+```typescript
+readonly diagnostics: string
+```
+
+Native JSON support report; detailed fields are not a stable typed API.
 
 ## SmartSpectraLogLevel
 
@@ -450,4 +479,12 @@ Best-effort classification. Missing metadata and multi-lens cameras are unknown;
 
 ```typescript
 export type CameraLensType = 'unknown' | 'wideAngle' | 'ultraWide' | 'telephoto';
+```
+
+## DeviceCompatibilityVerdict
+
+Device Compatibility. Pin the JS and native SDK versions together. Outcome for the configured SDK workload.
+
+```typescript
+export type DeviceCompatibilityVerdict = 'ready' | 'limited' | 'blocked' | 'inconclusive';
 ```

@@ -77,12 +77,13 @@ allprojects {
     }
 
     // Dokka 2.2.0 resolves jsoup 1.16.1, Jackson 2.15.3, and FreeMarker 2.3.32 for HTML
-    // documentation generation. Pin the fixed releases (jsoup 1.23.1; Jackson 2.18.11 for
-    // six jackson-databind GHSAs; FreeMarker 2.3.35 for GHSA-27j2-h3m2-8237) until Dokka
-    // updates its transitive dependencies. Documentation tooling only, not the SDK runtime.
+    // documentation generation. Pin the fixed releases (jsoup 1.23.2 for GHSA-65r4-943x-97jj;
+    // Jackson 2.18.11 for six jackson-databind GHSAs; FreeMarker 2.3.35 for GHSA-27j2-h3m2-8237)
+    // until Dokka updates its transitive dependencies. Documentation tooling only, not the SDK
+    // runtime.
     configurations.matching { it.name.startsWith("dokkaHtmlGeneratorRuntimeResolver") }.configureEach {
         resolutionStrategy.eachDependency {
-            if (requested.group == "org.jsoup" && requested.name == "jsoup") useVersion("1.23.1")
+            if (requested.group == "org.jsoup" && requested.name == "jsoup") useVersion("1.23.2")
             if (requested.group.startsWith("com.fasterxml.jackson")) useVersion("2.18.11")
             if (requested.group == "org.freemarker" && requested.name == "freemarker") useVersion("2.3.35")
         }

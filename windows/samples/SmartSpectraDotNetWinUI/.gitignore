@@ -1,0 +1,7 @@
+# Build output
+bin/
+obj/
+# VS / Rider user state
+*.user
+.vs/
+.idea/

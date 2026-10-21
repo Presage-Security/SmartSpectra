@@ -433,7 +433,7 @@ class ViewController: UIViewController {
         case .invalidState:
             return "SDK is in an invalid state for this action."
         case .serverError, .processingFailed, .frameConversionFailed, .nonMonotonicTimestamp,
-             .timestampGap:
+             .timestampGap, .metricNotAuthorized:
             return sdkError.message
         }
     }

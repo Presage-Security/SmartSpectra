@@ -47,6 +47,24 @@ Thread safety: all public methods are thread-safe and may be called from any thr
   The SDK version string.
 
 - ```cpp
+  DeviceCompatibilityVerdict isDeviceCompatible()
+  ```
+
+  Checks the current SDK configuration without changing it. Blocks until cleanup; call from a worker thread. Camera frames are replaced with reference imagery. Clears the previous result when a new check starts and returns its verdict.
+
+- ```cpp
+  void cancelDeviceCompatibility()
+  ```
+
+  Requests cancellation from any thread. The check returns Inconclusive after cleanup and retains no result. Does nothing when no check is active.
+
+- ```cpp
+  std::optional<DeviceCompatibilityResult> getDeviceCompatibilityResult() const
+  ```
+
+  Latest completed check, or no value before/during a check or after an exception. Returns an owned copy without running another check.
+
+- ```cpp
   void SetOnProcessingStatusChanged(OnProcessingStatusChangedFn cb)
   ```
 
@@ -219,11 +237,13 @@ Thread safety: all public methods are thread-safe and may be called from any thr
   static const std::vector<MetricType>& BreathingMetrics()
   ```
 
-  Predefined metric bundles. Each returns the standard set of metrics for its category; pass one (or combine several) into requested_metrics. DefaultSupportedMetrics is what the SDK measures when requested_metrics is left empty.
+  Predefined metric bundles. Each returns the standard set of metrics for its category; pass one (or combine several) into requested_metrics. The breathing bundle produces rate, chest trace, and abdomen trace. Amplitude, apnea, respiratory line length, baseline, and inhale/exhale ratio are Coming soon; their fields remain empty in the current SDK.
 
 - ```cpp
   static const std::vector<MetricType>& DefaultSupportedMetrics()
   ```
+
+  Default request bundle, currently BreathingMetrics(), including its Coming soon entries. Only available metrics produce values.
 
 - ```cpp
   static const std::vector<MetricType>& CardioMetrics()
@@ -454,6 +474,7 @@ Error codes returned by synchronous API calls and delivered via OnErrorFn.
 - `kFrameConversionFailed = 9`
 - `kNonMonotonicTimestamp = 10`
 - `kTimestampGap          = 11`
+- `kMetricNotAuthorized = 13`
 
 ## OnProcessingStatusChangedFn
 
@@ -582,6 +603,37 @@ Best-effort lens classification. Unknown includes unavailable metadata and camer
 - `kFront`
 - `kBack`
 - `kById`
+
+## DeviceCompatibilityResult
+
+Complete consumer result. Diagnostics is an owned JSON support report; its detailed schema is diagnostic data, not a stable typed application API.
+
+### Properties
+
+- ```cpp
+  DeviceCompatibilityVerdict verdict = DeviceCompatibilityVerdict::kInconclusive
+  ```
+
+- ```cpp
+  std::string reason
+  ```
+
+  Explains the outcome and the next action the application/user can take.
+
+- ```cpp
+  std::string diagnostics
+  ```
+
+  Detailed performance evidence, configuration and SDK version. No credentials or pixels.
+
+## DeviceCompatibilityVerdict
+
+Outcome of the configured SDK compatibility check.
+
+- `kReady`
+- `kLimited`
+- `kBlocked`
+- `kInconclusive`
 
 ## SmartSpectraLogLevel
 

@@ -4,10 +4,13 @@
 //
 // SPDX-License-Identifier: LicenseRef-Proprietary
 import SwiftUI
+import AVFoundation
 import SmartSpectra
 
 struct CheckupView: View {
     private let sdk = SmartSpectraSDK.shared
+    @State private var compatibilityTask: Task<Void, Never>?
+    @State private var compatibilityStatus = "Not tested"
     @State private var edgePulseRateBuffer: [MeasurementWithConfidence] = []
     @State private var edgeArterialPressureBuffer: [MeasurementWithConfidence] = []
     @State private var edgeBreathingRateBuffer: [MeasurementWithConfidence] = []
@@ -39,11 +42,54 @@ struct CheckupView: View {
 
     }
 
+    @MainActor
+    private func testDeviceCompatibility() {
+        guard compatibilityTask == nil else { return }
+        compatibilityStatus = "Checking device…"
+        compatibilityTask = Task { @MainActor in
+            defer { compatibilityTask = nil }
+            guard await AVCaptureDevice.requestAccess(for: .video) else {
+                compatibilityStatus = "Camera permission required"
+                return
+            }
+            do {
+                try Task.checkCancellation()
+                let verdict = try await sdk.isDeviceCompatible()
+                switch verdict {
+                case .ready: compatibilityStatus = "Ready"
+                case .limited: compatibilityStatus = "Limited"
+                case .blocked: compatibilityStatus = "Blocked"
+                case .inconclusive: compatibilityStatus = "Inconclusive"
+                @unknown default: compatibilityStatus = "Unknown verdict"
+                }
+            } catch is CancellationError {
+                compatibilityStatus = "Cancelled"
+            } catch {
+                compatibilityStatus = "Check failed: \(error.localizedDescription)"
+            }
+        }
+    }
+
     var body: some View {
 
         VStack {
             // add smartspectra view
             SmartSpectraView()
+                .disabled(compatibilityTask != nil)
+
+            VStack(spacing: 4) {
+                Button(compatibilityTask == nil ? "Test device" : "Testing…") {
+                    testDeviceCompatibility()
+                }
+                .buttonStyle(.bordered)
+                .disabled(compatibilityTask != nil)
+                .accessibilityIdentifier("testDeviceCompatibility")
+                Text(compatibilityStatus)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .accessibilityIdentifier("deviceCompatibilityVerdict")
+            }
+            .onDisappear { compatibilityTask?.cancel() }
 
             if isCustomizationEnabled {
                 CameraSelectionButton(sdk: sdk)

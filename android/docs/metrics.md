@@ -6,9 +6,31 @@ sidebarTitle: Configuring Metrics
 
 # Configuring Android Metrics
 
+> **Important:** SDK metrics are offered for general wellness and informational purposes only. SDK metrics have not been cleared by the FDA and may not be used for medical diagnosis or treatment.
+
 By default, Android measurements request the breathing metric set. Combine it
 with `SmartSpectraConfig.cardioMetrics` when your app needs pulse rate,
 arterial-pressure trace, and HRV.
+
+## Metric Availability
+
+Breathing rate, chest trace, and abdomen trace are available. The following
+entries are included in the breathing bundle but are **not currently generated**:
+
+| Metric | Request value | Availability |
+| --- | --- | --- |
+| Breathing amplitude | `BREATHING_AMPLITUDE` | Not currently generated |
+| Apnea detection | `APNEA` | Not currently generated |
+| Respiratory line length | `RESPIRATORY_LINE_LENGTH` | Not currently generated |
+| Breathing baseline | `BASELINE` | Not currently generated |
+| Inhale/exhale ratio | `INHALE_EXHALE_RATIO` | Not currently generated |
+
+These metrics are not generated in the current SDK. Their output fields remain
+empty even when requested; waiting longer will not produce samples. An empty
+apnea field does not mean that apnea was not detected. Show “Unavailable” or omit
+these metrics from your app instead of showing zero or a loading indicator.
+
+See [Data Types](../../docs/data-types.md#breathing) for field-level availability.
 
 ## Breathing and Pulse
 

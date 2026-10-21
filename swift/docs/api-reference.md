@@ -33,6 +33,18 @@ Tests and advanced integrations can create an isolated instance via ``init(confi
 ### Methods
 
 - ```swift
+  public func isDeviceCompatible () async throws -> DeviceCompatibilityVerdict
+  ```
+
+  Checks the configured SDK and returns its verdict. Clears the previous result at start.
+
+- ```swift
+  public func getDeviceCompatibilityResult () -> DeviceCompatibilityResult?
+  ```
+
+  Latest completed result; nil before/during a check or after cancellation/error.
+
+- ```swift
   public func start () async throws
   ```
 
@@ -253,7 +265,7 @@ Standalone construction is available for tests and advanced integrations that pa
 
   This property provides granular control over which metric families the SDK requests. Derived feature flags such as cardio and face processing are inferred from the selected metric types.
 
-  Duplicate metrics are removed automatically while preserving the original order.
+  Duplicate metrics are removed automatically while preserving the original order. Empty selections (including selections containing only unrecognized metrics) use the default breathing metrics, just like an unset selection.
 
   If you do not set this property, the SDK defaults to breathing-only metrics: chest breathing, abdomen breathing, breathing rate, breathing amplitude, apnea, respiratory line length, baseline, and inhale/exhale ratio.
 
@@ -431,6 +443,7 @@ Raw values are stable across SDK versions and match the C++/Android wire values.
 - `case frameConversionFailed = 9`
 - `case nonMonotonicTimestamp = 10`
 - `case timestampGap = 11`
+- `case metricNotAuthorized = 13`
 
 ## CameraSelection
 
@@ -506,3 +519,32 @@ Raw values are stable across SDK versions and match the C++/Android wire values.
 - `case warning = 2`
 - `case error = 3`
 - `case none = 4`
+
+## DeviceCompatibilityVerdict
+
+Device Compatibility verdict.
+
+- `case ready = 0`
+- `case limited = 1`
+- `case blocked = 2`
+- `case inconclusive = 3`
+
+## DeviceCompatibilityResult
+
+Completed compatibility verdict, actionable explanation, and a JSON diagnostic report.
+
+### Properties
+
+- ```swift
+  public let verdict : DeviceCompatibilityVerdict
+  ```
+
+- ```swift
+  public let reason : String
+  ```
+
+- ```swift
+  public let diagnostics : String
+  ```
+
+  Native JSON support report; contains no credentials or input pixels.

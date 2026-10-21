@@ -6,6 +6,28 @@ sidebarTitle: Migration Guide
 
 # SmartSpectra Node.js SDK Migration Guide
 
+## Device Compatibility (v3.5.0 preview)
+
+Device Compatibility is a new optional SDK operation. Existing applications do
+not need to migrate an earlier compatibility API.
+
+Call `sdk.isDeviceCompatible()` on your configured SDK instance. It checks the
+selected metrics and supported camera configuration using the SDK's existing
+authentication, and returns a lowercase `DeviceCompatibilityVerdict` string. Compare the verdict
+explicitly with Ready, Limited, Blocked, or Inconclusive; it is not a Boolean.
+
+Use `sdk.getDeviceCompatibilityResult()` to retrieve the latest completed
+`DeviceCompatibilityResult`, containing `verdict`, an actionable `reason`, and a
+`diagnostics` JSON string. Check that the optional/nullable result is present before
+reading it. A new check clears the prior result, while a rejected concurrent call
+preserves the active check's ownership of the result.
+
+The check does not change the SDK's measurement settings. Unsupported selections
+return Inconclusive with an explanation rather than testing a different workload.
+
+See [Device Compatibility Results and Recovery](../../docs/device-compatibility-experience.md)
+for setup, result handling, diagnostic export, and platform-specific lifecycle behavior.
+
 ## Node.js SDK v3.4.0 camera selection
 
 The existing `useCamera()` and `useCamera({ deviceIndex: ... })` calls remain

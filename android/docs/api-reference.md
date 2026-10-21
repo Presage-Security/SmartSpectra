@@ -17,6 +17,18 @@ class SmartSpectraSdk
 ### Methods
 
 - ```kotlin
+  public suspend fun isDeviceCompatible(): com.presagetech.smartspectra.compatibility.DeviceCompatibilityVerdict
+  ```
+
+  Checks the configured SDK and returns its verdict. Clears the previous result at start.
+
+- ```kotlin
+  public fun getDeviceCompatibilityResult(): com.presagetech.smartspectra.compatibility.DeviceCompatibilityResult?
+  ```
+
+  Latest completed result; null before/during a check or after cancellation/error.
+
+- ```kotlin
   public suspend fun start()
   ```
 
@@ -334,6 +346,7 @@ SDK error codes. Raw values are stable across SDK versions and match the C++/Swi
 - `FRAME_CONVERSION_FAILED`
 - `NON_MONOTONIC_TIMESTAMP`
 - `TIMESTAMP_GAP`
+- `METRIC_NOT_AUTHORIZED`
 
 ## SmartSpectraException
 
@@ -544,4 +557,31 @@ public data class FrameSubmissionResult.Rejected(val error: SmartSpectraError) :
 
 - ```kotlin
   val error: SmartSpectraError
+  ```
+
+## DeviceCompatibilityVerdict
+
+- `READY`
+- `LIMITED`
+- `BLOCKED`
+- `INCONCLUSIVE`
+
+## DeviceCompatibilityResult
+
+```kotlin
+public data class DeviceCompatibilityResult( val verdict: DeviceCompatibilityVerdict, val reason: String, /** Native JSON support report. No credentials or input pixels. */ val diagnostics: String, )
+```
+
+### Properties
+
+- ```kotlin
+  val verdict: DeviceCompatibilityVerdict
+  ```
+
+- ```kotlin
+  val reason: String
+  ```
+
+- ```kotlin
+  val diagnostics: String
   ```

@@ -16,10 +16,11 @@ The picker is available in portrait and landscape and is disabled while processi
 After a failed Start, **Select camera** first stops the failed session, then opens
 the list so you can choose another camera and try again.
 
-Build and install:
+Build and install from the `android/` directory. The `external` flavor uses the
+stable SDK from Maven Central; use `assembleRcDebug` / `installRcDebug` for the
+current release candidate:
 
 ```bash
-cd smartspectra/android
-./gradlew :samples:minimal-app:assembleInternalDebug
-./gradlew :samples:minimal-app:installInternalDebug
+./gradlew :samples:minimal-app:assembleExternalDebug
+./gradlew :samples:minimal-app:installExternalDebug
 ```

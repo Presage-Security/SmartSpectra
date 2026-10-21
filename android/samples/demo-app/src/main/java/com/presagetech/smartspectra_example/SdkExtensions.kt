@@ -36,6 +36,7 @@ internal fun SmartSpectraError.userFacingMessage(context: Context): String {
                 ?: context.getString(R.string.smart_spectra_error_input_unavailable)
         SmartSpectraError.Code.INVALID_STATE ->
             context.getString(R.string.smart_spectra_error_invalid_state)
+        SmartSpectraError.Code.METRIC_NOT_AUTHORIZED -> message
         SmartSpectraError.Code.PROCESSING_FAILED,
         SmartSpectraError.Code.FRAME_CONVERSION_FAILED,
         SmartSpectraError.Code.NON_MONOTONIC_TIMESTAMP,
