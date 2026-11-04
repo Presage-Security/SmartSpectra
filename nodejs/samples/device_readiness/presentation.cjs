@@ -5,5 +5,4 @@ function present(result) {
     return { title: result.verdict, reason: result.reason, action: result.reason,
         canProceed: result.verdict === 'ready' };
 }
-function supportReport(result) { return result.diagnostics; }
-module.exports = { present, supportReport };
+module.exports = { present };

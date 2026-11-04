@@ -10,7 +10,7 @@ sidebarTitle: Troubleshooting
 
 ### Package not found in Xcode
 
-Ensure you're adding the package via **File → Add Package Dependencies...**, entering `https://github.com/Presage-Security/SmartSpectra-Swift`, and selecting the release tag `3.5.0-rc.3`, from the [SmartSpectra-Swift releases](https://github.com/Presage-Security/SmartSpectra-Swift/releases), for repeatable builds. Pin the current release rather than an older one — the [migration guide](migration-guide.md) documents behaviour changes since 3.0. Use **Branch → main** only when testing the latest final public release before pinning a version.
+Ensure you're adding the package via **File → Add Package Dependencies...**, entering `https://github.com/Presage-Security/SmartSpectra-Swift`, and selecting the release tag `3.5.0-rc.5`, from the [SmartSpectra-Swift releases](https://github.com/Presage-Security/SmartSpectra-Swift/releases), for repeatable builds. Pin the current release rather than an older one — the [migration guide](migration-guide.md) documents behaviour changes since 3.0. Use **Branch → main** only when testing the latest final public release before pinning a version.
 
 If you pasted a subdirectory URL such as `/tree/main/swift/sdk`, replace it with the repository root URL above. Swift Package Manager resolves the package from the repo root.
 
@@ -171,6 +171,7 @@ Inspect the `SmartSpectraError` in `FrameSubmissionResult.rejected`:
 | `.frameConversionFailed` | Supply BGRA or 8-bit bi-planar NV12 with even dimensions for NV12. Sample buffers must contain ready, uncompressed pixels. |
 | `.nonMonotonicTimestamp` | Use finite, nonnegative, strictly increasing microsecond timestamps below `Int64.max - 2`. Sample buffers use their presentation timestamps. |
 | `.timestampGap` | Stop and start after a gap over two seconds; do not rewrite live capture timestamps to conceal an interruption. |
+| `.sustainedLowFrameRate` | The session ended because the frame rate stayed too low; see [Measurement stops with `.sustainedLowFrameRate`](#measurement-stops-with-sustainedlowframerate). |
 
 Keep pixels alive and unchanged until submission returns. Supply upright pixels
 or select a fixed `FrameTransform`; the SDK does not infer sample orientation
@@ -211,6 +212,20 @@ do {
 ```
 
 For older-to-current mappings, see the [iOS Migration Guide](migration-guide.md).
+
+---
+
+## Measurement
+
+### Measurement stops with `.sustainedLowFrameRate`
+
+The frame rate stayed too low during a measurement, for example because of low
+light or heavy device load, so the session ended. Improve the lighting, close
+other demanding apps, and let the device cool down before measuring again. The
+error's `retryable` is `true`:
+the host may offer a user-initiated fresh start; do not restart automatically.
+To check whether a device can sustain measurement before starting, call
+`checkDeviceReadiness()`.
 
 ---
 

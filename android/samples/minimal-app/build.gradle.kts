@@ -25,9 +25,9 @@ extensions.configure<com.android.build.api.dsl.ApplicationExtension>("android") 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    // Device readiness ships in the 3.4 preview. Keep the stable 3.3 consumer build usable.
-    sourceSets.matching { it.name == "internal" || it.name == "rc" }.configureEach {
-        kotlin.srcDir("src/compatibility/kotlin")
+    // The readiness helper uses unreleased APIs from the in-tree SDK.
+    sourceSets.matching { it.name == "internal" }.configureEach {
+        kotlin.srcDir("src/readiness/kotlin")
     }
 
     buildFeatures {

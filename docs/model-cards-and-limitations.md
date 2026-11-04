@@ -35,7 +35,7 @@ These conditions may produce inaccurate measurements with high confidence and sh
 - Chewing gum.
 - Flickering illumination, such as TV screens.
 
-[Model card](https://vandv.presagetech.com/arterial_pressure_model_card.html)
+[Model card](https://presagetech.com/model-cards/arterial_pressure_model_card.html)
 
 ## Heart Rate Variability
 
@@ -66,7 +66,7 @@ These conditions may produce inaccurate measurements with high confidence and sh
 - Chewing gum.
 - Flickering illumination, such as TV screens.
 
-[Model card](https://vandv.presagetech.com/hrv_model_card.html)
+[Model card](https://presagetech.com/model-cards/hrv_model_card.html)
 
 ## Pulse Rate
 
@@ -90,7 +90,7 @@ These conditions may produce inaccurate measurements with high confidence and sh
 - Chewing gum.
 - Flickering illumination, such as TV screens.
 
-[Model card](https://vandv.presagetech.com/arterial_pressure_model_card.html)
+[Model card](https://presagetech.com/model-cards/arterial_pressure_model_card.html)
 
 ## Face Analysis
 
@@ -135,7 +135,7 @@ These conditions may produce inaccurate measurements with high confidence and sh
 - Dark clothing.
 - Tightly striped patterns on clothing causing image aliasing.
 
-[Model card](https://vandv.presagetech.com/breathing_model_card.html)
+[Model card](https://presagetech.com/model-cards/breathing_model_card.html)
 
 ## Upper and Lower Breathing Waveforms
 
@@ -160,4 +160,4 @@ These conditions may produce inaccurate measurements with high confidence and sh
 - Dark clothing.
 - Tightly striped patterns on clothing causing image aliasing.
 
-[Model card](https://vandv.presagetech.com/breathing_model_card.html)
+[Model card](https://presagetech.com/model-cards/breathing_model_card.html)

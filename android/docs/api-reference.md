@@ -17,16 +17,10 @@ class SmartSpectraSdk
 ### Methods
 
 - ```kotlin
-  public suspend fun isDeviceCompatible(): com.presagetech.smartspectra.compatibility.DeviceCompatibilityVerdict
+  public suspend fun checkDeviceReadiness(): DeviceReadinessResult
   ```
 
-  Checks the configured SDK and returns its verdict. Clears the previous result at start.
-
-- ```kotlin
-  public fun getDeviceCompatibilityResult(): com.presagetech.smartspectra.compatibility.DeviceCompatibilityResult?
-  ```
-
-  Latest completed result; null before/during a check or after cancellation/error.
+  Checks the configured SDK and returns its verdict and recommended next step.
 
 - ```kotlin
   public suspend fun start()
@@ -176,7 +170,7 @@ public class SmartSpectraConfig()
   public var enableTelemetry: Boolean = true
   ```
 
-  Controls whether the SDK reports anonymous, aggregate usage telemetry. On by default; set `false` to opt out. When enabled, the SDK sends a per-session summary — no raw frames, metric values, file paths, or user/device identifiers — to help Presage improve SDK reliability. Reporting is best-effort and never blocks a measurement. Read when a measurement session starts.
+  Controls session summaries and full device readiness diagnostic reports. On by default; set `false` to opt out before starting a session or check. Reports may contain free text, file paths and platform context. Authenticated requests can correlate reports with an account/device. No raw frames or measured vitals are sent. Reporting is best-effort; see SDK Telemetry & Privacy.
 
 - ```kotlin
   public var previewSurfaceProvider: Preview.SurfaceProvider?
@@ -188,13 +182,13 @@ public class SmartSpectraConfig()
   public var requestedMetrics: List<MetricType>?
   ```
 
-  Metrics the SDK requests for authorization and output. The getter never returns `null` — when no list has been set (or after explicitly setting `null`), it falls back to [breathingMetrics]. The setter accepts `null` to reset back to that default.
+  Metrics the SDK requests for authorization and output. `BREATHING_AMPLITUDE`, `APNEA`, `RESPIRATORY_LINE_LENGTH`, `BASELINE` and `INHALE_EXHALE_RATIO` are Unavailable: setting them is accepted, but `start()` then fails with `SmartSpectraError.Code.CONFIGURATION_FAILED`. The getter never returns `null` — when no list has been set (or after explicitly setting `null`), it falls back to [breathingMetrics]. The setter accepts `null` to reset back to that default.
 
 - ```kotlin
-  public val breathingMetrics: List<MetricType> = listOf( MetricType.CHEST_BREATHING, MetricType.ABDOMEN_BREATHING, MetricType.BREATHING_RATE, MetricType.BREATHING_AMPLITUDE, MetricType.APNEA, MetricType.RESPIRATORY_LINE_LENGTH, MetricType.BASELINE, MetricType.INHALE_EXHALE_RATIO, )
+  public val breathingMetrics: List<MetricType> = listOf( MetricType.CHEST_BREATHING, MetricType.ABDOMEN_BREATHING, MetricType.BREATHING_RATE, )
   ```
 
-  Breathing metric bundle. Equivalent to leaving [requestedMetrics] unset.
+  Breathing metric bundle: [MetricType.CHEST_BREATHING], [MetricType.ABDOMEN_BREATHING], [MetricType.BREATHING_RATE]. Equivalent to leaving [requestedMetrics] unset.
 
 - ```kotlin
   public val cardioMetrics: List<MetricType> = listOf( MetricType.PULSE_RATE, MetricType.ARTERIAL_PRESSURE_TRACE, MetricType.HRV, )
@@ -216,9 +210,14 @@ public class SmartSpectraConfig()
 
 ## CameraPosition
 
-- `public fun fromLensFacing(@CameraSelector.LensFacing lensFacing: Int): CameraPosition = when (lensFacing)`
 - `FRONT`
 - `BACK`
+
+### Methods
+
+- ```kotlin
+  public fun fromLensFacing(@CameraSelector.LensFacing lensFacing: Int): CameraPosition
+  ```
 
 ## CustomInput
 
@@ -291,7 +290,6 @@ public data class ValidationStatus( val code: ValidationCode, val hint: String, 
 
 ## ValidationCode
 
-- `val wireValue: Int`
 - `OK`
 - `NO_FACE_FOUND`
 - `MULTIPLE_FACES_FOUND`
@@ -308,6 +306,12 @@ public data class ValidationStatus( val code: ValidationCode, val hint: String, 
 - `FACE_TOO_HIGH`
 - `FACE_TOO_LOW`
 - `FACE_NOT_FORWARD`
+
+### Properties
+
+- ```kotlin
+  val wireValue: Int
+  ```
 
 ## SmartSpectraError
 
@@ -347,6 +351,7 @@ SDK error codes. Raw values are stable across SDK versions and match the C++/Swi
 - `NON_MONOTONIC_TIMESTAMP`
 - `TIMESTAMP_GAP`
 - `METRIC_NOT_AUTHORIZED`
+- `SUSTAINED_LOW_FRAME_RATE`
 
 ## SmartSpectraException
 
@@ -440,6 +445,14 @@ public data class CameraInfo( val id: String, val name: String? = null, val faci
 - ```kotlin
   val lensType: CameraLensType = CameraLensType.UNKNOWN
   ```
+
+## SmartSpectraTestingApi
+
+Marks SDK API intended for automated testing only (for example, feeding a recorded video instead of the live camera in a CI pipeline). These APIs are not part of the production measurement surface and may change without a migration path. Opt in explicitly with `@OptIn(SmartSpectraTestingApi::class)`.
+
+```kotlin
+public annotation class SmartSpectraTestingApi
+```
 
 ## SmartSpectraLogLevel
 
@@ -559,29 +572,27 @@ public data class FrameSubmissionResult.Rejected(val error: SmartSpectraError) :
   val error: SmartSpectraError
   ```
 
-## DeviceCompatibilityVerdict
+## DeviceReadinessVerdict
 
 - `READY`
 - `LIMITED`
 - `BLOCKED`
 - `INCONCLUSIVE`
 
-## DeviceCompatibilityResult
+## DeviceReadinessResult
+
+Completed verdict and explanation, including the recommended next step.
 
 ```kotlin
-public data class DeviceCompatibilityResult( val verdict: DeviceCompatibilityVerdict, val reason: String, /** Native JSON support report. No credentials or input pixels. */ val diagnostics: String, )
+public data class DeviceReadinessResult( val verdict: DeviceReadinessVerdict, val reason: String, )
 ```
 
 ### Properties
 
 - ```kotlin
-  val verdict: DeviceCompatibilityVerdict
+  val verdict: DeviceReadinessVerdict
   ```
 
 - ```kotlin
   val reason: String
-  ```
-
-- ```kotlin
-  val diagnostics: String
   ```

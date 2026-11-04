@@ -9,8 +9,8 @@ import SmartSpectra
 
 struct CheckupView: View {
     private let sdk = SmartSpectraSDK.shared
-    @State private var compatibilityTask: Task<Void, Never>?
-    @State private var compatibilityStatus = "Not tested"
+    @State private var readinessTask: Task<Void, Never>?
+    @State private var readinessStatus = "Not tested"
     @State private var edgePulseRateBuffer: [MeasurementWithConfidence] = []
     @State private var edgeArterialPressureBuffer: [MeasurementWithConfidence] = []
     @State private var edgeBreathingRateBuffer: [MeasurementWithConfidence] = []
@@ -43,29 +43,29 @@ struct CheckupView: View {
     }
 
     @MainActor
-    private func testDeviceCompatibility() {
-        guard compatibilityTask == nil else { return }
-        compatibilityStatus = "Checking device…"
-        compatibilityTask = Task { @MainActor in
-            defer { compatibilityTask = nil }
+    private func testDeviceReadiness() {
+        guard readinessTask == nil else { return }
+        readinessStatus = "Checking device…"
+        readinessTask = Task { @MainActor in
+            defer { readinessTask = nil }
             guard await AVCaptureDevice.requestAccess(for: .video) else {
-                compatibilityStatus = "Camera permission required"
+                readinessStatus = "Camera permission required"
                 return
             }
             do {
                 try Task.checkCancellation()
-                let verdict = try await sdk.isDeviceCompatible()
+                let verdict = try await sdk.checkDeviceReadiness().verdict
                 switch verdict {
-                case .ready: compatibilityStatus = "Ready"
-                case .limited: compatibilityStatus = "Limited"
-                case .blocked: compatibilityStatus = "Blocked"
-                case .inconclusive: compatibilityStatus = "Inconclusive"
-                @unknown default: compatibilityStatus = "Unknown verdict"
+                case .ready: readinessStatus = "Ready"
+                case .limited: readinessStatus = "Limited"
+                case .blocked: readinessStatus = "Blocked"
+                case .inconclusive: readinessStatus = "Inconclusive"
+                @unknown default: readinessStatus = "Unknown verdict"
                 }
             } catch is CancellationError {
-                compatibilityStatus = "Cancelled"
+                readinessStatus = "Cancelled"
             } catch {
-                compatibilityStatus = "Check failed: \(error.localizedDescription)"
+                readinessStatus = "Check failed: \(error.localizedDescription)"
             }
         }
     }
@@ -75,21 +75,21 @@ struct CheckupView: View {
         VStack {
             // add smartspectra view
             SmartSpectraView()
-                .disabled(compatibilityTask != nil)
+                .disabled(readinessTask != nil)
 
             VStack(spacing: 4) {
-                Button(compatibilityTask == nil ? "Test device" : "Testing…") {
-                    testDeviceCompatibility()
+                Button(readinessTask == nil ? "Test device" : "Testing…") {
+                    testDeviceReadiness()
                 }
                 .buttonStyle(.bordered)
-                .disabled(compatibilityTask != nil)
-                .accessibilityIdentifier("testDeviceCompatibility")
-                Text(compatibilityStatus)
+                .disabled(readinessTask != nil)
+                .accessibilityIdentifier("testDeviceReadiness")
+                Text(readinessStatus)
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                    .accessibilityIdentifier("deviceCompatibilityVerdict")
+                    .accessibilityIdentifier("deviceReadinessVerdict")
             }
-            .onDisappear { compatibilityTask?.cancel() }
+            .onDisappear { readinessTask?.cancel() }
 
             if isCustomizationEnabled {
                 CameraSelectionButton(sdk: sdk)

@@ -34,8 +34,8 @@ public sealed partial class MainWindow : Window
     // equivalent to the breathing bundle alone.
     private static readonly int[] RequestedMetrics =
     {
-        0, 1, 2, 3, 4, 5, 6, 7,  // breathing: chest/abdomen/rate/amplitude/apnea/RLL/baseline/IE-ratio
-        15, 16, 17,              // cardio: pulse rate / arterial pressure trace / HRV
+        0, 1, 2,              // breathing: chest / abdomen / rate
+        15, 16, 17,           // cardio: pulse rate / arterial pressure trace / HRV
     };
 
     private readonly DispatcherQueue _dispatcher = DispatcherQueue.GetForCurrentThread();

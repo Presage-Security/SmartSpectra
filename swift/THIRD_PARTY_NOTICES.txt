@@ -19,13 +19,14 @@ Apache-2.0
   - HighwayHash
   - KleidiAI
   - Kompute
+  - LiteRT (TensorFlow Lite runtime)
   - MediaPipe
   - ml_dtypes
   - OpenCV
   - protoc-gen-validate
   - ruy
   - Swift Protobuf
-  - TensorFlow (TensorFlow Lite)
+  - TensorFlow
 
 BSD-2-Clause
   - cpuinfo
@@ -282,7 +283,7 @@ Full license texts included in this file
    See the License for the specific language governing permissions and
    limitations under the License.
 
-Applies to: Abseil, CNCF xDS API, Envoy data-plane-api, FlatBuffers, gemmlowp, Google APIs, gRPC, HighwayHash, KleidiAI, Kompute, MediaPipe, ml_dtypes, OpenCV, protoc-gen-validate, ruy, Swift Protobuf, TensorFlow (TensorFlow Lite)
+Applies to: Abseil, CNCF xDS API, Envoy data-plane-api, FlatBuffers, gemmlowp, Google APIs, gRPC, HighwayHash, KleidiAI, Kompute, LiteRT (TensorFlow Lite runtime), MediaPipe, ml_dtypes, OpenCV, protoc-gen-validate, ruy, Swift Protobuf, TensorFlow
 
 ===== BSD-2-Clause =====
 Copyright (c) <year> <owner>. All rights reserved.

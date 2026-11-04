@@ -42,5 +42,6 @@ internal fun SmartSpectraError.userFacingMessage(context: Context): String {
         SmartSpectraError.Code.NON_MONOTONIC_TIMESTAMP,
         SmartSpectraError.Code.TIMESTAMP_GAP,
         -> context.getString(R.string.smart_spectra_error_processing)
+        else -> message
     }
 }

@@ -60,8 +60,9 @@ var config = new SmartSpectraConfig
 {
     ApiKey = Environment.GetEnvironmentVariable("SMARTSPECTRA_API_KEY")
         ?? throw new InvalidOperationException("SMARTSPECTRA_API_KEY is required"),
-    // Leave empty for the SDK's default breathing metric set, or pass native
-    // MetricType integer values to request additional metrics.
+    // Leave empty for the SDK default metrics: chest breathing, abdomen
+    // breathing, and breathing rate. Pass native MetricType integer values to
+    // request additional metrics.
     RequestedMetrics = Array.Empty<int>(),
 };
 
@@ -119,7 +120,9 @@ session.Wait(timeoutMs: 5000);
 | Property | Type | Description |
 | --- | --- | --- |
 | `ApiKey` | `string` | API key authentication |
-| `RequestedMetrics` | `int[]` | Native `MetricType` integer values. Empty uses the SDK default breathing metric set |
+| `RequestedMetrics` | `int[]` | Native `MetricType` integer values. Empty uses the SDK default metrics: chest breathing, abdomen breathing, and breathing rate |
+
+**Unavailable metrics:** breathing amplitude, apnea, respiratory line length, baseline, and inhale/exhale ratio (`MetricType` values 3 to 7, since .NET passes raw integers) are Unavailable. Requesting any of them makes `RunFile`/`StartCustom` return a `SmartSpectraError` with code `ConfigurationFailed`, and the SDK log names them. Remove them from `RequestedMetrics`.
 
 ### `SmartSpectraSession`
 
@@ -159,6 +162,14 @@ Lifecycle methods (`RunFile`, `StartCustom`, `SendFrame`) return a
 | `Message` | `string` | Human-readable detail |
 | `Retryable` | `bool` | `true` if the caller can safely retry the operation |
 | `Ok` | `bool` | Shorthand for `Code == SmartSpectraErrorCode.Ok` |
+
+`SustainedLowFrameRate` (14) means the frame rate stayed too low to measure
+reliably, so the session ended. `ErrorOccurred` delivers it. In a `RunFile`
+session it is not retryable, because the same file stops the same way; `RunFile`
+itself returns `ProcessingFailed`, as for every error that ends a run. From
+`StartCustom` frames it is retryable: the host may offer a user-initiated fresh
+start; do not restart automatically. A `SendFrame` that meets the stop returns
+the same code.
 
 `Create` throws `SmartSpectraException` on failure (wrapping a
 `SmartSpectraError` exposed via the `Error` property) instead of returning

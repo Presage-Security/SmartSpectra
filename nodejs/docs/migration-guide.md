@@ -6,27 +6,47 @@ sidebarTitle: Migration Guide
 
 # SmartSpectra Node.js SDK Migration Guide
 
-## Device Compatibility (v3.5.0 preview)
+## Node.js SDK v3.5.0-rc.4 Migration
 
-Device Compatibility is a new optional SDK operation. Existing applications do
-not need to migrate an earlier compatibility API.
+### Device Readiness
 
-Call `sdk.isDeviceCompatible()` on your configured SDK instance. It checks the
-selected metrics and supported camera configuration using the SDK's existing
-authentication, and returns a lowercase `DeviceCompatibilityVerdict` string. Compare the verdict
-explicitly with Ready, Limited, Blocked, or Inconclusive; it is not a Boolean.
+Replace `isDeviceCompatible()` with `checkDeviceReadiness()`. The check returns
+`DeviceReadinessResult` with `verdict` and `reason`; remove the separate
+`getDeviceCompatibilityResult()` call.
+See [Device Readiness](../../docs/device-readiness.md) for usage and results.
 
-Use `sdk.getDeviceCompatibilityResult()` to retrieve the latest completed
-`DeviceCompatibilityResult`, containing `verdict`, an actionable `reason`, and a
-`diagnostics` JSON string. Check that the optional/nullable result is present before
-reading it. A new check clears the prior result, while a rejected concurrent call
-preserves the active check's ownership of the result.
+### Sustained low frame rate has its own error code
 
-The check does not change the SDK's measurement settings. Unsupported selections
-return Inconclusive with an explanation rather than testing a different workload.
+When the frame rate stays too low to measure reliably during a measurement, the
+session still ends, but the `'error'` event now receives
+`SmartSpectraErrorCode.kSustainedLowFrameRate` (14) instead of
+`SmartSpectraErrorCode.kProcessingFailed`. The message is "SmartSpectra stopped
+because the frame rate stayed too low to measure reliably." A frame submitted as
+the session ends is rejected with the same code. `retryable` is `false` when the
+SDK plays a video file, because the same file stops the same way; it is `true` for
+cameras and custom input:
+the host may offer a user-initiated fresh start; do not restart automatically.
+To check whether a device can sustain measurement before starting, call
+`checkDeviceReadiness()`.
 
-See [Device Compatibility Results and Recovery](../../docs/device-compatibility-experience.md)
-for setup, result handling, diagnostic export, and platform-specific lifecycle behavior.
+### Unavailable breathing metrics fail at start
+
+`MetricType.BREATHING_AMPLITUDE`, `MetricType.APNEA`,
+`MetricType.RESPIRATORY_LINE_LENGTH`, `MetricType.BASELINE`, and
+`MetricType.INHALE_EXHALE_RATIO` are Unavailable: the SDK does not produce
+them. They are no longer part of the default request or `breathingMetrics`,
+which now contain `MetricType.CHEST_BREATHING`, `MetricType.ABDOMEN_BREATHING`,
+and `MetricType.BREATHING_RATE`.
+
+Requesting any Unavailable metric makes `start()` fail with
+`SmartSpectraErrorCode.kConfigurationFailed`. The measurement does not begin,
+and the SDK log names the rejected metrics. `checkDeviceReadiness()` resolves to a result with verdict
+`'blocked'` for the same configuration.
+
+Apps that use the default request or `breathingMetrics` need no change and
+receive the same breathing data as before.
+
+To migrate, remove the Unavailable metrics from `requestedMetrics`.
 
 ## Node.js SDK v3.4.0 camera selection
 

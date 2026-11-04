@@ -12,21 +12,29 @@ By default, C++ measurements request the breathing metric set. Add pulse rate wh
 
 ## Metric Availability
 
-Breathing rate, chest trace, and abdomen trace are available. The following
-entries are included in the breathing bundle but are **not currently generated**:
+The breathing bundle and the default request contain chest breathing, abdomen
+breathing, and breathing rate. The five metrics below are **Unavailable**: the
+SDK does not produce them, requesting any of them makes `Start()` fail with
+`SmartSpectraErrorCode::kConfigurationFailed`, and the SDK log names the
+rejected metrics. Remove them from `requested_metrics`.
 
 | Metric | Request value | Availability |
 | --- | --- | --- |
-| Breathing amplitude | `BREATHING_AMPLITUDE` | Not currently generated |
-| Apnea detection | `APNEA` | Not currently generated |
-| Respiratory line length | `RESPIRATORY_LINE_LENGTH` | Not currently generated |
-| Breathing baseline | `BASELINE` | Not currently generated |
-| Inhale/exhale ratio | `INHALE_EXHALE_RATIO` | Not currently generated |
+| Breathing amplitude | `BREATHING_AMPLITUDE` | Unavailable |
+| Apnea detection | `APNEA` | Unavailable |
+| Respiratory line length | `RESPIRATORY_LINE_LENGTH` | Unavailable |
+| Breathing baseline | `BASELINE` | Unavailable |
+| Inhale/exhale ratio | `INHALE_EXHALE_RATIO` | Unavailable |
 
-These metrics are not generated in the current SDK. Their output fields remain
-empty even when requested; waiting longer will not produce samples. An empty
-apnea field does not mean that apnea was not detected. Show “Unavailable” or omit
-these metrics from your app instead of showing zero or a loading indicator.
+### Metric Bundles
+
+| Bundle | Members |
+| --- | --- |
+| `BreathingMetrics()` (default) | `CHEST_BREATHING`, `ABDOMEN_BREATHING`, `BREATHING_RATE` |
+| `CardioMetrics()` | `PULSE_RATE`, `ARTERIAL_PRESSURE_TRACE`, `HRV` |
+| `FaceMetrics()` | `FACE_LANDMARKS`, `BLINKING`, `TALKING`, `EXPRESSIONS` |
+| `MicromotionMetrics()` | `GLUTES_MICROMOTION`, `KNEES_MICROMOTION` |
+| `EdaMetrics()` | `EDA_TRACE` |
 
 See [Data Types](../../docs/data-types.md#breathing) for field-level availability.
 
@@ -83,9 +91,10 @@ spectra.SetOnMetrics([](const spectra::Metrics& metrics, int64_t) {
 ```
 
 If `requested_metrics` is empty, the SDK uses `DefaultSupportedMetrics()`,
-which returns `BreathingMetrics()`. Use `BreathingMetrics()` when you are
-explicitly composing a breathing request. Cardio fields are empty unless you
-request a cardio metric such as `PULSE_RATE`.
+which returns `BreathingMetrics()`: chest breathing, abdomen breathing, and
+breathing rate. Use `BreathingMetrics()` when you are explicitly composing a
+breathing request. Cardio fields are empty unless you request a cardio metric
+such as `PULSE_RATE`.
 
 ## Metric Update Patterns
 

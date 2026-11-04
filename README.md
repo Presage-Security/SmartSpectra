@@ -81,7 +81,7 @@ Review the [SmartSpectra model cards and limitations](docs/model-cards-and-limit
 
 ## Telemetry and Privacy
 
-The SDK can report a small, aggregate, per-session diagnostic summary so we can measure release quality across the devices and conditions the SDK runs on. It is aggregate-only — no raw video, no measured vitals values, no user or device identifiers — and it is opt-out. See [SDK Telemetry & Privacy](docs/telemetry-and-privacy.md) for exactly what is and isn't collected and how to disable it.
+SDK telemetry is on by default and sends session summaries and full device readiness diagnostic reports. Reports may contain free text, file paths and platform context; authenticated requests can correlate them with an account/device. No raw video or measured vitals values are sent. See [SDK Telemetry & Privacy](docs/telemetry-and-privacy.md) for report contents and how to opt out.
 
 ## Authentication
 

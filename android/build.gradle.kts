@@ -102,6 +102,20 @@ allprojects {
             }
         }
     }
+
+    // Guava below 33.7.2 is affected by GHSA-xxph-c9ww-hj94 (deserialization of compact
+    // collections allocates unbounded memory; no backport). AGP 9.2.1's lint and UTP resolve
+    // 32.0.1-jre / 33.3.1-jre, and the samples' runtime classpaths 33.3.1-android. Keeps each
+    // request's flavor. Delete once nothing resolves below 33.7.2, since useVersion() would
+    // otherwise downgrade it.
+    configurations.configureEach {
+        resolutionStrategy.eachDependency {
+            if (requested.group == "com.google.guava" && requested.name == "guava") {
+                val flavor = requested.version.orEmpty().substringAfterLast('-', "jre")
+                useVersion("33.7.2-$flavor")
+            }
+        }
+    }
 }
 
 // AGP 9's built-in Kotlin compiles .kt files but does not register the

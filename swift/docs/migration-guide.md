@@ -6,30 +6,48 @@ sidebarTitle: Migration Guide
 
 # SmartSpectra Swift SDK Migration Guide
 
-> Applies to SmartSpectra Swift SDK v3.x.
+> Applies to SmartSpectra Swift SDK v3.x, including `v3.5.0-rc.5`.
 > Migrating from a v3.0 release-candidate prior to rc.13, or from v2.x.
 
-## Device Compatibility (v3.5.0 preview)
+## Swift SDK v3.5.0-rc.4 Migration
 
-Device Compatibility is a new optional SDK operation. Existing applications do
-not need to migrate an earlier compatibility API.
+### Device Readiness
 
-Call `sdk.isDeviceCompatible()` on your configured SDK instance. It checks the
-selected metrics and supported camera configuration using the SDK's existing
-authentication, and returns `DeviceCompatibilityVerdict`. Compare the verdict
-explicitly with Ready, Limited, Blocked, or Inconclusive; it is not a Boolean.
+Replace `isDeviceCompatible()` with `checkDeviceReadiness()`. The check returns
+`DeviceReadinessResult` with `verdict` and `reason`; remove the separate
+`getDeviceCompatibilityResult()` call.
+See [Device Readiness](../../docs/device-readiness.md) for usage and results.
 
-Use `sdk.getDeviceCompatibilityResult()` to retrieve the latest completed
-`DeviceCompatibilityResult`, containing `verdict`, an actionable `reason`, and a
-`diagnostics` JSON string. Check that the optional/nullable result is present before
-reading it. A new check clears the prior result, while a rejected concurrent call
-preserves the active check's ownership of the result.
+### Sustained low frame rate has its own error code
 
-The check does not change the SDK's measurement settings. Unsupported selections
-return Inconclusive with an explanation rather than testing a different workload.
+When the frame rate stays too low to measure reliably during a measurement, the
+session still ends, but the error now reports `.sustainedLowFrameRate` (14)
+instead of `.processingFailed`. The message includes "SmartSpectra stopped
+because the frame rate stayed too low to measure reliably." A frame submitted as
+the session ends is rejected with the same code. `retryable` is `true`: the host
+may offer a user-initiated fresh start; do not restart automatically. To check
+whether a device can sustain measurement before starting, call
+`checkDeviceReadiness()`.
 
-See [Device Compatibility Results and Recovery](../../docs/device-compatibility-experience.md)
-for setup, result handling, diagnostic export, and platform-specific lifecycle behavior.
+If you `switch` over `SmartSpectraError.Code` without a `default`, add
+`.sustainedLowFrameRate`.
+
+### Unavailable breathing metrics fail at start
+
+`.breathingAmplitude`, `.apnea`, `.respiratoryLineLength`, `.baseline`, and
+`.inhaleExhaleRatio` are Unavailable: the SDK does not produce them. They are
+no longer part of the default request or `SmartSpectraConfig.breathingMetrics`,
+which now contain `.chestBreathing`, `.abdomenBreathing`, and `.breathingRate`.
+
+Requesting any Unavailable metric makes `start()` fail with
+`.configurationFailed`. The measurement does not begin, and the SDK log names
+the rejected metrics. `checkDeviceReadiness()` returns a result with verdict `.blocked` for the same
+configuration.
+
+Apps that use the default request or `SmartSpectraConfig.breathingMetrics`
+need no change and receive the same breathing data as before.
+
+To migrate, remove the Unavailable metrics from `requestedMetrics`.
 
 ## Swift SDK v3.4.0 Migration
 

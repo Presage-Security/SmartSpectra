@@ -24,13 +24,13 @@ Apache-2.0
   - Guava ListenableFuture
   - HighwayHash
   - JSR 305
-  - KleidiAI
   - Kompute
+  - LiteRT (TensorFlow Lite runtime)
   - MediaPipe
   - ml_dtypes
   - OpenCV
   - ruy
-  - TensorFlow (TensorFlow Lite)
+  - TensorFlow
 
 BSD-2-Clause
   - cpuinfo
@@ -296,7 +296,7 @@ Full license texts included in this file
    See the License for the specific language governing permissions and
    limitations under the License.
 
-Applies to: Abseil, AndroidX Camera Camera2, AndroidX Camera Core, AndroidX Camera Lifecycle, AndroidX Core, AndroidX Lifecycle LiveData, AndroidX Lifecycle Process, AndroidX Startup Runtime, FlatBuffers, Flogger, Flogger System Backend, gemmlowp, Guava ListenableFuture, HighwayHash, JSR 305, KleidiAI, Kompute, MediaPipe, ml_dtypes, OpenCV, ruy, TensorFlow (TensorFlow Lite)
+Applies to: Abseil, AndroidX Camera Camera2, AndroidX Camera Core, AndroidX Camera Lifecycle, AndroidX Core, AndroidX Lifecycle LiveData, AndroidX Lifecycle Process, AndroidX Startup Runtime, FlatBuffers, Flogger, Flogger System Backend, gemmlowp, Guava ListenableFuture, HighwayHash, JSR 305, Kompute, LiteRT (TensorFlow Lite runtime), MediaPipe, ml_dtypes, OpenCV, ruy, TensorFlow
 
 ===== BSD-2-Clause =====
 Copyright (c) <year> <owner>. All rights reserved.

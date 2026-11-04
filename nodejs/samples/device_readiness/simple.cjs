@@ -6,9 +6,9 @@ async function main() {
     const sdk = new SmartSpectraSDK({ apiKey: process.env.PHYSIOLOGY_API_KEY });
     sdk.useCamera();
     try {
-        const verdict = await sdk.isDeviceCompatible();
-        console.log(verdict);
-        process.exitCode = verdict === 'ready' ? 0 : 2;
+        const result = await sdk.checkDeviceReadiness();
+        console.log(result.verdict);
+        process.exitCode = result.verdict === 'ready' ? 0 : 2;
     } finally { await sdk.destroy(); }
 }
 main().catch(error => { console.error(error.message); process.exitCode = 1; });
