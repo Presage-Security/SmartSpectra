@@ -100,6 +100,31 @@ a widely-supported container/codec such as MP4 (H.264); the SDK decodes it
 automatically. See the [metrics guide](metrics.md) for which metrics to request
 and how to read the decoded payloads.
 
+## Linux Vulkan driver setup
+
+On **Linux x64 with Node SDK 3.4.0**, the `expressions-inference` model
+needs a compatible Vulkan installable client driver (ICD). Requesting
+`TALKING` exercises this model path. A headless machine can use an installed hardware driver or a
+software driver; the SDK's bundled Vulkan loader reads `VK_ICD_FILENAMES`.
+Set it to the host's existing ICD JSON file before starting Node.
+
+For example, on a machine with Chromium's SwiftShader installed at this path:
+
+```sh
+export VK_ICD_FILENAMES='/usr/lib/chromium/vk_swiftshader_icd.json'
+node headless-smoke.mjs ./test-assets/face.mp4
+```
+
+ICD paths vary by distribution; select the JSON file for the driver installed
+on your runner. `VK_DRIVER_FILES` worked with the system loader in the SDK
+3.4.0 reproduction; the bundled loader needed `VK_ICD_FILENAMES` for the same driver.
+
+If native model-delivery logs show
+`Vulkan is not available: vkCreateInstance failed with ErrorIncompatibleDriver`,
+check this driver setup. In the affected run, the SDK reached running and
+file EOF while its `'error'` callback stayed silent. Keep the requested-metric
+assertions above alongside lifecycle checks so CI checks the model outputs.
+
 ## A CI pipeline, in general terms
 
 1. **Expose the API key** as a job secret.
