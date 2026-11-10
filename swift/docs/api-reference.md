@@ -33,6 +33,12 @@ Tests and advanced integrations can create an isolated instance via ``init(confi
 ### Methods
 
 - ```swift
+  public func checkDeviceReadiness () async throws -> DeviceReadinessResult
+  ```
+
+  Checks the configured SDK and returns its verdict and recommended next step.
+
+- ```swift
   public func start () async throws
   ```
 
@@ -226,9 +232,7 @@ Standalone construction is available for tests and advanced integrations that pa
   public var enableTelemetry : Bool = true
   ```
 
-  Controls whether the SDK reports anonymous, aggregate usage telemetry.
-
-  Telemetry is on by default; set this to `false` to opt out. When enabled, the SDK sends a per-session summary. It does not include raw frames, metric values, file paths, user identifiers, or device identifiers. Reporting is best-effort and never blocks or affects a measurement session.
+  Controls session summaries and full device readiness diagnostic reports. On by default; set `false` to opt out before starting a session or check. Reports may contain free text, file paths and platform context. Authenticated requests can correlate reports with an account/device. No raw frames or measured vitals are sent. Reporting is best-effort; see SDK Telemetry & Privacy.
 
   Example:
 
@@ -237,7 +241,7 @@ Standalone construction is available for tests and advanced integrations that pa
   sdk.config.enableTelemetry = false
   ```
 
-  - Note: Read when a measurement session starts.
+  - Note: Read when a measurement session or readiness check starts.
 
 - ```swift
   public var apiKey : String?
@@ -253,9 +257,9 @@ Standalone construction is available for tests and advanced integrations that pa
 
   This property provides granular control over which metric families the SDK requests. Derived feature flags such as cardio and face processing are inferred from the selected metric types.
 
-  Duplicate metrics are removed automatically while preserving the original order.
+  Duplicate metrics are removed automatically while preserving the original order. Empty selections (including selections containing only unrecognized metrics) use the default breathing metrics, just like an unset selection.
 
-  If you do not set this property, the SDK defaults to breathing-only metrics: chest breathing, abdomen breathing, breathing rate, breathing amplitude, apnea, respiratory line length, baseline, and inhale/exhale ratio.
+  If you do not set this property, the SDK defaults to breathing-only metrics: chest breathing, abdomen breathing, and breathing rate. `.breathingAmplitude`, `.apnea`, `.respiratoryLineLength`, `.baseline`, and `.inhaleExhaleRatio` are Unavailable: setting them is accepted, but `start()` then throws `SmartSpectraError` with code `.configurationFailed`.
 
   Example:
 
@@ -278,7 +282,7 @@ Standalone construction is available for tests and advanced integrations that pa
   public nonisolated static let breathingMetrics : [MetricType]
   ```
 
-  Breathing metric bundle. Equivalent to leaving ``SmartSpectraConfig/requestedMetrics`` unset.
+  Breathing metric bundle: chest breathing, abdomen breathing, and breathing rate. Equivalent to leaving ``SmartSpectraConfig/requestedMetrics`` unset.
 
 - ```swift
   public nonisolated static let cardioMetrics : [MetricType]
@@ -431,6 +435,8 @@ Raw values are stable across SDK versions and match the C++/Android wire values.
 - `case frameConversionFailed = 9`
 - `case nonMonotonicTimestamp = 10`
 - `case timestampGap = 11`
+- `case metricNotAuthorized = 13`
+- `case sustainedLowFrameRate = 14`
 
 ## CameraSelection
 
@@ -506,3 +512,26 @@ Raw values are stable across SDK versions and match the C++/Android wire values.
 - `case warning = 2`
 - `case error = 3`
 - `case none = 4`
+
+## DeviceReadinessVerdict
+
+Device readiness verdict.
+
+- `case ready = 0`
+- `case limited = 1`
+- `case blocked = 2`
+- `case inconclusive = 3`
+
+## DeviceReadinessResult
+
+Completed verdict and explanation, including the recommended next step.
+
+### Properties
+
+- ```swift
+  public let verdict : DeviceReadinessVerdict
+  ```
+
+- ```swift
+  public let reason : String
+  ```

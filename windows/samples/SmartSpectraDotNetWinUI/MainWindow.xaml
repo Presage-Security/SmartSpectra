@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+    x:Class="SmartSpectraDotNetWinUI.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="SmartSpectra .NET WinUI Sample">
+
+    <Grid Padding="24" RowSpacing="12" ColumnSpacing="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock
+            Grid.Row="0"
+            Text="SmartSpectra .NET SDK — live camera quickstart"
+            Style="{StaticResource TitleTextBlockStyle}" />
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="8">
+            <PasswordBox x:Name="ApiKeyBox" Width="360" PlaceholderText="SmartSpectra API key" />
+            <Button x:Name="StartButton" Content="Start" Click="OnStartClick" Style="{StaticResource AccentButtonStyle}" />
+            <Button x:Name="StopButton" Content="Stop" Click="OnStopClick" IsEnabled="False" />
+        </StackPanel>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="24">
+            <TextBlock x:Name="StatusText" Text="Status: idle" />
+            <TextBlock x:Name="ValidationText" Text="Validation: —" />
+        </StackPanel>
+
+        <!-- Simple metric readouts (last stable value) — pulse + breathing rate. -->
+        <StackPanel Grid.Row="3" Orientation="Horizontal" Spacing="12">
+            <Border Padding="16,12" CornerRadius="8" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" MinWidth="180">
+                <StackPanel>
+                    <TextBlock Text="Pulse rate" Opacity="0.7" />
+                    <TextBlock x:Name="PulseText" Text="— BPM" Style="{StaticResource SubtitleTextBlockStyle}" />
+                </StackPanel>
+            </Border>
+            <Border Padding="16,12" CornerRadius="8" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" MinWidth="180">
+                <StackPanel>
+                    <TextBlock Text="Breathing rate" Opacity="0.7" />
+                    <TextBlock x:Name="BreathingText" Text="— BR/min" Style="{StaticResource SubtitleTextBlockStyle}" />
+                </StackPanel>
+            </Border>
+        </StackPanel>
+
+        <!-- Live camera preview. Frames are pushed to the SDK via SendFrame and
+             mirrored here so the user can position their face. -->
+        <Border Grid.Row="4" CornerRadius="8" Background="Black"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
+            <Image x:Name="PreviewImage" Stretch="Uniform" />
+        </Border>
+
+        <TextBox
+            x:Name="LogText"
+            Grid.Row="5"
+            Height="120"
+            IsReadOnly="True"
+            AcceptsReturn="True"
+            TextWrapping="Wrap"
+            FontFamily="Consolas"
+            ScrollViewer.VerticalScrollBarVisibility="Auto" />
+    </Grid>
+</Window>

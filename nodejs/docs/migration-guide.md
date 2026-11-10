@@ -6,6 +6,48 @@ sidebarTitle: Migration Guide
 
 # SmartSpectra Node.js SDK Migration Guide
 
+## Node.js SDK v3.5.0-rc.4 Migration
+
+### Device Readiness
+
+Replace `isDeviceCompatible()` with `checkDeviceReadiness()`. The check returns
+`DeviceReadinessResult` with `verdict` and `reason`; remove the separate
+`getDeviceCompatibilityResult()` call.
+See [Device Readiness](../../docs/device-readiness.md) for usage and results.
+
+### Sustained low frame rate has its own error code
+
+When the frame rate stays too low to measure reliably during a measurement, the
+session still ends, but the `'error'` event now receives
+`SmartSpectraErrorCode.kSustainedLowFrameRate` (14) instead of
+`SmartSpectraErrorCode.kProcessingFailed`. The message is "SmartSpectra stopped
+because the frame rate stayed too low to measure reliably." A frame submitted as
+the session ends is rejected with the same code. `retryable` is `false` when the
+SDK plays a video file, because the same file stops the same way; it is `true` for
+cameras and custom input:
+the host may offer a user-initiated fresh start; do not restart automatically.
+To check whether a device can sustain measurement before starting, call
+`checkDeviceReadiness()`.
+
+### Unavailable breathing metrics fail at start
+
+`MetricType.BREATHING_AMPLITUDE`, `MetricType.APNEA`,
+`MetricType.RESPIRATORY_LINE_LENGTH`, `MetricType.BASELINE`, and
+`MetricType.INHALE_EXHALE_RATIO` are Unavailable: the SDK does not produce
+them. They are no longer part of the default request or `breathingMetrics`,
+which now contain `MetricType.CHEST_BREATHING`, `MetricType.ABDOMEN_BREATHING`,
+and `MetricType.BREATHING_RATE`.
+
+Requesting any Unavailable metric makes `start()` fail with
+`SmartSpectraErrorCode.kConfigurationFailed`. The measurement does not begin,
+and the SDK log names the rejected metrics. `checkDeviceReadiness()` resolves to a result with verdict
+`'blocked'` for the same configuration.
+
+Apps that use the default request or `breathingMetrics` need no change and
+receive the same breathing data as before.
+
+To migrate, remove the Unavailable metrics from `requestedMetrics`.
+
 ## Node.js SDK v3.4.0 camera selection
 
 The existing `useCamera()` and `useCamera({ deviceIndex: ... })` calls remain

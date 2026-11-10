@@ -6,7 +6,37 @@ sidebarTitle: Configuring Metrics
 
 # Configuring iOS Metrics
 
-By default, Swift SDK measurements request the breathing metric set. Add pulse rate when your app needs a basic cardio value.
+> **Important:** SDK metrics are offered for general wellness and informational purposes only. SDK metrics have not been cleared by the FDA and may not be used for medical diagnosis or treatment.
+
+By default, Swift SDK measurements request the breathing metric set: chest breathing, abdomen breathing, and breathing rate. Add pulse rate when your app needs a basic cardio value.
+
+## Metric Availability
+
+The breathing bundle and the default request contain chest breathing, abdomen
+breathing, and breathing rate. The five metrics below are **Unavailable**: the
+SDK does not produce them, requesting any of them makes `start()` fail with
+`.configurationFailed`, and the SDK log names the rejected metrics. Remove them
+from `requestedMetrics`.
+
+| Metric | Request value | Availability |
+| --- | --- | --- |
+| Breathing amplitude | `.breathingAmplitude` | Unavailable |
+| Apnea detection | `.apnea` | Unavailable |
+| Respiratory line length | `.respiratoryLineLength` | Unavailable |
+| Breathing baseline | `.baseline` | Unavailable |
+| Inhale/exhale ratio | `.inhaleExhaleRatio` | Unavailable |
+
+### Metric Bundles
+
+| Bundle | Members |
+| --- | --- |
+| `SmartSpectraConfig.breathingMetrics` (default) | `.chestBreathing`, `.abdomenBreathing`, `.breathingRate` |
+| `SmartSpectraConfig.cardioMetrics` | `.pulseRate`, `.arterialPressureTrace`, `.hrv` |
+| `SmartSpectraConfig.faceMetrics` | `.faceLandmarks`, `.blinking`, `.talking`, `.expressions` |
+| `SmartSpectraConfig.micromotionMetrics` | `.glutesMicromotion`, `.kneesMicromotion` |
+| `SmartSpectraConfig.edaMetrics` | `.edaTrace` |
+
+See [Data Types](../../docs/data-types.md#breathing) for field-level availability.
 
 ## Breathing and Pulse
 
@@ -36,7 +66,7 @@ if let metrics = sdk.metrics {
 }
 ```
 
-Set `requestedMetrics = nil` to return to the default breathing-only set. Cardio fields are empty unless you request a cardio metric such as `.pulseRate`.
+Set `requestedMetrics = nil` to return to the default breathing-only set (chest breathing, abdomen breathing, and breathing rate). Cardio fields are empty unless you request a cardio metric such as `.pulseRate`.
 
 ## Metric Update Patterns
 

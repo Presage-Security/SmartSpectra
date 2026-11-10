@@ -68,7 +68,7 @@ enum FeatureType {
 
 ## MetricType
 
-MetricType defines individual physiological measurements that can be requested and produced during video-based vital signs analysis.
+MetricType defines individual physiological measurements that can be requested during video-based vital signs analysis. Metrics marked Unavailable produce no values; requesting any of them makes start fail with ConfigurationFailed.
 
 ```proto
 enum MetricType {
@@ -96,6 +96,11 @@ enum MetricType {
 - `CHEST_BREATHING` -- Breathing upper (chest) metrics
 - `ABDOMEN_BREATHING` -- Breathing lower (abdomen) metrics
 - `BREATHING_RATE` -- Breathing aggregate metrics
+- `BREATHING_AMPLITUDE` -- Unavailable: breathing amplitude. Requesting it makes start fail with ConfigurationFailed.
+- `APNEA` -- Unavailable: apnea detection. Requesting it makes start fail with ConfigurationFailed.
+- `RESPIRATORY_LINE_LENGTH` -- Unavailable: respiratory line length. Requesting it makes start fail with ConfigurationFailed.
+- `BASELINE` -- Unavailable: breathing baseline. Requesting it makes start fail with ConfigurationFailed.
+- `INHALE_EXHALE_RATIO` -- Unavailable: inhale/exhale ratio. Requesting it makes start fail with ConfigurationFailed.
 - `EDA_TRACE` -- EDA Proxy metrics
 - `FACE_LANDMARKS` -- Face metrics
 - `PULSE_RATE` -- Cardio metrics
@@ -296,11 +301,11 @@ message Breathing {
 - `repeated` [`MeasurementWithConfidence`](#measurementwithconfidence) `rate` -- Respiratory rate measurements with confidence scores. `stable` marks confidence at or above the minimum accepted accuracy standard for breathing rate (+/-1 br/min), which corresponds to confidence >= 45; see the [breathing model card](https://vandv.presagetech.com/breathing_model_card.html) for the confidence-to-error mapping.
 - `repeated` [`Measurement`](#measurement) `upper_trace` -- Chest breathing movement trace measurements. The trace has no confidence of its own; `stable` is inherited from the breathing rate verdict (>= 45); see the [breathing model card](https://vandv.presagetech.com/breathing_model_card.html).
 - `repeated` [`Measurement`](#measurement) `lower_trace` -- Abdominal breathing movement trace measurements. The trace has no confidence of its own; `stable` is inherited from the breathing rate verdict (>= 45); see the [breathing model card](https://vandv.presagetech.com/breathing_model_card.html).
-- `repeated` [`Measurement`](#measurement) `amplitude` -- Breathing amplitude measurements
-- `repeated` [`DetectionStatus`](#detectionstatus) `apnea` -- Apnea (breathing cessation) detection status
-- `repeated` [`Measurement`](#measurement) `respiratory_line_length` -- Respiratory line length measurements for breathing pattern analysis
-- `repeated` [`Measurement`](#measurement) `baseline` -- Baseline breathing measurements
-- `repeated` [`Measurement`](#measurement) `inhale_exhale_ratio` -- Inhale to exhale duration ratio measurements
+- `repeated` [`Measurement`](#measurement) `amplitude` -- Unavailable: breathing amplitude. This field stays empty; requesting BREATHING_AMPLITUDE makes start fail with ConfigurationFailed.
+- `repeated` [`DetectionStatus`](#detectionstatus) `apnea` -- Unavailable: apnea (breathing cessation) detection. This field stays empty; requesting APNEA makes start fail with ConfigurationFailed.
+- `repeated` [`Measurement`](#measurement) `respiratory_line_length` -- Unavailable: respiratory line length. This field stays empty; requesting RESPIRATORY_LINE_LENGTH makes start fail with ConfigurationFailed.
+- `repeated` [`Measurement`](#measurement) `baseline` -- Unavailable: breathing baseline. This field stays empty; requesting BASELINE makes start fail with ConfigurationFailed.
+- `repeated` [`Measurement`](#measurement) `inhale_exhale_ratio` -- Unavailable: inhale/exhale duration ratio. This field stays empty; requesting INHALE_EXHALE_RATIO makes start fail with ConfigurationFailed.
 
 ## Landmarks
 

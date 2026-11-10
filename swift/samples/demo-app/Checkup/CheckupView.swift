@@ -4,10 +4,13 @@
 //
 // SPDX-License-Identifier: LicenseRef-Proprietary
 import SwiftUI
+import AVFoundation
 import SmartSpectra
 
 struct CheckupView: View {
     private let sdk = SmartSpectraSDK.shared
+    @State private var readinessTask: Task<Void, Never>?
+    @State private var readinessStatus = "Not tested"
     @State private var edgePulseRateBuffer: [MeasurementWithConfidence] = []
     @State private var edgeArterialPressureBuffer: [MeasurementWithConfidence] = []
     @State private var edgeBreathingRateBuffer: [MeasurementWithConfidence] = []
@@ -39,11 +42,54 @@ struct CheckupView: View {
 
     }
 
+    @MainActor
+    private func testDeviceReadiness() {
+        guard readinessTask == nil else { return }
+        readinessStatus = "Checking device…"
+        readinessTask = Task { @MainActor in
+            defer { readinessTask = nil }
+            guard await AVCaptureDevice.requestAccess(for: .video) else {
+                readinessStatus = "Camera permission required"
+                return
+            }
+            do {
+                try Task.checkCancellation()
+                let verdict = try await sdk.checkDeviceReadiness().verdict
+                switch verdict {
+                case .ready: readinessStatus = "Ready"
+                case .limited: readinessStatus = "Limited"
+                case .blocked: readinessStatus = "Blocked"
+                case .inconclusive: readinessStatus = "Inconclusive"
+                @unknown default: readinessStatus = "Unknown verdict"
+                }
+            } catch is CancellationError {
+                readinessStatus = "Cancelled"
+            } catch {
+                readinessStatus = "Check failed: \(error.localizedDescription)"
+            }
+        }
+    }
+
     var body: some View {
 
         VStack {
             // add smartspectra view
             SmartSpectraView()
+                .disabled(readinessTask != nil)
+
+            VStack(spacing: 4) {
+                Button(readinessTask == nil ? "Test device" : "Testing…") {
+                    testDeviceReadiness()
+                }
+                .buttonStyle(.bordered)
+                .disabled(readinessTask != nil)
+                .accessibilityIdentifier("testDeviceReadiness")
+                Text(readinessStatus)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .accessibilityIdentifier("deviceReadinessVerdict")
+            }
+            .onDisappear { readinessTask?.cancel() }
 
             if isCustomizationEnabled {
                 CameraSelectionButton(sdk: sdk)

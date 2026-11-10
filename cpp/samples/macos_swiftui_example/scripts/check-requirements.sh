@@ -94,8 +94,11 @@ Xcode Signing & Capabilities:
 Team = <your Apple Development team>
 Bundle Identifier = <your unique bundle identifier>
 
-Command-line build:
-SMARTSPECTRA_DEVELOPMENT_TEAM=<team-id> SMARTSPECTRA_SDK_ROOT="$SDK_ROOT" task cpp:macos-swiftui-example
+Command-line build (from this example's directory):
+xcodebuild -project smartspectra_swift_ui.xcodeproj -scheme smartspectra_swift_ui \\
+  -destination 'platform=macOS' -allowProvisioningUpdates \\
+  HOMEBREW_PREFIX="$HOMEBREW_PREFIX" SMARTSPECTRA_SDK_ROOT="$SDK_ROOT" \\
+  SMARTSPECTRA_DEVELOPMENT_TEAM=<team-id> build
 EOF
 fi
 

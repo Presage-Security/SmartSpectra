@@ -177,6 +177,21 @@ Register that fingerprint under **Account → OAuth Registration** alongside you
 
 ---
 
+## Measurement
+
+### Measurement stops with `SUSTAINED_LOW_FRAME_RATE`
+
+The frame rate stayed too low during a measurement, for example because of low
+light or heavy device load, so the session ended and `sdk.error` reports
+`SmartSpectraError.Code.SUSTAINED_LOW_FRAME_RATE`. Improve the lighting, close
+other demanding apps, and let the device cool down before measuring again. The
+error's `retryable` is `true`:
+the host may offer a user-initiated fresh start; do not restart automatically.
+To check whether a device can sustain measurement before starting, call
+`checkDeviceReadiness()`.
+
+---
+
 ## Getting Help
 
 - Email: [support@presagetech.com](mailto:support@presagetech.com)

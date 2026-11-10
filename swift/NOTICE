@@ -15,10 +15,11 @@ The following Apache-licensed components are included in this shipped artifact:
   - HighwayHash
   - KleidiAI
   - Kompute
+  - LiteRT (TensorFlow Lite runtime)
   - MediaPipe
   - ml_dtypes
   - OpenCV
   - protoc-gen-validate
   - ruy
   - Swift Protobuf
-  - TensorFlow (TensorFlow Lite)
+  - TensorFlow

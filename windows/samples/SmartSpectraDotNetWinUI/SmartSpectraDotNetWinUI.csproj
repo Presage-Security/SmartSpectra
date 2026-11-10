@@ -1,0 +1,61 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <RootNamespace>SmartSpectraDotNetWinUI</RootNamespace>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!-- SmartSpectra.Net ships win-x64 native DLLs only, so the app must be x64. -->
+    <Platforms>x64</Platforms>
+    <PlatformTarget>x64</PlatformTarget>
+    <!-- Single RID (not RuntimeIdentifiers) so a plain `dotnet build`/`dotnet run`
+         is RID-qualified — required for the self-contained Windows App SDK
+         runtime (below) to be deployed into the output. -->
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <UseWinUI>true</UseWinUI>
+    <Nullable>enable</Nullable>
+    <!-- Committed packages.lock.json makes the full resolved NuGet graph
+         (including transitives) visible to the MR-time OSV dependency gate.
+         Regenerate after a dependency change with: dotnet restore -->
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <!-- SendFrame reads the camera frame's native buffer via a byte* obtained
+         from IMemoryBufferByteAccess, so the frame push avoids a managed copy. -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!-- Unpackaged desktop app (no MSIX) — simplest to build and run from a
+         plain folder. -->
+    <WindowsPackageType>None</WindowsPackageType>
+    <!-- Bundle the Windows App SDK runtime into the output instead of requiring
+         a machine-wide install. Without this, launching the unpackaged app
+         demands the *exact* framework runtime the package targets (1.6) and
+         prompts to install it even when a newer runtime (1.7/2.x) is present —
+         newer runtimes don't satisfy the 1.6 bootstrap request. Self-contained
+         makes the sample run on any machine with no runtime prerequisite. -->
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+    <!-- Required for `dotnet build`/`dotnet run` to build a WinUI 3 project with
+         only the .NET SDK installed (no full Visual Studio). Without it, the
+         Windows App SDK's MrtCore PRI generation looks for the AppxPackage
+         MSBuild tasks (Microsoft.Build.Packaging.Pri.Tasks.dll) under the VS
+         MSBuild tree and the build fails with MSB4062. This is the documented
+         Windows App SDK workaround (WindowsAppSDK #4889) and is what lets the
+         README's plain `dotnet build`/`dotnet run` commands work. -->
+    <EnableMsixTooling>true</EnableMsixTooling>
+
+    <!-- Version of the published SmartSpectra.Net package to consume from the
+         feed (see nuget.config). Override on the command line to pull a
+         different release, e.g.:
+           dotnet build -p:SmartSpectraNetVersion=3.4.0 -->
+    <SmartSpectraNetVersion Condition="'$(SmartSpectraNetVersion)' == ''">3.4.0</SmartSpectraNetVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.6.241114003" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.1742" />
+    <!-- Pulled from the published Presage feed (packages.presagetech.com).
+         SmartSpectra.Net.targets in the package copies the native runtime DLLs
+         (smartspectra.dll, smartspectra_capi.dll, opencv_world*.dll) to the
+         output directory automatically. -->
+    <PackageReference Include="SmartSpectra.Net" Version="$(SmartSpectraNetVersion)" />
+  </ItemGroup>
+
+</Project>

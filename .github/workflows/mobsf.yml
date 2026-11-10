@@ -7,9 +7,9 @@ name: MobSF
 
 on:
   push:
-    branches: [ "main", "test", "dev" ]
+    branches: [ "main", "rc" ]
   pull_request:
-    branches: [ "main", "test", "dev" ]
+    branches: [ "main", "rc" ]
   schedule:
     - cron: '15 12 * * 5'
 

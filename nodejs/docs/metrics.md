@@ -4,7 +4,39 @@ description: Request pulse and breathing rates, HRV and EDA metrics from the Sma
 sidebarTitle: Configuring Metrics
 ---
 
-The Node.js SDK passes requested metric codes through to the native SmartSpectra C++ SDK. Omitting `requestedMetrics` uses the default breathing bundle.
+# Configuring Node.js Metrics
+
+> **Important:** SDK metrics are offered for general wellness and informational purposes only. SDK metrics have not been cleared by the FDA and may not be used for medical diagnosis or treatment.
+
+The Node.js SDK passes requested metric codes through to the native SmartSpectra C++ SDK. Omitting `requestedMetrics` uses the default breathing bundle: chest breathing, abdomen breathing, and breathing rate.
+
+## Metric Availability
+
+The breathing bundle and the default request contain chest breathing, abdomen
+breathing, and breathing rate. The five metrics below are **Unavailable**: the
+SDK does not produce them, requesting any of them makes `start()` fail with
+`SmartSpectraErrorCode.kConfigurationFailed`, and the SDK log names the
+rejected metrics. Remove them from `requestedMetrics`.
+
+| Metric | Request value | Availability |
+| --- | --- | --- |
+| Breathing amplitude | `BREATHING_AMPLITUDE` | Unavailable |
+| Apnea detection | `APNEA` | Unavailable |
+| Respiratory line length | `RESPIRATORY_LINE_LENGTH` | Unavailable |
+| Breathing baseline | `BASELINE` | Unavailable |
+| Inhale/exhale ratio | `INHALE_EXHALE_RATIO` | Unavailable |
+
+### Metric Bundles
+
+| Bundle | Members |
+| --- | --- |
+| `breathingMetrics` (default, = `defaultSupportedMetrics`) | `CHEST_BREATHING`, `ABDOMEN_BREATHING`, `BREATHING_RATE` |
+| `cardioMetrics` | `PULSE_RATE`, `ARTERIAL_PRESSURE_TRACE`, `HRV` |
+| `faceMetrics` | `FACE_LANDMARKS`, `BLINKING`, `TALKING`, `EXPRESSIONS` |
+| `micromotionMetrics` | `GLUTES_MICROMOTION`, `KNEES_MICROMOTION` |
+| `edaMetrics` | `EDA_TRACE` |
+
+See [Data Types](../../docs/data-types.md#breathing) for field-level availability.
 
 ## Breathing and Pulse
 
@@ -21,7 +53,7 @@ const sdk = new SmartSpectraSDK({
 });
 ```
 
-The bundle exports (`breathingMetrics`, `cardioMetrics`, `faceMetrics`, `edaMetrics`) contain the `MetricType` integer codes defined in `metric_types.proto`. `defaultSupportedMetrics` is the bundle used when `requestedMetrics` is omitted (currently equal to `breathingMetrics`).
+The bundle exports (`breathingMetrics`, `cardioMetrics`, `faceMetrics`, `micromotionMetrics`, `edaMetrics`) contain the `MetricType` integer codes defined in `metric_types.proto`. `defaultSupportedMetrics` is the bundle used when `requestedMetrics` is omitted (currently equal to `breathingMetrics`: chest breathing, abdomen breathing, and breathing rate).
 
 ### Read Metrics
 

@@ -6,9 +6,40 @@ sidebarTitle: Configuring Metrics
 
 # Configuring Android Metrics
 
-By default, Android measurements request the breathing metric set. Combine it
-with `SmartSpectraConfig.cardioMetrics` when your app needs pulse rate,
+> **Important:** SDK metrics are offered for general wellness and informational purposes only. SDK metrics have not been cleared by the FDA and may not be used for medical diagnosis or treatment.
+
+By default, Android measurements request the breathing metric set: chest
+breathing, abdomen breathing, and breathing rate. Combine it with
+`SmartSpectraConfig.cardioMetrics` when your app needs pulse rate,
 arterial-pressure trace, and HRV.
+
+## Metric Availability
+
+The breathing bundle and the default request contain chest breathing, abdomen
+breathing, and breathing rate. The five metrics below are **Unavailable**: the
+SDK does not produce them, requesting any of them makes `start()` fail with
+`SmartSpectraError.Code.CONFIGURATION_FAILED`, and the SDK log names the
+rejected metrics. Remove them from `requestedMetrics`.
+
+| Metric | Request value | Availability |
+| --- | --- | --- |
+| Breathing amplitude | `BREATHING_AMPLITUDE` | Unavailable |
+| Apnea detection | `APNEA` | Unavailable |
+| Respiratory line length | `RESPIRATORY_LINE_LENGTH` | Unavailable |
+| Breathing baseline | `BASELINE` | Unavailable |
+| Inhale/exhale ratio | `INHALE_EXHALE_RATIO` | Unavailable |
+
+### Metric Bundles
+
+| Bundle | Members |
+| --- | --- |
+| `SmartSpectraConfig.breathingMetrics` (default) | `CHEST_BREATHING`, `ABDOMEN_BREATHING`, `BREATHING_RATE` |
+| `SmartSpectraConfig.cardioMetrics` | `PULSE_RATE`, `ARTERIAL_PRESSURE_TRACE`, `HRV` |
+| `SmartSpectraConfig.faceMetrics` | `FACE_LANDMARKS`, `BLINKING`, `TALKING`, `EXPRESSIONS` |
+| `SmartSpectraConfig.micromotionMetrics` | `GLUTES_MICROMOTION`, `KNEES_MICROMOTION` |
+| `SmartSpectraConfig.edaMetrics` | `EDA_TRACE` |
+
+See [Data Types](../../docs/data-types.md#breathing) for field-level availability.
 
 ## Breathing and Pulse
 
@@ -39,7 +70,8 @@ sdk.metrics.observe(viewLifecycleOwner) { metrics ->
 }
 ```
 
-Set `requestedMetrics = null` to return to the default breathing-only set.
+Set `requestedMetrics = null` to return to the default breathing-only set
+(chest breathing, abdomen breathing, and breathing rate).
 `cardioMetrics` contains `PULSE_RATE`, `ARTERIAL_PRESSURE_TRACE`, and `HRV`.
 Cardio fields are empty unless you request a cardio metric.
 

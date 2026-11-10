@@ -6,7 +6,37 @@ sidebarTitle: Configuring Metrics
 
 # Configuring C++ Metrics
 
+> **Important:** SDK metrics are offered for general wellness and informational purposes only. SDK metrics have not been cleared by the FDA and may not be used for medical diagnosis or treatment.
+
 By default, C++ measurements request the breathing metric set. Add pulse rate when your app needs a basic cardio value.
+
+## Metric Availability
+
+The breathing bundle and the default request contain chest breathing, abdomen
+breathing, and breathing rate. The five metrics below are **Unavailable**: the
+SDK does not produce them, requesting any of them makes `Start()` fail with
+`SmartSpectraErrorCode::kConfigurationFailed`, and the SDK log names the
+rejected metrics. Remove them from `requested_metrics`.
+
+| Metric | Request value | Availability |
+| --- | --- | --- |
+| Breathing amplitude | `BREATHING_AMPLITUDE` | Unavailable |
+| Apnea detection | `APNEA` | Unavailable |
+| Respiratory line length | `RESPIRATORY_LINE_LENGTH` | Unavailable |
+| Breathing baseline | `BASELINE` | Unavailable |
+| Inhale/exhale ratio | `INHALE_EXHALE_RATIO` | Unavailable |
+
+### Metric Bundles
+
+| Bundle | Members |
+| --- | --- |
+| `BreathingMetrics()` (default) | `CHEST_BREATHING`, `ABDOMEN_BREATHING`, `BREATHING_RATE` |
+| `CardioMetrics()` | `PULSE_RATE`, `ARTERIAL_PRESSURE_TRACE`, `HRV` |
+| `FaceMetrics()` | `FACE_LANDMARKS`, `BLINKING`, `TALKING`, `EXPRESSIONS` |
+| `MicromotionMetrics()` | `GLUTES_MICROMOTION`, `KNEES_MICROMOTION` |
+| `EdaMetrics()` | `EDA_TRACE` |
+
+See [Data Types](../../docs/data-types.md#breathing) for field-level availability.
 
 ## Breathing and Pulse
 
@@ -61,9 +91,10 @@ spectra.SetOnMetrics([](const spectra::Metrics& metrics, int64_t) {
 ```
 
 If `requested_metrics` is empty, the SDK uses `DefaultSupportedMetrics()`,
-which returns `BreathingMetrics()`. Use `BreathingMetrics()` when you are
-explicitly composing a breathing request. Cardio fields are empty unless you
-request a cardio metric such as `PULSE_RATE`.
+which returns `BreathingMetrics()`: chest breathing, abdomen breathing, and
+breathing rate. Use `BreathingMetrics()` when you are explicitly composing a
+breathing request. Cardio fields are empty unless you request a cardio metric
+such as `PULSE_RATE`.
 
 ## Metric Update Patterns
 

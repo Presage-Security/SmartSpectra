@@ -70,10 +70,14 @@ payload your metrics subscription receives. The groups and what each carries:
 
 - **`cardio`** — pulse rate, a relative arterial-pressure waveform (a *shape*, not a calibrated
   blood-pressure reading), and heart-rate variability (e.g. RMSSD/SDNN).
-- **`breathing`** — its own group, not nested under cardio: breathing rate, chest/abdomen
-  movement traces, amplitude, and apnea detection.
+- **`breathing`** — its own group, not nested under cardio: breathing rate and chest/abdomen
+  movement traces.
 - **`face`** — landmarks, blinking, talking, and facial-expression detections.
 - **`eda`** — EDA Proxy trace (electrodermal activity / skin conductance).
+
+Breathing amplitude, apnea, respiratory line length, baseline, and inhale/exhale ratio are
+**Unavailable**: the SDK does not produce them, and requesting any of them makes `start()` fail
+with ConfigurationFailed. Do not request them.
 
 The group names are the vocabulary you request; the field descriptions above are conceptual, not
 literal accessors. The numeric fields — the rates and traces — arrive as a **repeated time-series
@@ -85,7 +89,8 @@ and the payload schema at `.../docs/data-types` (see the reference section below
 Metrics you don't request, or aren't authorized for your key, are simply omitted from the
 payload rather than raising an error. That's distinct from the authorization *request* itself
 failing (for example, the network call that validates your key doesn't succeed) — that surfaces
-as a `start()` error, not a silent omission.
+as a `start()` error, not a silent omission. The exception is an Unavailable metric: requesting
+one makes `start()` fail with ConfigurationFailed instead of being omitted.
 
 ## Input: camera, file, or custom frames
 

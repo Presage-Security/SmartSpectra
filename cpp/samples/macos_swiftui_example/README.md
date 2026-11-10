@@ -147,19 +147,23 @@ Look for the 10-character team ID in parentheses at the end of an `Apple Develop
 
 ## Command-Line Build
 
-From the repository root, provide your Apple Developer Team ID:
+From this directory, provide your Apple Developer Team ID:
 
 ```sh
-SMARTSPECTRA_DEVELOPMENT_TEAM=<team-id> task cpp:macos-swiftui-example
+xcodebuild \
+  -project smartspectra_swift_ui.xcodeproj \
+  -scheme smartspectra_swift_ui \
+  -configuration Debug \
+  -destination 'platform=macOS' \
+  -derivedDataPath build_xcode \
+  -allowProvisioningUpdates \
+  HOMEBREW_PREFIX="$(brew --prefix)" \
+  SMARTSPECTRA_SDK_ROOT="$(brew --prefix)" \
+  SMARTSPECTRA_DEVELOPMENT_TEAM=<team-id> \
+  build
 ```
 
-If your Homebrew prefix is not `/opt/homebrew`, pass it explicitly:
-
-```sh
-HOMEBREW_PREFIX="$(brew --prefix)" \
-SMARTSPECTRA_DEVELOPMENT_TEAM=<team-id> \
-task cpp:macos-swiftui-example
-```
+Add `SMARTSPECTRA_BUNDLE_IDENTIFIER=<bundle-id>` to override the bundle identifier.
 
 ## Requirements Script
 
@@ -190,11 +194,7 @@ SMARTSPECTRA_SDK_ROOT = $(HOMEBREW_PREFIX)
 
 ### `Signing Team is not set`
 
-Select the app target, open Signing & Capabilities, and choose your Apple Development team. For command-line builds, pass your Team ID:
-
-```sh
-SMARTSPECTRA_DEVELOPMENT_TEAM=<team-id> task cpp:macos-swiftui-example
-```
+Select the app target, open Signing & Capabilities, and choose your Apple Development team. For command-line builds, pass `SMARTSPECTRA_DEVELOPMENT_TEAM=<team-id>` to `xcodebuild` as shown in [Command-Line Build](#command-line-build).
 
 ### `brew install presage/smartspectra/smartspectra-rc` fails because `smartspectra` is already linked
 

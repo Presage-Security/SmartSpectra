@@ -6,8 +6,60 @@ sidebarTitle: Migration Guide
 
 # SmartSpectra Android SDK Migration Guide
 
-> Applies to SmartSpectra Android SDK v3.x.
+> Applies to SmartSpectra Android SDK v3.x, including `v3.5.0`.
 > Migrating from a v3.0 release-candidate prior to rc.12, or from v2.x.
+
+## Android SDK `v3.5.0` Migration
+
+### `AndroidKeyStoreHelper` is no longer public
+
+`com.presagetech.smartspectra.emd.security.AndroidKeyStoreHelper` is an SDK
+internal and is no longer accessible from apps. It was never documented. Store
+your own app's secrets with the Android Keystore APIs directly.
+
+## Android SDK v3.5.0-rc.4 Migration
+
+### Device Readiness
+
+Replace `isDeviceCompatible()` with `checkDeviceReadiness()`. The check returns
+`DeviceReadinessResult` with `verdict` and `reason`; remove the separate
+`getDeviceCompatibilityResult()` call.
+See [Device Readiness](../../docs/device-readiness.md) for usage and results.
+
+### Sustained low frame rate has its own error code
+
+When the frame rate stays too low to measure reliably during a measurement, the
+session still ends, but the error now reports
+`SmartSpectraError.Code.SUSTAINED_LOW_FRAME_RATE` (14) instead of
+`SmartSpectraError.Code.PROCESSING_FAILED`. The message is "SmartSpectra stopped
+because the frame rate stayed too low to measure reliably." A frame submitted as
+the session ends is rejected with the same code. `retryable` is `true`: the host
+may offer a user-initiated fresh start; do not restart automatically. To check
+whether a device can sustain measurement before starting, call
+`checkDeviceReadiness()`.
+
+If you `when` over `SmartSpectraError.Code` without an `else` branch, add
+`SUSTAINED_LOW_FRAME_RATE`.
+
+### Unavailable breathing metrics fail at start
+
+`MetricType.BREATHING_AMPLITUDE`, `MetricType.APNEA`,
+`MetricType.RESPIRATORY_LINE_LENGTH`, `MetricType.BASELINE`, and
+`MetricType.INHALE_EXHALE_RATIO` are Unavailable: the SDK does not produce
+them. They are no longer part of the default request or
+`SmartSpectraConfig.breathingMetrics`, which now contain
+`MetricType.CHEST_BREATHING`, `MetricType.ABDOMEN_BREATHING`, and
+`MetricType.BREATHING_RATE`.
+
+Requesting any Unavailable metric makes `start()` fail with
+`SmartSpectraError.Code.CONFIGURATION_FAILED`. The measurement does not begin,
+and the SDK log names the rejected metrics. `checkDeviceReadiness()` returns a result with verdict
+`DeviceReadinessVerdict.BLOCKED` for the same configuration.
+
+Apps that use the default request or `SmartSpectraConfig.breathingMetrics`
+need no change and receive the same breathing data as before.
+
+To migrate, remove the Unavailable metrics from `requestedMetrics`.
 
 ## Android SDK v3.4.0 Migration
 
@@ -208,7 +260,6 @@ import com.presage.physiology.proto.MetricTypesProto.MetricType
 
 // After:
 import com.presagetech.smartspectra.proto.MetricsProto.Metrics
-import com.presagetech.smartspectra.proto.MetricTypesProto.MetricType
 ```
 
 The proto package also changed from `presage.physiology` to

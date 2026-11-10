@@ -22,6 +22,7 @@ if (NOT TARGET SmartSpectra::SDK)
     find_package(SmartSpectra REQUIRED)
 endif ()
 
+add_subdirectory(device_readiness)
 add_subdirectory(dense_facemesh_example)
 add_subdirectory(minimal_example)
 add_subdirectory(hello_vitals)

@@ -20,10 +20,10 @@ The following Apache-licensed components are included in this shipped artifact:
   - Guava ListenableFuture
   - HighwayHash
   - JSR 305
-  - KleidiAI
   - Kompute
+  - LiteRT (TensorFlow Lite runtime)
   - MediaPipe
   - ml_dtypes
   - OpenCV
   - ruy
-  - TensorFlow (TensorFlow Lite)
+  - TensorFlow

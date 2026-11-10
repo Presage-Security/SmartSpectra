@@ -6,8 +6,48 @@ sidebarTitle: Migration Guide
 
 # SmartSpectra Swift SDK Migration Guide
 
-> Applies to SmartSpectra Swift SDK v3.x.
+> Applies to SmartSpectra Swift SDK v3.x, including `v3.5.0`.
 > Migrating from a v3.0 release-candidate prior to rc.13, or from v2.x.
+
+## Swift SDK v3.5.0-rc.4 Migration
+
+### Device Readiness
+
+Replace `isDeviceCompatible()` with `checkDeviceReadiness()`. The check returns
+`DeviceReadinessResult` with `verdict` and `reason`; remove the separate
+`getDeviceCompatibilityResult()` call.
+See [Device Readiness](../../docs/device-readiness.md) for usage and results.
+
+### Sustained low frame rate has its own error code
+
+When the frame rate stays too low to measure reliably during a measurement, the
+session still ends, but the error now reports `.sustainedLowFrameRate` (14)
+instead of `.processingFailed`. The message includes "SmartSpectra stopped
+because the frame rate stayed too low to measure reliably." A frame submitted as
+the session ends is rejected with the same code. `retryable` is `true`: the host
+may offer a user-initiated fresh start; do not restart automatically. To check
+whether a device can sustain measurement before starting, call
+`checkDeviceReadiness()`.
+
+If you `switch` over `SmartSpectraError.Code` without a `default`, add
+`.sustainedLowFrameRate`.
+
+### Unavailable breathing metrics fail at start
+
+`.breathingAmplitude`, `.apnea`, `.respiratoryLineLength`, `.baseline`, and
+`.inhaleExhaleRatio` are Unavailable: the SDK does not produce them. They are
+no longer part of the default request or `SmartSpectraConfig.breathingMetrics`,
+which now contain `.chestBreathing`, `.abdomenBreathing`, and `.breathingRate`.
+
+Requesting any Unavailable metric makes `start()` fail with
+`.configurationFailed`. The measurement does not begin, and the SDK log names
+the rejected metrics. `checkDeviceReadiness()` returns a result with verdict `.blocked` for the same
+configuration.
+
+Apps that use the default request or `SmartSpectraConfig.breathingMetrics`
+need no change and receive the same breathing data as before.
+
+To migrate, remove the Unavailable metrics from `requestedMetrics`.
 
 ## Swift SDK v3.4.0 Migration
 

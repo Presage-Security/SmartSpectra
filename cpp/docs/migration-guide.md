@@ -6,7 +6,51 @@ sidebarTitle: Migration Guide
 
 # SmartSpectra C++ SDK Migration Guide
 
-> Applies to SmartSpectra C++ SDK v3.x.
+> Applies to SmartSpectra C++ SDK v3.x, including `v3.5.0`.
+
+## C++ SDK v3.5.0-rc.4 Migration
+
+### Device Readiness
+
+Replace `isDeviceCompatible()` with `checkDeviceReadiness()`. The check returns
+`DeviceReadinessResult` with `verdict` and `reason`; remove the separate
+`getDeviceCompatibilityResult()` call. In C++, the call blocks until cleanup;
+use a worker thread in UI applications. Replace
+`cancelDeviceCompatibility()` with `sdk.Stop()` from another thread.
+See [Device Readiness](../../docs/device-readiness.md) for usage and results.
+
+### Sustained low frame rate has its own error code
+
+When the frame rate stays too low to measure reliably during a measurement, the
+session still ends, but the error callback now receives
+`SmartSpectraErrorCode::kSustainedLowFrameRate` (14) instead of
+`SmartSpectraErrorCode::kProcessingFailed`. The message is "SmartSpectra stopped
+because the frame rate stayed too low to measure reliably." A frame submitted as
+the session ends is rejected with the same code. `retryable` is `false` when the
+SDK plays a video file, because the same file stops the same way; it is `true` for
+cameras and custom input:
+the host may offer a user-initiated fresh start; do not restart automatically.
+To check whether a device can sustain measurement before starting, call
+`checkDeviceReadiness()`.
+Retryability follows the source selected for the run, including a source changed
+after `Reset()`.
+
+### Unavailable breathing metrics fail at start
+
+`BREATHING_AMPLITUDE`, `APNEA`, `RESPIRATORY_LINE_LENGTH`, `BASELINE`, and
+`INHALE_EXHALE_RATIO` are Unavailable: the SDK does not produce them. They are
+no longer part of the default request or `BreathingMetrics()`, which now
+contain `CHEST_BREATHING`, `ABDOMEN_BREATHING`, and `BREATHING_RATE`.
+
+Requesting any Unavailable metric makes `Start()` fail with
+`SmartSpectraErrorCode::kConfigurationFailed`. The measurement does not begin,
+and the SDK log names the rejected metrics. `checkDeviceReadiness()` returns a result with verdict
+`DeviceReadinessVerdict::kBlocked` for the same configuration.
+
+Apps that use the default request or `BreathingMetrics()` need no change and
+receive the same breathing data as before.
+
+To migrate, remove the Unavailable metrics from `requested_metrics`.
 
 ## C++ SDK v3.4.0 Migration
 

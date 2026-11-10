@@ -14,6 +14,7 @@ no native addon, no `binding.gyp`, no `electron-rebuild`, no `node-gyp`.
 
 - Electron sample: [electron-quickstart](https://github.com/Presage-Security/SmartSpectra/tree/main/nodejs/samples/electron-quickstart)
 - API reference: <https://smartspectra.presagetech.com/docs/nodejs/api-reference>
+- Device Readiness: [check readiness and handle results](docs/device-readiness.md)
 - Metrics guide: <https://smartspectra.presagetech.com/docs/nodejs/metrics>
 
 ## Architecture
@@ -262,6 +263,20 @@ once the graph reports `Running`. Call `sdk.useMediaStream(stream)` before
 `<canvas>.captureStream()`, `desktopCapturer`, etc. Host-supplied streams
 are managed by the host; SDK-acquired streams are released on
 `stop()` / `reset()` / `destroy()`.
+
+For a camera mounted sideways or upside down, pass a `FrameTransform` with the
+stream:
+
+```ts
+import { FrameTransform } from '@smartspectra/node-sdk/renderer';
+sdk.useMediaStream(stream, { frameTransform: FrameTransform.kRotate90CW });
+```
+
+The default is `FrameTransform.kNone`. The SDK rotates or mirrors each frame
+before processing from the next `start()`; your preview element is not
+transformed. The selected transform survives `stop()` / `start()` and `reset()`.
+Each `useMediaStream()` call replaces the previous transform, so pass it again
+when you swap streams.
 
 The renderer uses `MediaStreamTrackProcessor` + `OffscreenCanvas` to
 extract RGBA pixels and ships each frame to the main process via the

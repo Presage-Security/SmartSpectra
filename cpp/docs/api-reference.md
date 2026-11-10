@@ -47,6 +47,12 @@ Thread safety: all public methods are thread-safe and may be called from any thr
   The SDK version string.
 
 - ```cpp
+  DeviceReadinessResult checkDeviceReadiness()
+  ```
+
+  Checks the current SDK configuration without changing it. Blocks until cleanup; call from a worker thread in UI applications. Stop() from another thread cancels. Returns the verdict and recommended next step. Keep the SDK alive until return.
+
+- ```cpp
   void SetOnProcessingStatusChanged(OnProcessingStatusChangedFn cb)
   ```
 
@@ -94,7 +100,7 @@ Thread safety: all public methods are thread-safe and may be called from any thr
   [[nodiscard]] SmartSpectraError Stop()
   ```
 
-  Stops the active measurement session. Safe to call when no session is running — it returns success immediately.
+  Stops the active measurement session or requests cancellation of a readiness check. For readiness, returns success without waiting; the blocking check returns Inconclusive after cleanup. Safe to call from another thread. Returns success immediately when no session or check is running.
 
 - ```cpp
   [[nodiscard]] SmartSpectraError Reset()
@@ -201,13 +207,13 @@ Thread safety: all public methods are thread-safe and may be called from any thr
   SdkRuntimeContext runtime_context
   ```
 
-  Low-cardinality labels describing the public SDK/runtime surface. Used only for aggregate SDK telemetry; no stable device/user identifiers.
+  Low-cardinality labels describing the public SDK/runtime surface. Used for SDK telemetry; these labels contain no stable device/user identifiers.
 
 - ```cpp
   bool enable_telemetry = true
   ```
 
-  Opt out of aggregate SDK telemetry by setting this false. On by default. Telemetry is aggregate-only (no raw frames, metric values, file paths, user identifiers, or device IDs). When enabled, a per-session summary is POSTed to the authenticated continuous server — best-effort, never blocking a measurement session.
+  SDK telemetry is on by default; set false to opt out of session summaries and full device readiness diagnostic reports. Reports may contain free text, file paths and platform context. Authenticated requests can correlate reports with an account/device. No raw frames or measured vitals are sent. Reporting is best-effort; see SDK Telemetry & Privacy.
 
 - ```cpp
   std::optional<std::string> video_output_directory
@@ -219,11 +225,13 @@ Thread safety: all public methods are thread-safe and may be called from any thr
   static const std::vector<MetricType>& BreathingMetrics()
   ```
 
-  Predefined metric bundles. Each returns the standard set of metrics for its category; pass one (or combine several) into requested_metrics. DefaultSupportedMetrics is what the SDK measures when requested_metrics is left empty.
+  Predefined metric bundles. Each returns the standard set of metrics for its category; pass one (or combine several) into requested_metrics. The breathing bundle is CHEST_BREATHING, ABDOMEN_BREATHING, and BREATHING_RATE. BREATHING_AMPLITUDE, APNEA, RESPIRATORY_LINE_LENGTH, BASELINE, and INHALE_EXHALE_RATIO are Unavailable: requesting any of them makes Start() fail with kConfigurationFailed.
 
 - ```cpp
   static const std::vector<MetricType>& DefaultSupportedMetrics()
   ```
+
+  Default request used when requested_metrics is empty: the same three metrics as BreathingMetrics().
 
 - ```cpp
   static const std::vector<MetricType>& CardioMetrics()
@@ -282,6 +290,8 @@ Thread safety: all public methods are thread-safe and may be called from any thr
 - ```cpp
   VideoFileBuilder& SetInterframeDelay(int ms)
   ```
+
+  Delay between frames in ms. The SDK measures frame rate from frame timestamps: the timestamp file when one is given, otherwise the video's playback position. The interframe delay changes playback speed, not the measured frame rate.
 
 - ```cpp
   VideoFileBuilder& SetStartOffset(int ms)
@@ -454,6 +464,8 @@ Error codes returned by synchronous API calls and delivered via OnErrorFn.
 - `kFrameConversionFailed = 9`
 - `kNonMonotonicTimestamp = 10`
 - `kTimestampGap          = 11`
+- `kMetricNotAuthorized = 13`
+- `kSustainedLowFrameRate = 14`
 
 ## OnProcessingStatusChangedFn
 
@@ -582,6 +594,31 @@ Best-effort lens classification. Unknown includes unavailable metadata and camer
 - `kFront`
 - `kBack`
 - `kById`
+
+## DeviceReadinessResult
+
+Consumer verdict and explanation, including the next recommended action.
+
+### Properties
+
+- ```cpp
+  DeviceReadinessVerdict verdict = DeviceReadinessVerdict::kInconclusive
+  ```
+
+- ```cpp
+  std::string reason
+  ```
+
+  Explains the outcome and the next action the application/user can take.
+
+## DeviceReadinessVerdict
+
+Outcome of the configured SDK readiness check.
+
+- `kReady`
+- `kLimited`
+- `kBlocked`
+- `kInconclusive`
 
 ## SmartSpectraLogLevel
 
