@@ -6,7 +6,7 @@ sidebarTitle: Migration Guide
 
 # SmartSpectra Swift SDK Migration Guide
 
-> Applies to SmartSpectra Swift SDK v3.x, including `v3.5.0-rc.5`.
+> Applies to SmartSpectra Swift SDK v3.x, including `v3.6.0-rc.1`.
 > Migrating from a v3.0 release-candidate prior to rc.13, or from v2.x.
 
 ## Swift SDK v3.5.0-rc.4 Migration

@@ -13,9 +13,9 @@ no native addon, no `binding.gyp`, no `electron-rebuild`, no `node-gyp`.
 ## Start here
 
 - Electron sample: [electron-quickstart](https://github.com/Presage-Security/SmartSpectra/tree/main/nodejs/samples/electron-quickstart)
-- API reference: <https://smartspectra.presagetech.com/docs/nodejs/api-reference>
+- API reference: <https://presagetech.com/docs/smartspectra-sdk/nodejs/api-reference>
 - Device Readiness: [check readiness and handle results](docs/device-readiness.md)
-- Metrics guide: <https://smartspectra.presagetech.com/docs/nodejs/metrics>
+- Metrics guide: <https://presagetech.com/docs/smartspectra-sdk/nodejs/metrics>
 
 ## Architecture
 
@@ -472,6 +472,6 @@ release engine binary.
 
 ## Support
 
-- Docs site: <https://smartspectra.presagetech.com/docs/nodejs>
+- Docs site: <https://presagetech.com/docs/smartspectra-sdk/nodejs>
 - GitHub issues: <https://github.com/Presage-Security/SmartSpectra/issues>
 - Email: <support@presagetech.com>

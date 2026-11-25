@@ -25,7 +25,7 @@ Windows (experimental).
 ## Getting Started
 
 To get started, follow the instructions for one of our currently supported platforms. Each platform has its own integration guide and example applications to help you get up and running quickly.
-Documentation is available at <https://smartspectra.presagetech.com/>.
+Documentation is available at <https://presagetech.com/docs/smartspectra-sdk>.
 
 ## Build with an AI Assistant
 
@@ -36,7 +36,7 @@ This repo ships `using-smartspectra`, an [Agent Skill](https://agentskills.io) t
 
 Then ask your assistant to build with SmartSpectra. Full guide: [docs/agent-skill.md](docs/agent-skill.md).
 
-Presage also hosts an MCP (Model Context Protocol) server at `https://mcp.presagetech.com/mcp`. Connect it and your assistant can work with your developer account directly — fetch or rotate your API key, register an iOS or Android app ID, download its OAuth config file, and check your plan and credits. Setup: [docs/mcp-server.md](docs/mcp-server.md).
+Presage also hosts an MCP (Model Context Protocol) server at `https://mcp.presagetech.com/mcp`. Connect it and your assistant can work with your developer account directly — fetch or rotate your API key, register an iOS or Android app ID and point you to the portal page that downloads its OAuth config file, and check your plan and credits. Setup: [docs/mcp-server.md](docs/mcp-server.md).
 
 ## Features
 

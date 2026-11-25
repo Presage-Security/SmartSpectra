@@ -50,7 +50,11 @@ int main(int argc, char** argv) {
             google::protobuf::util::JsonPrintOptions options;
             // can overwhelm log output if whitespace is enabled
             options.add_whitespace = false;
-            google::protobuf::util::MessageToJsonString(m, &json, options);
+            if (const auto status = google::protobuf::util::MessageToJsonString(m, &json, options);
+                !status.ok()) {
+                std::cerr << "Failed to convert metrics to JSON: " << status.message() << '\n';
+                return;
+            }
             std::cout << "Got edge metrics at " << ts << " microseconds: " << json << '\n';
         }
     );

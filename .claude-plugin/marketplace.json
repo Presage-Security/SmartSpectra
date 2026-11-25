@@ -3,7 +3,7 @@
   "description": "Claude Code plugins for the SmartSpectra SDK — measure vitals (pulse, breathing, and more) from video.",
   "owner": {
     "name": "Presage Technologies",
-    "url": "https://smartspectra.presagetech.com"
+    "url": "https://presagetech.com/docs/smartspectra-sdk"
   },
   "plugins": [
     {

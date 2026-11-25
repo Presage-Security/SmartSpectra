@@ -64,11 +64,10 @@ unlinked to identity.
 
 ## Storage and retention
 
-Full readiness reports are stored in private diagnostic storage. Operational
-logs contain summary metadata and archive references rather than the full report.
-Reports and access logs currently have no automatic expiration configured; deletion
-and retention are governed by Presage's applicable policies. A fixed retention
-period must not be inferred from a CI test artifact's expiration.
+Full readiness reports are stored in private diagnostic storage and expire
+automatically 30 days after they are stored. Operational logs contain summary
+metadata and archive references rather than the full report; their retention is
+governed by Presage's applicable policies.
 
 Telemetry requests are limited to 256 KiB both compressed and decompressed; a full
 readiness diagnostic report is limited to 128 KiB. Oversized events are not
@@ -77,11 +76,16 @@ accepted. The request limit also applies to measurement-session summaries.
 ## Turning it off
 
 Telemetry is opt-out through configuration on supported SDKs. It defaults to on;
-when disabled, the SDK starts no telemetry session and transmits nothing.
+when disabled, the SDK starts no telemetry session and sends no telemetry.
 Set `enableTelemetry = false` on the SDK config:
 `SmartSpectraConfig::enable_telemetry` in C++, `enableTelemetry` in Swift/iOS,
 Kotlin/Android and Node, and `SmartSpectraConfig.EnableTelemetry` in the
-[.NET wrapper for Windows](https://smartspectra.presagetech.com/docs/cpp/windows/windows-dotnet).
+[.NET wrapper for Windows](https://presagetech.com/docs/smartspectra-sdk/cpp/windows).
+
+Turning telemetry off stops telemetry only. It does not turn off the SDK's other
+server requests: authentication, model delivery and, when your app uses them,
+[LLM Insights](llm-insights/index.md#privacy--data-notice) requests continue
+whether or not telemetry is enabled.
 
 Telemetry is sent over the same authenticated, TLS-pinned channel the SDK uses
 for its other server requests, when authenticated server access is available — never to a separate or
@@ -93,5 +97,5 @@ measurement session.
 
 If you distribute an application that embeds the SDK, disclose this collection to
 your users and complete your app-store data-collection declarations accordingly,
-consistent with Presage's
-[Privacy Policy](https://api.physiology.presagetech.com/privacypolicy).
+consistent with the
+[SmartSpectra SDK Privacy Policy](https://presagetech.com/legal/privacy-policy).

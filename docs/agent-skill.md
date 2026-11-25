@@ -40,10 +40,10 @@ are working inside a clone of the repo, Codex also discovers the skill automatic
 
 ## Install anywhere else
 
-For any other assistant, the same skill is served straight from this site:
+For any other assistant, the same skill file is on GitHub:
 
 ```text
-https://smartspectra.presagetech.com/skill.md
+https://raw.githubusercontent.com/Presage-Security/SmartSpectra/main/.agents/skills/using-smartspectra/SKILL.md
 ```
 
 Point your tool at that URL, or paste the file into the assistant's instructions. It is the
@@ -55,11 +55,11 @@ The skill has your assistant read this site for exact API detail, and every page
 available as markdown — append `.md` to any documentation URL:
 
 ```text
-https://smartspectra.presagetech.com/docs/swift/metrics.md
+https://presagetech.com/docs/smartspectra-sdk/swift/metrics.md
 ```
 
-[llms.txt](https://smartspectra.presagetech.com/llms.txt) indexes every page with a one-line
-description, and [llms-full.txt](https://smartspectra.presagetech.com/llms-full.txt) is the whole
+[llms.txt](https://presagetech.com/docs/smartspectra-sdk/llms.txt) indexes every page with a one-line
+description, and [llms-full.txt](https://presagetech.com/docs/smartspectra-sdk/llms-full.txt) is the whole
 corpus in one file. Assistants generally find these on their own; the URLs are here for when you
 want to hand one over directly.
 
@@ -83,12 +83,12 @@ output.
   but if you also connect the [SmartSpectra MCP Server](mcp-server.md) the assistant can retrieve
   it from your account. Otherwise set it as described on your platform's setup page.
 - **Network access** for the assistant while it works: the skill has the assistant read the live
-  docs at `smartspectra.presagetech.com` for exact API detail. Without web access it can still
+  docs at `presagetech.com/docs/smartspectra-sdk` for exact API detail. Without web access it can still
   apply the general model but cannot look up precise signatures.
 
 ## Getting Help
 
 - Email: [support@presagetech.com](mailto:support@presagetech.com)
 - [Submit a GitHub issue](https://github.com/Presage-Security/SmartSpectra/issues)
-- [Docs and FAQ](https://smartspectra.presagetech.com)
+- [Docs and FAQ](https://presagetech.com/docs/smartspectra-sdk)
 - [Developer Admin Portal](https://physiology.presagetech.com/auth/login)

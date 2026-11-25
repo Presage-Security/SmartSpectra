@@ -6,7 +6,7 @@ sidebarTitle: Migration Guide
 
 # SmartSpectra C++ SDK Migration Guide
 
-> Applies to SmartSpectra C++ SDK v3.x, including `v3.5.0-rc.5`.
+> Applies to SmartSpectra C++ SDK v3.x, including `v3.6.0-rc.1`.
 
 ## C++ SDK v3.5.0-rc.4 Migration
 

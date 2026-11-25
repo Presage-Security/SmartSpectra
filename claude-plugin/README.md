@@ -1,6 +1,6 @@
 # SmartSpectra SDK — agent skill
 
-[SmartSpectra](https://smartspectra.presagetech.com/) (Presage Technologies) measures
+[SmartSpectra](https://presagetech.com/docs/smartspectra-sdk) (Presage Technologies) measures
 vitals — pulse, breathing, and more — from an ordinary camera or a recorded video. This
 repo ships the `using-smartspectra` agent skill, which teaches a coding agent how to build
 apps with the SmartSpectra SDK: getting an API key, the config → start/stop/reset lifecycle,
@@ -48,9 +48,10 @@ Ask your agent to use SmartSpectra — e.g. *"build a minimal app that measures 
 my pulse"* — and the `using-smartspectra` skill guides it the rest of the way.
 
 The skill covers getting an API key as a manual step. The MCP server does that part for the agent —
-it can fetch or rotate your key, register an app ID, and download its OAuth config file. The Claude
+it can fetch or rotate your key, register an app ID, and point you to the portal download for its
+OAuth config file. The Claude
 Code plugin bundles it; on the npx and Codex paths, connect it yourself:
-<https://smartspectra.presagetech.com/docs/mcp-server>.
+<https://presagetech.com/docs/smartspectra-sdk/mcp-server>.
 
-Full guide (both agents): <https://smartspectra.presagetech.com/docs/agent-skill>. For SDK API
-references and per-platform sample apps, see <https://smartspectra.presagetech.com/>.
+Full guide (both agents): <https://presagetech.com/docs/smartspectra-sdk/agent-skill>. For SDK API
+references and per-platform sample apps, see <https://presagetech.com/docs/smartspectra-sdk>.

@@ -45,7 +45,7 @@ Use [Option 1: API Key](docs/option-1-api-key.md) for the fastest manual setup.
 
 Use [Option 2: OAuth](docs/option-2-oauth.md) if you need OAuth.
 
-Either way, an AI assistant connected to the [SmartSpectra MCP Server](../docs/mcp-server.md) can do the account side for you — fetch your API key, or register your package name and signing certificate fingerprint and download `presage_services.xml`.
+Either way, an AI assistant connected to the [SmartSpectra MCP Server](../docs/mcp-server.md) can do the account side for you — fetch your API key, or register your package name and signing certificate fingerprint and point you to the portal page that downloads `presage_services.xml`.
 
 If your app already captures video, use the
 [custom-input guide](docs/headless-mode.md#caller-owned-camera-and-custom-input)

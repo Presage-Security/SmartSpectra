@@ -60,7 +60,7 @@ In Xcode:
 
 1. Click `File` → `Add Package Dependencies...`
 2. Paste `https://github.com/Presage-Security/SmartSpectra-Swift/`
-3. For repeatable builds, choose `Exact Version` and enter a released tag such as `3.5.0-rc.5`, from the [SmartSpectra-Swift releases](https://github.com/Presage-Security/SmartSpectra-Swift/releases)
+3. For repeatable builds, choose `Exact Version` and enter a released tag such as `3.6.0-rc.1`, from the [SmartSpectra-Swift releases](https://github.com/Presage-Security/SmartSpectra-Swift/releases)
 4. Use `Branch` → `main` only when testing the latest final public release before pinning a version
 5. Add the package to the `Cool Vitals` app target
 
@@ -102,7 +102,7 @@ Use this `Signing & Capabilities` view in Xcode to find the Application ID and O
 
 ![Signing & Capabilities view showing where Xcode exposes the Bundle Identifier for the Application ID and the signing identity used to look up the Organization ID](../../cpp/docs/images/macos-xcode-signing-source.png)
 
-An AI assistant connected to the [SmartSpectra MCP Server](../../docs/mcp-server.md) can do this step for you: it registers the bundle identifier and team ID (`apps.register`, including sandbox mode) and fetches `PresageService-Info.plist` (`apps.get_config`) without you opening the portal. Registration asks you to confirm before it takes effect.
+An AI assistant connected to the [SmartSpectra MCP Server](../../docs/mcp-server.md) can do this step for you: it registers the bundle identifier and team ID (`apps.register`, including sandbox mode) and returns the portal page that downloads `PresageService-Info.plist` (`apps.get_config`). Registration asks you to confirm before it takes effect. You still download the file from the portal, because it contains your account identifier.
 
 If you cannot find a download for `PresageService-Info.plist`, stop here.
 

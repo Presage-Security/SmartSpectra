@@ -419,5 +419,5 @@ Use the distribution-specific package; do not configure an Ubuntu suite on Debia
 
 - Email: [support@presagetech.com](mailto:support@presagetech.com)
 - [Submit a GitHub issue](https://github.com/Presage-Security/SmartSpectra/issues)
-- [Docs and FAQ](https://smartspectra.presagetech.com)
+- [Docs and FAQ](https://presagetech.com/docs/smartspectra-sdk)
 - [Developer Admin Portal](https://physiology.presagetech.com/auth/login)

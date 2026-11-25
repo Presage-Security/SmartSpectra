@@ -16,7 +16,7 @@ own protobuf codegen.
 
 ## Start here
 
-- Docs site: <https://smartspectra.presagetech.com/docs/nodejs>
+- Docs site: <https://presagetech.com/docs/smartspectra-sdk/nodejs>
 - GitHub issues: <https://github.com/Presage-Security/SmartSpectra/issues>
 
 | File | Purpose |

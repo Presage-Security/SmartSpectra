@@ -133,6 +133,17 @@ spectra::gui::ConfidenceSample ToHrvSample(const presage::smartspectra::Hrv& val
     };
 }
 
+// Serializes metrics to JSON; logs and returns false on failure.
+bool MetricsToJson(const presage::smartspectra::Metrics& metrics,
+                   const google::protobuf::util::JsonPrintOptions& opts, std::string& json) {
+    if (const auto status = google::protobuf::util::MessageToJsonString(metrics, &json, opts);
+        !status.ok()) {
+        std::cerr << "Failed to convert metrics to JSON: " << status.message() << '\n';
+        return false;
+    }
+    return true;
+}
+
 int main(int argc, char** argv) {
     absl::SetProgramUsageMessage(
         "Run Presage SmartSpectra C++ REST Continuous Example.\n"
@@ -307,7 +318,7 @@ int main(int argc, char** argv) {
                 google::protobuf::util::JsonPrintOptions opts;
                 opts.always_print_fields_with_no_presence = true;
                 if (verbosity < 4) opts.add_whitespace = false;
-                google::protobuf::util::MessageToJsonString(metrics, &json, opts);
+                if (!MetricsToJson(metrics, opts, json)) return;
                 std::cout << "Metrics";
                 if (verbosity > 2) std::cout << ": " << json;
                 std::cout << '\n';
@@ -323,7 +334,7 @@ int main(int argc, char** argv) {
                 google::protobuf::util::JsonPrintOptions opts;
                 opts.always_print_fields_with_no_presence = true;
                 if (verbosity < 4) opts.add_whitespace = false;
-                google::protobuf::util::MessageToJsonString(metrics, &json, opts);
+                if (!MetricsToJson(metrics, opts, json)) return;
                 std::ofstream(path) << json;
                 if (verbosity > 0)
                     std::cout << "Saved accumulated metrics to: " << path.string() << '\n';
@@ -503,8 +514,9 @@ int main(int argc, char** argv) {
         auto path = std::filesystem::path(output_dir) / "metrics.json";
         std::string json;
         google::protobuf::util::JsonPrintOptions opts;
-        google::protobuf::util::MessageToJsonString(accumulated_metrics, &json, opts);
-        std::ofstream(path) << json;
+        if (MetricsToJson(accumulated_metrics, opts, json)) {
+            std::ofstream(path) << json;
+        }
     }
 
     if (!headless) cv::destroyAllWindows();

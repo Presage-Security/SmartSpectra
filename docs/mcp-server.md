@@ -15,8 +15,8 @@ https://mcp.presagetech.com/mcp
 
 Connect it to an MCP-capable AI assistant — Claude Code, claude.ai, Codex, Cursor, or any
 other compliant client — and the assistant can manage your SmartSpectra developer account for you:
-fetch or rotate your API key, check your plan and credits, register apps, download the OAuth
-config file for a registered app, and search these docs.
+fetch or rotate your API key, check your plan and credits, register apps, point you to the
+portal page that downloads a registered app's OAuth config file, and search these docs.
 
 It pairs with the [AI agent skill](agent-skill.md): the skill teaches an assistant how to build
 with the SmartSpectra SDK; the MCP server gives it authorized access to your account, so
@@ -86,7 +86,7 @@ The client discovers the OAuth endpoints automatically and opens a browser to si
 | `usage.get_plan` | Report your plan tier, remaining credits, and next renewal date. Credits are counted per account, not per registered app. |
 | `apps.list` | List your registered apps — platform, app ID, sandbox mode, and the registration ID used by the other app tools. |
 | `apps.register` | Register (or update) an Apple or Android app ID, including sandbox mode and the descriptive fields the portal asks for. |
-| `apps.get_config` | Fetch the OAuth config file for a registered app — `PresageService-Info.plist` on Apple, `presage_services.xml` on Android. |
+| `apps.get_config` | Confirm a registered app's OAuth config file — `PresageService-Info.plist` on Apple, `presage_services.xml` on Android — and return the portal page to download it from. The file itself isn't returned because it contains your account identifier. |
 | `apps.delete` | Delete an app registration, identified by the registration ID from `apps.list`. |
 | `docs.map` | List the pages of this documentation site. |
 | `docs.search` | Search this documentation. |
@@ -98,10 +98,12 @@ The server also exposes a `using-smartspectra` prompt that loads the
 ## Setting up OAuth through an assistant
 
 On iOS and Android, OAuth setup normally means registering your app in the portal by hand and
-downloading a config file. With this server connected, an assistant does both steps for you:
-`apps.register` with your bundle ID and Apple team ID (or package name and signing certificate
-SHA-256 fingerprint), then `apps.get_config` to fetch the config file and write it into your
-project at the right path.
+downloading a config file. With this server connected, an assistant registers the app for you
+with `apps.register` (your bundle ID and Apple team ID, or package name and signing certificate
+SHA-256 fingerprint). It then calls `apps.get_config`, which confirms the registration and
+returns the portal page where you download the config file. The file contains your account
+identifier, so it isn't passed through the conversation. Download it there and put it at the
+path the platform guide gives.
 
 - **iOS** — [Option 2: OAuth](../swift/docs/option-2-oauth.md) covers where
   `PresageService-Info.plist` goes and how to confirm OAuth is wired correctly.
@@ -139,5 +141,5 @@ Deleting your account is not available through the MCP server. Use the
 
 - Email: [support@presagetech.com](mailto:support@presagetech.com)
 - [Submit a GitHub issue](https://github.com/Presage-Security/SmartSpectra/issues)
-- [Docs and FAQ](https://smartspectra.presagetech.com)
+- [Docs and FAQ](https://presagetech.com/docs/smartspectra-sdk)
 - [Developer Admin Portal](https://physiology.presagetech.com/auth/login)

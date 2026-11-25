@@ -58,7 +58,7 @@ Use [Option 1: API Key](docs/option-1-api-key.md) for the fastest manual setup.
 
 Use [Option 2: OAuth](docs/option-2-oauth.md) if you need OAuth.
 
-Either way, an AI assistant connected to the [SmartSpectra MCP Server](../docs/mcp-server.md) can do the account side for you — fetch your API key, or register your bundle ID and Apple team ID and download `PresageService-Info.plist`.
+Either way, an AI assistant connected to the [SmartSpectra MCP Server](../docs/mcp-server.md) can do the account side for you — fetch your API key, or register your bundle ID and Apple team ID and point you to the portal page that downloads `PresageService-Info.plist`.
 
 ## LLM Insights
 

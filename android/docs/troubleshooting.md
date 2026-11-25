@@ -196,5 +196,5 @@ To check whether a device can sustain measurement before starting, call
 
 - Email: [support@presagetech.com](mailto:support@presagetech.com)
 - [Submit a GitHub issue](https://github.com/Presage-Security/SmartSpectra/issues)
-- [Docs and FAQ](https://smartspectra.presagetech.com)
+- [Docs and FAQ](https://presagetech.com/docs/smartspectra-sdk)
 - [Developer Admin Portal](https://physiology.presagetech.com/auth/login)

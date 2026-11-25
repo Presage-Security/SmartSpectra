@@ -33,10 +33,11 @@ observable property).
 Treat the key as a secret: don't commit it, and avoid hardcoding it into an app binary you ship
 to end users (an OAuth-backed flow is the production-grade alternative on mobile).
 
-If the [SmartSpectra MCP server](https://smartspectra.presagetech.com/docs/mcp-server) is
+If the [SmartSpectra MCP server](https://presagetech.com/docs/smartspectra-sdk/mcp-server) is
 connected, `api_keys.get` returns the developer's key from their account instead of a portal
-visit, and `apps.register` + `apps.get_config` register an iOS/Android app ID and fetch its
-OAuth config file.
+visit, and `apps.register` + `apps.get_config` register an iOS/Android app ID and return the
+portal page where the developer downloads its OAuth config file (the file itself is not
+returned).
 
 ## The lifecycle (same shape on every binding)
 
@@ -112,7 +113,7 @@ doesn't change how you consume output.
 
 The prose above is the durable mental model. For anything exact — signatures, config properties,
 enum values, install/link steps, per-platform gotchas, OAuth setup, troubleshooting, or a
-**complete working sample app** — **read the official docs at `smartspectra.presagetech.com`.**
+**complete working sample app** — **read the official docs at `presagetech.com/docs/smartspectra-sdk`.**
 They track the shipped SDK and link the maintained per-platform sample apps; fetch the live page
 rather than relying on memory or scaffolding an app from scratch, since the SDK evolves.
 
@@ -123,11 +124,11 @@ Every documentation page is available as **markdown** — append `.md` to its UR
 (`…/docs/swift/metrics.md`). Prefer that over the HTML: it is the same content without the page
 furniture, roughly a twentieth of the bytes.
 
-1. **Start at the index:** fetch `https://smartspectra.presagetech.com/llms.txt` — a plain-text
+1. **Start at the index:** fetch `https://presagetech.com/docs/smartspectra-sdk/llms.txt` — a plain-text
    list of every doc page with a one-line description, linking each page's markdown. Use it to
    find the page you need.
 2. **Fetch that page**, e.g.
-   `https://smartspectra.presagetech.com/docs/<platform>/<topic>.md`, where:
+   `https://presagetech.com/docs/smartspectra-sdk/<platform>/<topic>.md`, where:
    - `platform` ∈ `android`, `swift` (iOS), `cpp` (Linux/macOS/Windows), `nodejs`.
    - `topic` ∈ `api-reference`, `metrics`, `option-1-api-key`, `option-2-oauth`,
      `troubleshooting`, `migration-guide`, `headless-mode` (availability varies by platform —
@@ -136,6 +137,6 @@ furniture, roughly a twentieth of the bytes.
    - The complete runnable sample lives on the platform's **setup page** — the API-key/install
      page (`android/option-1-api-key`, `cpp/linux/…`).
 3. **Whole corpus at once** (large — prefer a specific page):
-   `https://smartspectra.presagetech.com/llms-full.txt`.
+   `https://presagetech.com/docs/smartspectra-sdk/llms-full.txt`.
 
 Cross-cutting reference (platform-independent): `.../docs/data-types.md` (the payload schema).

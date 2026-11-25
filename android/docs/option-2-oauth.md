@@ -96,7 +96,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.10.0")
     implementation("androidx.camera:camera-view:1.6.0")
 
-    implementation("com.presagetech:smartspectra:3.5.0-rc.5-SNAPSHOT")
+    implementation("com.presagetech:smartspectra:3.6.0-rc.1-SNAPSHOT")
 }
 ```
 
@@ -138,7 +138,7 @@ You need to get it from Presage first:
 
 If you are testing a sandbox-enabled app registration, make sure the app row shows **Sandbox Status: Enabled**. Click **Enable** if sandbox is not already enabled.
 
-An AI assistant connected to the [SmartSpectra MCP Server](../../docs/mcp-server.md) can do this step for you: it registers the app ID and fingerprint (`apps.register`) and fetches `presage_services.xml` (`apps.get_config`) without you opening the portal. Registration asks you to confirm before it takes effect.
+An AI assistant connected to the [SmartSpectra MCP Server](../../docs/mcp-server.md) can do this step for you: it registers the app ID and fingerprint (`apps.register`) and returns the portal page that downloads `presage_services.xml` (`apps.get_config`). Registration asks you to confirm before it takes effect. You still download the file from the portal, because it contains your account identifier.
 
 See Google's [Authenticating Your Client](https://developers.google.com/android/guides/client-auth) guide for Android signing certificate fingerprints.
 
